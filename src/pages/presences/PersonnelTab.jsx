@@ -16,6 +16,13 @@ import { PERSONNEL_STATUT_LABELS, PERSONNEL_STATUT_OPTIONS, personnelStatutBadge
 import { rules, validate } from '../../lib/validate'
 
 const today = () => new Date().toISOString().slice(0, 10)
+const nowTime = () => new Date().toTimeString().slice(0, 5)
+
+/** Une heure saisie pour AUJOURD'HUI ne doit pas être dans le futur — évite de pointer en avance. */
+function isFutureTime(dateStr, timeStr) {
+  if (!timeStr || dateStr !== today()) return false
+  return timeStr > nowTime()
+}
 
 // La lecture (`GET .../presences/...`) peut renvoyer soit un "HH:MM" nu
 // (nouveau format confirmé côté écriture), soit un date-time complet
@@ -46,6 +53,9 @@ function PointerPersonnelForm({ employeOptions, restrictedEmploye, date, onCance
   const [fieldErrors, setFieldErrors] = useState({})
   const [formError, setFormError] = useState('')
 
+  const isToday = date === today()
+  const maxTime = isToday ? nowTime() : undefined
+
   async function handleSubmit(e) {
     e.preventDefault()
     setFormError('')
@@ -59,6 +69,25 @@ function PointerPersonnelForm({ employeOptions, restrictedEmploye, date, onCance
     )
     setFieldErrors(errors)
     if (Object.keys(errors).length > 0) return
+
+    // Empêche de pointer en avance : ni une date future, ni une heure du
+    // jour qui n'est pas encore passée (créneau ou heure réelle).
+    if (date > today()) {
+      setFormError('Impossible de pointer pour une date future.')
+      return
+    }
+    if (isFutureTime(date, heureDebut) || isFutureTime(date, heureFin)) {
+      setFormError("Ce créneau n'a pas encore eu lieu.")
+      return
+    }
+    if (isFutureTime(date, heureArriveeReelle)) {
+      setFormError("L'heure d'arrivée saisie n'est pas encore passée.")
+      return
+    }
+    if (isFutureTime(date, heureDepartReelle)) {
+      setFormError("L'heure de départ saisie n'est pas encore passée.")
+      return
+    }
 
     const payload = { employeId, date, statut, heureDebut, heureFin }
     if (heureArriveeReelle) payload.heureArrivee = `${date}T${heureArriveeReelle}:00`
@@ -102,8 +131,8 @@ function PointerPersonnelForm({ employeOptions, restrictedEmploye, date, onCance
       <div>
         <p className="text-sm font-medium text-ink-700 mb-1.5">Créneau pointé</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <TextField id="heureDebut" label="Début" type="time" value={heureDebut} onChange={(e) => setHeureDebut(e.target.value)} error={fieldErrors.heureDebut} required />
-          <TextField id="heureFin" label="Fin" type="time" value={heureFin} onChange={(e) => setHeureFin(e.target.value)} error={fieldErrors.heureFin} required />
+          <TextField id="heureDebut" label="Début" type="time" value={heureDebut} onChange={(e) => setHeureDebut(e.target.value)} error={fieldErrors.heureDebut} max={maxTime} required />
+          <TextField id="heureFin" label="Fin" type="time" value={heureFin} onChange={(e) => setHeureFin(e.target.value)} error={fieldErrors.heureFin} max={maxTime} required />
         </div>
         <p className="text-xs text-ink-400 mt-1.5">
           Permet plusieurs séances dans la journée pour le même employé (ex: 08:00-10:00 puis 14:00-16:00).
@@ -112,8 +141,8 @@ function PointerPersonnelForm({ employeOptions, restrictedEmploye, date, onCance
       <div>
         <p className="text-sm font-medium text-ink-700 mb-1.5">Heure réelle (optionnel)</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <TextField id="heureArriveeReelle" label="Arrivée" type="time" value={heureArriveeReelle} onChange={(e) => setHeureArriveeReelle(e.target.value)} />
-          <TextField id="heureDepartReelle" label="Départ" type="time" value={heureDepartReelle} onChange={(e) => setHeureDepartReelle(e.target.value)} />
+          <TextField id="heureArriveeReelle" label="Arrivée" type="time" value={heureArriveeReelle} onChange={(e) => setHeureArriveeReelle(e.target.value)} max={maxTime} />
+          <TextField id="heureDepartReelle" label="Départ" type="time" value={heureDepartReelle} onChange={(e) => setHeureDepartReelle(e.target.value)} max={maxTime} />
         </div>
       </div>
       {formError && <Alert variant="danger">{formError}</Alert>}
@@ -165,12 +194,18 @@ export function PersonnelTab({ etablissementId }) {
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
-        <TextField id="date" label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="max-w-xs" />
-        <Button onClick={() => setPointerOpen(true)} disabled={isEnseignant && !ownEmploye}>
+        <TextField id="date" label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} max={today()} className="max-w-xs" />
+        <Button onClick={() => setPointerOpen(true)} disabled={date > today() || (isEnseignant && !ownEmploye)}>
           <Plus className="h-4 w-4" />
           {isEnseignant ? 'Pointer ma présence' : 'Pointer un employé'}
         </Button>
       </div>
+
+      {date > today() && (
+        <Alert variant="warning" className="mb-4">
+          Impossible de pointer une présence pour une date future.
+        </Alert>
+      )}
 
       {isEnseignant && !ownEmploye && (
         <Alert variant="warning" className="mb-4">
