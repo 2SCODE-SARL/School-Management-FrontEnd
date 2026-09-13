@@ -38,11 +38,13 @@ function formatHeure(value) {
 //
 // `PointerPersonnelDto` distingue deux notions différentes (confirmé par
 // la doc à jour) :
-// - `heureDebut`/`heureFin` (HH:MM, désormais REQUIS) = le créneau/la
-//   séance pointée — c'est ce qui permet plusieurs séances par jour pour
-//   un même employé sans qu'un pointage n'écrase les autres.
-// - `heureArrivee`/`heureDepart` (date-time, optionnels) = l'heure RÉELLE
-//   d'arrivée/de départ, un concept séparé (ex: en retard sur son créneau).
+// - `heureDebut`/`heureFin` (HH:MM) = le créneau/la séance pointée —
+//   permet plusieurs séances par jour pour un même employé. L'API l'exige
+//   toujours, mais ce qui compte vraiment pour l'utilisateur c'est l'heure
+//   réelle d'arrivée/de départ en classe — donc le créneau est optionnel
+//   côté formulaire et se déduit de l'heure réelle si non renseigné.
+// - `heureArrivee`/`heureDepart` (date-time) = l'heure RÉELLE d'arrivée/de
+//   départ — c'est elle qui est obligatoire ici.
 function PointerPersonnelForm({ employeOptions, restrictedEmploye, date, onCancel, onSubmit, isSubmitting }) {
   const [employeId, setEmployeId] = useState(restrictedEmploye?.id ?? '')
   const [statut, setStatut] = useState('PRESENT')
@@ -60,24 +62,21 @@ function PointerPersonnelForm({ employeOptions, restrictedEmploye, date, onCance
     e.preventDefault()
     setFormError('')
     const errors = validate(
-      { employeId, heureDebut, heureFin },
+      { employeId, heureArriveeReelle, heureDepartReelle },
       {
         employeId: [rules.required("Choisis l'employé.")],
-        heureDebut: [rules.required('Le début du créneau est requis.')],
-        heureFin: [rules.required('La fin du créneau est requise.')],
+        heureArriveeReelle: [rules.required("L'heure d'arrivée réelle est requise.")],
+        heureDepartReelle: [rules.required('L\'heure de départ réelle est requise.')],
       },
     )
     setFieldErrors(errors)
     if (Object.keys(errors).length > 0) return
 
     // Empêche de pointer en avance : ni une date future, ni une heure du
-    // jour qui n'est pas encore passée (créneau ou heure réelle).
+    // jour qui n'est pas encore passée (heure réelle, prioritaire, ou
+    // créneau si saisi séparément).
     if (date > today()) {
       setFormError('Impossible de pointer pour une date future.')
-      return
-    }
-    if (isFutureTime(date, heureDebut) || isFutureTime(date, heureFin)) {
-      setFormError("Ce créneau n'a pas encore eu lieu.")
       return
     }
     if (isFutureTime(date, heureArriveeReelle)) {
@@ -88,10 +87,23 @@ function PointerPersonnelForm({ employeOptions, restrictedEmploye, date, onCance
       setFormError("L'heure de départ saisie n'est pas encore passée.")
       return
     }
+    if (isFutureTime(date, heureDebut) || isFutureTime(date, heureFin)) {
+      setFormError("Ce créneau n'a pas encore eu lieu.")
+      return
+    }
 
-    const payload = { employeId, date, statut, heureDebut, heureFin }
-    if (heureArriveeReelle) payload.heureArrivee = `${date}T${heureArriveeReelle}:00`
-    if (heureDepartReelle) payload.heureDepart = `${date}T${heureDepartReelle}:00`
+    // Le créneau reste exigé par l'API — s'il n'est pas renseigné, on
+    // retombe sur l'heure réelle (comportement voulu : "il peut même
+    // mettre la même heure").
+    const payload = {
+      employeId,
+      date,
+      statut,
+      heureDebut: heureDebut || heureArriveeReelle,
+      heureFin: heureFin || heureDepartReelle,
+      heureArrivee: `${date}T${heureArriveeReelle}:00`,
+      heureDepart: `${date}T${heureDepartReelle}:00`,
+    }
 
     try {
       await onSubmit(payload)
@@ -129,21 +141,43 @@ function PointerPersonnelForm({ employeOptions, restrictedEmploye, date, onCance
         required
       />
       <div>
-        <p className="text-sm font-medium text-ink-700 mb-1.5">Créneau pointé</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <TextField id="heureDebut" label="Début" type="time" value={heureDebut} onChange={(e) => setHeureDebut(e.target.value)} error={fieldErrors.heureDebut} max={maxTime} required />
-          <TextField id="heureFin" label="Fin" type="time" value={heureFin} onChange={(e) => setHeureFin(e.target.value)} error={fieldErrors.heureFin} max={maxTime} required />
-        </div>
-        <p className="text-xs text-ink-400 mt-1.5">
-          Permet plusieurs séances dans la journée pour le même employé (ex: 08:00-10:00 puis 14:00-16:00).
+        <p className="text-sm font-medium text-ink-700 mb-1.5">
+          Heure réelle (arrivée/départ en classe)<span className="text-danger-500"> *</span>
         </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <TextField
+            id="heureArriveeReelle"
+            label="Arrivée"
+            type="time"
+            value={heureArriveeReelle}
+            onChange={(e) => setHeureArriveeReelle(e.target.value)}
+            error={fieldErrors.heureArriveeReelle}
+            max={maxTime}
+            required
+          />
+          <TextField
+            id="heureDepartReelle"
+            label="Départ"
+            type="time"
+            value={heureDepartReelle}
+            onChange={(e) => setHeureDepartReelle(e.target.value)}
+            error={fieldErrors.heureDepartReelle}
+            max={maxTime}
+            required
+          />
+        </div>
+        <p className="text-xs text-ink-400 mt-1.5">Ne peut pas être une heure future — impossible de pointer avant que ce soit arrivé.</p>
       </div>
       <div>
-        <p className="text-sm font-medium text-ink-700 mb-1.5">Heure réelle (optionnel)</p>
+        <p className="text-sm font-medium text-ink-700 mb-1.5">Créneau pointé (optionnel)</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <TextField id="heureArriveeReelle" label="Arrivée" type="time" value={heureArriveeReelle} onChange={(e) => setHeureArriveeReelle(e.target.value)} max={maxTime} />
-          <TextField id="heureDepartReelle" label="Départ" type="time" value={heureDepartReelle} onChange={(e) => setHeureDepartReelle(e.target.value)} max={maxTime} />
+          <TextField id="heureDebut" label="Début" type="time" value={heureDebut} onChange={(e) => setHeureDebut(e.target.value)} max={maxTime} />
+          <TextField id="heureFin" label="Fin" type="time" value={heureFin} onChange={(e) => setHeureFin(e.target.value)} max={maxTime} />
         </div>
+        <p className="text-xs text-ink-400 mt-1.5">
+          Permet plusieurs séances dans la journée (ex: 08:00-10:00 puis 14:00-16:00). Laissé vide, l'heure réelle est
+          reprise pour le créneau.
+        </p>
       </div>
       {formError && <Alert variant="danger">{formError}</Alert>}
       <div className="flex justify-end gap-3 pt-2">

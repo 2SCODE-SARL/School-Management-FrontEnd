@@ -95,12 +95,18 @@ export function AccesTab({ etablissementId }) {
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
-        <TextField id="date" label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="max-w-xs" />
-        <Button onClick={() => setPointerOpen(true)}>
+        <TextField id="date" label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} max={today()} className="max-w-xs" />
+        <Button onClick={() => setPointerOpen(true)} disabled={date > today()}>
           <Plus className="h-4 w-4" />
           Enregistrer un passage
         </Button>
       </div>
+
+      {date > today() && (
+        <Alert variant="warning" className="mb-4">
+          Impossible d'enregistrer un passage pour une date future.
+        </Alert>
+      )}
 
       <div className="bg-white rounded-2xl border border-ink-100 overflow-hidden">
         {isLoading && (
