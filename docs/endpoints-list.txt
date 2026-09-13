@@ -1,0 +1,222 @@
+﻿DELETE	/api/academique/etablissements/{etablissementId}/classes/{classeId}/matieres/{matiereId}	10 — Administrateur | Académique,20 — Directeur | Académique
+DELETE	/api/documentation/etablissements/{etablissementId}/documents/{documentId}	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+DELETE	/api/inscriptions/parents/{id}/eleves/{eleveId}	10 — Administrateur | Élèves,20 — Directeur | Élèves,30 — Secrétaire | Élèves
+DELETE	/api/parametrage/etablissements/{etablissementId}/parametres/{cle}	10 — Administrateur | Paramétrage
+DELETE	/api/rbac/roles/{id}/permissions	10 — Administrateur | Rôles et permissions
+DELETE	/api/rh/etablissements/{etablissementId}/employes/{employeId}/matieres/{matiereId}	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+DELETE	/api/users/{id}	10 — Administrateur | Utilisateurs
+DELETE	/api/users/{id}/roles	10 — Administrateur | Utilisateurs
+GET	/api	00 — Public | Santé
+GET	/api/academique/etablissements/{etablissementId}/annees/{anneeId}/ponderations	10 — Administrateur | Académique,20 — Directeur | Académique
+GET	/api/academique/etablissements/{etablissementId}/classes	10 — Administrateur | Académique,20 — Directeur | Académique
+GET	/api/academique/etablissements/{etablissementId}/classes/{classeId}/matieres	10 — Administrateur | Académique,20 — Directeur | Académique
+GET	/api/academique/etablissements/{etablissementId}/classes/{id}	10 — Administrateur | Académique,20 — Directeur | Académique
+GET	/api/academique/etablissements/{etablissementId}/matieres	10 — Administrateur | Académique,20 — Directeur | Académique
+GET	/api/academique/etablissements/{etablissementId}/niveaux	10 — Administrateur | Académique,20 — Directeur | Académique
+GET	/api/academique/etablissements/{etablissementId}/niveaux/{id}	10 — Administrateur | Académique,20 — Directeur | Académique
+GET	/api/academique/etablissements/{etablissementId}/salles	10 — Administrateur | Académique,20 — Directeur | Académique
+GET	/api/academique/etablissements/{etablissementId}/series	10 — Administrateur | Académique,20 — Directeur | Académique
+GET	/api/academique/etablissements/{etablissementId}/types-evaluation	10 — Administrateur | Académique,20 — Directeur | Académique
+GET	/api/auth/me	01 — Commun | Mon compte
+GET	/api/communication/etablissements/{etablissementId}/templates	10 — Administrateur | Communication,20 — Directeur | Communication
+GET	/api/communication/me/notifications	01 — Commun | Communication
+GET	/api/communication/me/notifications/non-lues	01 — Commun | Communication
+GET	/api/documentation/etablissements/{etablissementId}/documents	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+GET	/api/documentation/etablissements/{etablissementId}/documents/{documentId}	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+GET	/api/documentation/etablissements/{etablissementId}/exports	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+GET	/api/documentation/etablissements/{etablissementId}/imports	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+GET	/api/documentation/etablissements/{etablissementId}/modeles	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+GET	/api/emplois-du-temps/etablissements/{etablissementId}/conflits	10 — Administrateur | Emplois du temps,20 — Directeur | Emplois du temps,30 — Secrétaire | Emplois du temps
+GET	/api/emplois-du-temps/etablissements/{etablissementId}/cours	10 — Administrateur | Emplois du temps,20 — Directeur | Emplois du temps,30 — Secrétaire | Emplois du temps
+GET	/api/emplois-du-temps/etablissements/{etablissementId}/cours/{coursId}	10 — Administrateur | Emplois du temps,20 — Directeur | Emplois du temps,30 — Secrétaire | Emplois du temps
+GET	/api/emplois-du-temps/etablissements/{etablissementId}/enseignants/{employeId}/disponibilites	10 — Administrateur | Emplois du temps,20 — Directeur | Emplois du temps,30 — Secrétaire | Emplois du temps
+GET	/api/emplois-du-temps/etablissements/{etablissementId}/remplacements	10 — Administrateur | Emplois du temps,20 — Directeur | Emplois du temps,30 — Secrétaire | Emplois du temps
+GET	/api/etablissements	10 — Administrateur | Établissements
+GET	/api/etablissements/{id}	10 — Administrateur | Établissements
+GET	/api/etablissements/{id}/annees	10 — Administrateur | Établissements
+GET	/api/etablissements/{id}/annees/{anneeId}	10 — Administrateur | Établissements
+GET	/api/finances/etablissements/{etablissementId}/annees/{anneeId}/types-frais	10 — Administrateur | Finances,20 — Directeur | Finances
+GET	/api/finances/etablissements/{etablissementId}/budgets	10 — Administrateur | Finances,20 — Directeur | Finances,50 — Comptable | Finances
+GET	/api/finances/etablissements/{etablissementId}/budgets/alertes	10 — Administrateur | Finances,20 — Directeur | Finances,50 — Comptable | Finances
+GET	/api/finances/etablissements/{etablissementId}/depenses	10 — Administrateur | Finances,20 — Directeur | Finances,50 — Comptable | Finances
+GET	/api/finances/etablissements/{etablissementId}/echeances	10 — Administrateur | Finances,20 — Directeur | Finances,30 — Secrétaire | Finances,50 — Comptable | Finances
+GET	/api/finances/etablissements/{etablissementId}/encaissements	10 — Administrateur | Finances,30 — Secrétaire | Finances,50 — Comptable | Finances
+GET	/api/finances/etablissements/{etablissementId}/impayes	10 — Administrateur | Finances,20 — Directeur | Finances,30 — Secrétaire | Finances,50 — Comptable | Finances
+GET	/api/finances/etablissements/{etablissementId}/paie/periode	10 — Administrateur | Finances,20 — Directeur | Finances,50 — Comptable | Finances
+GET	/api/health	00 — Public | Santé
+GET	/api/health/detailed	00 — Public | Santé
+GET	/api/health/ready	00 — Public | Santé
+GET	/api/health/resilience	00 — Public | Santé
+GET	/api/inscriptions/etablissements/{etablissementId}/eleves	10 — Administrateur | Élèves,20 — Directeur | Élèves,30 — Secrétaire | Élèves
+GET	/api/inscriptions/etablissements/{etablissementId}/eleves/{id}	10 — Administrateur | Élèves,20 — Directeur | Élèves,30 — Secrétaire | Élèves
+GET	/api/inscriptions/etablissements/{etablissementId}/inscriptions	10 — Administrateur | Inscriptions,20 — Directeur | Inscriptions,30 — Secrétaire | Inscriptions
+GET	/api/inscriptions/etablissements/{etablissementId}/inscriptions/{inscriptionId}	10 — Administrateur | Inscriptions,20 — Directeur | Inscriptions,30 — Secrétaire | Inscriptions
+GET	/api/inscriptions/etablissements/{etablissementId}/inscriptions/{inscriptionId}/documents	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+GET	/api/inscriptions/etablissements/{etablissementId}/types-documents	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+GET	/api/inscriptions/parents/{id}	10 — Administrateur | Élèves,20 — Directeur | Élèves,30 — Secrétaire | Élèves
+GET	/api/inscriptions/parents/{id}/eleves	10 — Administrateur | Élèves,20 — Directeur | Élèves,30 — Secrétaire | Élèves
+GET	/api/metrics	00 — Public | Santé
+GET	/api/parametrage/etablissements/{etablissementId}/parametres	10 — Administrateur | Paramétrage,20 — Directeur | Paramétrage
+GET	/api/parametrage/etablissements/{etablissementId}/parametres/{cle}	10 — Administrateur | Paramétrage,20 — Directeur | Paramétrage
+GET	/api/portail-parents/direction/{etablissementId}/demandes	10 — Administrateur | Demandes,20 — Directeur | Demandes,30 — Secrétaire | Demandes
+GET	/api/portail-parents/enfants/{eleveId}/acces	70 — Parent | Présences
+GET	/api/portail-parents/enfants/{eleveId}/bulletins	70 — Parent | Résultats
+GET	/api/portail-parents/enfants/{eleveId}/notes	70 — Parent | Résultats
+GET	/api/portail-parents/enfants/{eleveId}/presences	70 — Parent | Présences
+GET	/api/portail-parents/enfants/{eleveId}/resultats	70 — Parent | Résultats
+GET	/api/portail-parents/mes-demandes	70 — Parent | Demandes
+GET	/api/portail-parents/mes-enfants	70 — Parent | Mes enfants
+GET	/api/presences/etablissements/{etablissementId}/acces/date	10 — Administrateur | Présences,20 — Directeur | Présences,60 — Surveillant | Présences
+GET	/api/presences/etablissements/{etablissementId}/acces/eleves/{eleveId}	10 — Administrateur | Présences,20 — Directeur | Présences,60 — Surveillant | Présences
+GET	/api/presences/etablissements/{etablissementId}/alertes	10 — Administrateur | Présences,20 — Directeur | Présences,60 — Surveillant | Présences
+GET	/api/presences/etablissements/{etablissementId}/comportement/eleves/{eleveId}	10 — Administrateur | Présences,20 — Directeur | Présences,40 — Enseignant | Présences
+GET	/api/presences/etablissements/{etablissementId}/cours/{coursId}	10 — Administrateur | Présences,20 — Directeur | Présences,40 — Enseignant | Présences
+GET	/api/presences/etablissements/{etablissementId}/eleves/{eleveId}	10 — Administrateur | Présences,20 — Directeur | Présences,40 — Enseignant | Présences
+GET	/api/presences/etablissements/{etablissementId}/eleves/{eleveId}/observations	10 — Administrateur | Présences,20 — Directeur | Présences,40 — Enseignant | Présences
+GET	/api/presences/etablissements/{etablissementId}/personnel/{employeId}	10 — Administrateur | Présences,20 — Directeur | Présences,40 — Enseignant | Présences
+GET	/api/presences/etablissements/{etablissementId}/personnel/date	10 — Administrateur | Présences,20 — Directeur | Présences,40 — Enseignant | Présences
+GET	/api/rbac/roles	10 — Administrateur | Rôles et permissions
+GET	/api/rbac/roles/{id}	10 — Administrateur | Rôles et permissions
+GET	/api/rbac/roles/{id}/permissions	10 — Administrateur | Rôles et permissions
+GET	/api/resultats/etablissements/{etablissementId}/classes/{classeId}/trimestres/{trimestreId}/classement	10 — Administrateur | Résultats,20 — Directeur | Résultats,40 — Enseignant | Résultats
+GET	/api/resultats/etablissements/{etablissementId}/eleves/{eleveId}/trimestres/{trimestreId}/bulletin	10 — Administrateur | Résultats,20 — Directeur | Résultats
+GET	/api/resultats/etablissements/{etablissementId}/examens	10 — Administrateur | Résultats,20 — Directeur | Résultats,40 — Enseignant | Résultats
+GET	/api/resultats/etablissements/{etablissementId}/examens/{examenId}	10 — Administrateur | Résultats,20 — Directeur | Résultats,40 — Enseignant | Résultats
+GET	/api/resultats/etablissements/{etablissementId}/examens/{examenId}/notes	10 — Administrateur | Résultats,20 — Directeur | Résultats,40 — Enseignant | Résultats
+GET	/api/resultats/etablissements/{etablissementId}/reclamations	10 — Administrateur | Résultats,20 — Directeur | Résultats
+GET	/api/resultats/etablissements/{etablissementId}/trimestres/{trimestreId}/top	10 — Administrateur | Résultats,20 — Directeur | Résultats
+GET	/api/rh/etablissements/{etablissementId}/demandes-conges	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+GET	/api/rh/etablissements/{etablissementId}/employes	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+GET	/api/rh/etablissements/{etablissementId}/employes/{employeId}	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+GET	/api/rh/etablissements/{etablissementId}/employes/{employeId}/contrats	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+GET	/api/rh/etablissements/{etablissementId}/employes/{employeId}/solde-conge	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+GET	/api/rh/etablissements/{etablissementId}/types-conges	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+GET	/api/tableaux-de-bord/etablissements/{etablissementId}/comptable	10 — Administrateur | Tableaux de bord,20 — Directeur | Tableaux de bord,50 — Comptable | Tableaux de bord
+GET	/api/tableaux-de-bord/etablissements/{etablissementId}/directeur	10 — Administrateur | Tableaux de bord,20 — Directeur | Tableaux de bord
+GET	/api/tableaux-de-bord/etablissements/{etablissementId}/enseignant/me	10 — Administrateur | Tableaux de bord,20 — Directeur | Tableaux de bord,40 — Enseignant | Tableaux de bord
+GET	/api/tableaux-de-bord/etablissements/{etablissementId}/general	10 — Administrateur | Tableaux de bord,20 — Directeur | Tableaux de bord
+GET	/api/tableaux-de-bord/etablissements/{etablissementId}/parent/me	10 — Administrateur | Tableaux de bord,20 — Directeur | Tableaux de bord,70 — Parent | Tableaux de bord
+GET	/api/users	10 — Administrateur | Utilisateurs
+GET	/api/users/{id}	10 — Administrateur | Utilisateurs
+GET	/api/users/{id}/roles	10 — Administrateur | Utilisateurs
+GET	/api/users/me	01 — Commun | Mon compte
+PATCH	/api/academique/etablissements/{etablissementId}/classes/{id}	10 — Administrateur | Académique,20 — Directeur | Académique
+PATCH	/api/academique/etablissements/{etablissementId}/matieres/{id}	10 — Administrateur | Académique,20 — Directeur | Académique
+PATCH	/api/academique/etablissements/{etablissementId}/niveaux/{id}	10 — Administrateur | Académique,20 — Directeur | Académique
+PATCH	/api/academique/etablissements/{etablissementId}/salles/{id}	10 — Administrateur | Académique,20 — Directeur | Académique
+PATCH	/api/academique/etablissements/{etablissementId}/series/{id}	10 — Administrateur | Académique,20 — Directeur | Académique
+PATCH	/api/communication/etablissements/{etablissementId}/templates/{templateId}	10 — Administrateur | Communication,20 — Directeur | Communication
+PATCH	/api/communication/me/notifications/{notificationId}/lue	01 — Commun | Communication
+PATCH	/api/documentation/etablissements/{etablissementId}/documents/{documentId}/archiver	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+PATCH	/api/documentation/etablissements/{etablissementId}/documents/{documentId}/restaurer	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+PATCH	/api/emplois-du-temps/etablissements/{etablissementId}/cours/{coursId}	10 — Administrateur | Emplois du temps,20 — Directeur | Emplois du temps,30 — Secrétaire | Emplois du temps
+PATCH	/api/emplois-du-temps/etablissements/{etablissementId}/cours/{coursId}/annuler	10 — Administrateur | Emplois du temps,20 — Directeur | Emplois du temps,30 — Secrétaire | Emplois du temps
+PATCH	/api/emplois-du-temps/etablissements/{etablissementId}/remplacements/{remplacementId}/cloturer	10 — Administrateur | Emplois du temps,20 — Directeur | Emplois du temps,30 — Secrétaire | Emplois du temps
+PATCH	/api/etablissements/{id}	10 — Administrateur | Établissements
+PATCH	/api/etablissements/{id}/activate	10 — Administrateur | Établissements
+PATCH	/api/etablissements/{id}/annees/{anneeId}	10 — Administrateur | Établissements
+PATCH	/api/etablissements/{id}/annees/{anneeId}/trimestres/{trimestreId}	10 — Administrateur | Établissements
+PATCH	/api/etablissements/{id}/annees/{anneeId}/trimestres/{trimestreId}/statut	10 — Administrateur | Établissements
+PATCH	/api/etablissements/{id}/deactivate	10 — Administrateur | Établissements
+PATCH	/api/finances/etablissements/{etablissementId}/echeances/{echeanceId}/reduction	10 — Administrateur | Finances,20 — Directeur | Finances
+PATCH	/api/finances/etablissements/{etablissementId}/paie/{bulletinId}/payer	10 — Administrateur | Finances,20 — Directeur | Finances,50 — Comptable | Finances
+PATCH	/api/finances/etablissements/{etablissementId}/reductions/{id}	10 — Administrateur | Finances,20 — Directeur | Finances
+PATCH	/api/finances/etablissements/{etablissementId}/types-frais/{id}/actif	10 — Administrateur | Finances,20 — Directeur | Finances
+PATCH	/api/inscriptions/etablissements/{etablissementId}/documents/{documentId}/statut	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+PATCH	/api/inscriptions/etablissements/{etablissementId}/eleves/{id}	10 — Administrateur | Élèves,20 — Directeur | Élèves,30 — Secrétaire | Élèves
+PATCH	/api/inscriptions/parents/{id}	10 — Administrateur | Élèves,20 — Directeur | Élèves,30 — Secrétaire | Élèves
+PATCH	/api/portail-parents/direction/{etablissementId}/demandes/{demandeId}/cloturer	10 — Administrateur | Demandes,20 — Directeur | Demandes,30 — Secrétaire | Demandes
+PATCH	/api/portail-parents/direction/{etablissementId}/demandes/{demandeId}/repondre	10 — Administrateur | Demandes,20 — Directeur | Demandes,30 — Secrétaire | Demandes
+PATCH	/api/presences/etablissements/{etablissementId}/alertes/{alerteId}/lue	10 — Administrateur | Présences,20 — Directeur | Présences,60 — Surveillant | Présences
+PATCH	/api/presences/etablissements/{etablissementId}/presences/{presenceId}/justifier	10 — Administrateur | Présences,20 — Directeur | Présences,40 — Enseignant | Présences
+PATCH	/api/rbac/roles/{id}	10 — Administrateur | Rôles et permissions
+PATCH	/api/resultats/etablissements/{etablissementId}/bulletins/{bulletinId}/publier	10 — Administrateur | Résultats,20 — Directeur | Résultats
+PATCH	/api/resultats/etablissements/{etablissementId}/deliberations/{deliberationId}/cloturer	10 — Administrateur | Résultats,20 — Directeur | Résultats
+PATCH	/api/resultats/etablissements/{etablissementId}/examens/{examenId}/statut	10 — Administrateur | Résultats,20 — Directeur | Résultats,40 — Enseignant | Résultats
+PATCH	/api/resultats/etablissements/{etablissementId}/notes/{noteId}/valider	10 — Administrateur | Résultats,20 — Directeur | Résultats,40 — Enseignant | Résultats
+PATCH	/api/resultats/etablissements/{etablissementId}/reclamations/{demandeId}	10 — Administrateur | Résultats,20 — Directeur | Résultats,40 — Enseignant | Résultats
+PATCH	/api/rh/etablissements/{etablissementId}/contrats/{contratId}/statut	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+PATCH	/api/rh/etablissements/{etablissementId}/demandes-conges/{demandeId}/approuver	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+PATCH	/api/rh/etablissements/{etablissementId}/demandes-conges/{demandeId}/refuser	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+PATCH	/api/rh/etablissements/{etablissementId}/employes/{employeId}/actif	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+PATCH	/api/users/{id}	10 — Administrateur | Utilisateurs
+PATCH	/api/users/{id}/activate	10 — Administrateur | Utilisateurs
+PATCH	/api/users/{id}/deactivate	10 — Administrateur | Utilisateurs
+POST	/api/academique/etablissements/{etablissementId}/annees/{anneeId}/ponderations	10 — Administrateur | Académique,20 — Directeur | Académique
+POST	/api/academique/etablissements/{etablissementId}/classes	10 — Administrateur | Académique,20 — Directeur | Académique
+POST	/api/academique/etablissements/{etablissementId}/classes/{classeId}/matieres	10 — Administrateur | Académique,20 — Directeur | Académique
+POST	/api/academique/etablissements/{etablissementId}/matieres	10 — Administrateur | Académique,20 — Directeur | Académique
+POST	/api/academique/etablissements/{etablissementId}/niveaux	10 — Administrateur | Académique,20 — Directeur | Académique
+POST	/api/academique/etablissements/{etablissementId}/salles	10 — Administrateur | Académique,20 — Directeur | Académique
+POST	/api/academique/etablissements/{etablissementId}/series	10 — Administrateur | Académique,20 — Directeur | Académique
+POST	/api/academique/etablissements/{etablissementId}/types-evaluation	10 — Administrateur | Académique,20 — Directeur | Académique
+POST	/api/auth/login	00 — Public | Authentification
+POST	/api/auth/logout	01 — Commun | Mon compte
+POST	/api/auth/refresh	00 — Public | Authentification
+POST	/api/communication/etablissements/{etablissementId}/notifications	10 — Administrateur | Communication,20 — Directeur | Communication
+POST	/api/communication/etablissements/{etablissementId}/templates	10 — Administrateur | Communication,20 — Directeur | Communication
+POST	/api/documentation/etablissements/{etablissementId}/documents/upload	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+POST	/api/documentation/etablissements/{etablissementId}/export	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+POST	/api/documentation/etablissements/{etablissementId}/import	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+POST	/api/documentation/etablissements/{etablissementId}/modeles	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+POST	/api/documentation/etablissements/{etablissementId}/modeles/{modeleId}/generer-pdf	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+POST	/api/emplois-du-temps/etablissements/{etablissementId}/classes/{classeId}/generer	10 — Administrateur | Emplois du temps,20 — Directeur | Emplois du temps,30 — Secrétaire | Emplois du temps
+POST	/api/emplois-du-temps/etablissements/{etablissementId}/cours	10 — Administrateur | Emplois du temps,20 — Directeur | Emplois du temps,30 — Secrétaire | Emplois du temps
+POST	/api/emplois-du-temps/etablissements/{etablissementId}/enseignants/{employeId}/disponibilites	10 — Administrateur | Emplois du temps,20 — Directeur | Emplois du temps,30 — Secrétaire | Emplois du temps
+POST	/api/emplois-du-temps/etablissements/{etablissementId}/remplacements	10 — Administrateur | Emplois du temps,20 — Directeur | Emplois du temps,30 — Secrétaire | Emplois du temps
+POST	/api/etablissements	10 — Administrateur | Établissements
+POST	/api/etablissements/{id}/annees	10 — Administrateur | Établissements
+POST	/api/etablissements/{id}/annees/{anneeId}/fermer	10 — Administrateur | Établissements
+POST	/api/etablissements/{id}/annees/{anneeId}/ouvrir	10 — Administrateur | Établissements
+POST	/api/finances/etablissements/{etablissementId}/budgets	10 — Administrateur | Finances,20 — Directeur | Finances,50 — Comptable | Finances
+POST	/api/finances/etablissements/{etablissementId}/depenses	10 — Administrateur | Finances,20 — Directeur | Finances,50 — Comptable | Finances
+POST	/api/finances/etablissements/{etablissementId}/echeances/{echeanceId}/encaisser	10 — Administrateur | Finances,30 — Secrétaire | Finances,50 — Comptable | Finances
+POST	/api/finances/etablissements/{etablissementId}/employes/{employeId}/paie	10 — Administrateur | Finances,20 — Directeur | Finances,50 — Comptable | Finances
+POST	/api/finances/etablissements/{etablissementId}/inscriptions/{inscriptionId}/echeances	10 — Administrateur | Finances,20 — Directeur | Finances
+POST	/api/finances/etablissements/{etablissementId}/mobile-money/initier	10 — Administrateur | Finances,30 — Secrétaire | Finances,50 — Comptable | Finances
+POST	/api/finances/etablissements/{etablissementId}/reductions	10 — Administrateur | Finances,20 — Directeur | Finances
+POST	/api/finances/etablissements/{etablissementId}/types-frais	10 — Administrateur | Finances,20 — Directeur | Finances
+POST	/api/finances/mobile-money/webhook/confirmation	00 — Public | Finances
+POST	/api/inscriptions/etablissements/{etablissementId}/eleves	10 — Administrateur | Élèves,20 — Directeur | Élèves,30 — Secrétaire | Élèves
+POST	/api/inscriptions/etablissements/{etablissementId}/eleves/{id}/radier	10 — Administrateur | Élèves,20 — Directeur | Élèves,30 — Secrétaire | Élèves
+POST	/api/inscriptions/etablissements/{etablissementId}/inscriptions/{inscriptionId}/affectation-auto	10 — Administrateur | Inscriptions,20 — Directeur | Inscriptions,30 — Secrétaire | Inscriptions
+POST	/api/inscriptions/etablissements/{etablissementId}/inscriptions/{inscriptionId}/affecter	10 — Administrateur | Inscriptions,20 — Directeur | Inscriptions,30 — Secrétaire | Inscriptions
+POST	/api/inscriptions/etablissements/{etablissementId}/inscriptions/{inscriptionId}/documents	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+POST	/api/inscriptions/etablissements/{etablissementId}/inscriptions/{inscriptionId}/valider	10 — Administrateur | Inscriptions,20 — Directeur | Inscriptions,30 — Secrétaire | Inscriptions
+POST	/api/inscriptions/etablissements/{etablissementId}/preinscrire	10 — Administrateur | Inscriptions,20 — Directeur | Inscriptions,30 — Secrétaire | Inscriptions
+POST	/api/inscriptions/etablissements/{etablissementId}/reinscrire	10 — Administrateur | Inscriptions,20 — Directeur | Inscriptions,30 — Secrétaire | Inscriptions
+POST	/api/inscriptions/etablissements/{etablissementId}/types-documents	10 — Administrateur | Documentation,20 — Directeur | Documentation,30 — Secrétaire | Documentation
+POST	/api/inscriptions/parents	10 — Administrateur | Élèves,20 — Directeur | Élèves,30 — Secrétaire | Élèves
+POST	/api/inscriptions/parents/{id}/eleves	10 — Administrateur | Élèves,20 — Directeur | Élèves,30 — Secrétaire | Élèves
+POST	/api/parametrage/etablissements/{etablissementId}/parametres	10 — Administrateur | Paramétrage
+POST	/api/portail-parents/demandes	70 — Parent | Demandes
+POST	/api/presences/etablissements/{etablissementId}/acces	10 — Administrateur | Présences,20 — Directeur | Présences,60 — Surveillant | Présences
+POST	/api/presences/etablissements/{etablissementId}/alertes	10 — Administrateur | Présences,20 — Directeur | Présences,60 — Surveillant | Présences
+POST	/api/presences/etablissements/{etablissementId}/comportement	10 — Administrateur | Présences,20 — Directeur | Présences,40 — Enseignant | Présences
+POST	/api/presences/etablissements/{etablissementId}/cours/{coursId}/pointer	10 — Administrateur | Présences,20 — Directeur | Présences,40 — Enseignant | Présences
+POST	/api/presences/etablissements/{etablissementId}/eleves/{eleveId}/observations	10 — Administrateur | Présences,20 — Directeur | Présences,40 — Enseignant | Présences
+POST	/api/presences/etablissements/{etablissementId}/personnel	10 — Administrateur | Présences,20 — Directeur | Présences,40 — Enseignant | Présences
+POST	/api/rbac/roles	10 — Administrateur | Rôles et permissions
+POST	/api/rbac/roles/{id}/permissions	10 — Administrateur | Rôles et permissions
+POST	/api/resultats/etablissements/{etablissementId}/appreciations	10 — Administrateur | Résultats,20 — Directeur | Résultats,40 — Enseignant | Résultats
+POST	/api/resultats/etablissements/{etablissementId}/avis-direction	10 — Administrateur | Résultats,20 — Directeur | Résultats
+POST	/api/resultats/etablissements/{etablissementId}/deliberations	10 — Administrateur | Résultats,20 — Directeur | Résultats
+POST	/api/resultats/etablissements/{etablissementId}/deliberations/{deliberationId}/decisions	10 — Administrateur | Résultats,20 — Directeur | Résultats
+POST	/api/resultats/etablissements/{etablissementId}/deliberations/{deliberationId}/membres	10 — Administrateur | Résultats,20 — Directeur | Résultats
+POST	/api/resultats/etablissements/{etablissementId}/eleves/{eleveId}/trimestres/{trimestreId}/bulletin	10 — Administrateur | Résultats,20 — Directeur | Résultats
+POST	/api/resultats/etablissements/{etablissementId}/examens	10 — Administrateur | Résultats,20 — Directeur | Résultats,40 — Enseignant | Résultats
+POST	/api/resultats/etablissements/{etablissementId}/examens/{examenId}/notes	10 — Administrateur | Résultats,20 — Directeur | Résultats,40 — Enseignant | Résultats
+POST	/api/resultats/etablissements/{etablissementId}/examens/{examenId}/publier	10 — Administrateur | Résultats,20 — Directeur | Résultats
+POST	/api/resultats/etablissements/{etablissementId}/notes/{noteId}/reclamation	70 — Parent | Résultats
+POST	/api/rh/etablissements/{etablissementId}/contrats	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+POST	/api/rh/etablissements/{etablissementId}/demandes-conges	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines,40 — Enseignant | Ressources humaines
+POST	/api/rh/etablissements/{etablissementId}/employes	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+POST	/api/rh/etablissements/{etablissementId}/employes/{employeId}/annees/{anneeId}/solde-conge	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+POST	/api/rh/etablissements/{etablissementId}/employes/{employeId}/matieres	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+POST	/api/rh/etablissements/{etablissementId}/types-conges	10 — Administrateur | Ressources humaines,20 — Directeur | Ressources humaines
+POST	/api/tableaux-de-bord/etablissements/{etablissementId}/trimestres/{trimestreId}/recalculer	10 — Administrateur | Tableaux de bord,20 — Directeur | Tableaux de bord
+POST	/api/users	10 — Administrateur | Utilisateurs
+POST	/api/users/{id}/reset-password	10 — Administrateur | Utilisateurs
+POST	/api/users/{id}/restore	10 — Administrateur | Utilisateurs
+POST	/api/users/{id}/roles	10 — Administrateur | Utilisateurs
+POST	/api/users/me/change-password	01 — Commun | Mon compte

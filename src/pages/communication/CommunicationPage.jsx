@@ -1,0 +1,86 @@
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { MessageSquare } from 'lucide-react'
+import { useAuth } from '../../auth/AuthContext'
+import { getPrimaryRole } from '../../auth/roleHome'
+import { searchEtablissements } from '../../api/etablissements'
+import { Combobox } from '../../components/ui/Combobox'
+import { TemplatesTab } from './TemplatesTab'
+import { EnvoyerNotificationTab } from './EnvoyerNotificationTab'
+
+// Modèles : Admin/Directeur seulement (tags Swagger). Envoyer une
+// notification : Admin/Directeur/Secrétaire.
+const ALL_TABS = [
+  { key: 'envoyer', label: 'Envoyer une notification', Component: EnvoyerNotificationTab, roles: ['ADMINISTRATEUR', 'DIRECTEUR', 'SECRETAIRE'] },
+  { key: 'templates', label: 'Modèles de message', Component: TemplatesTab, roles: ['ADMINISTRATEUR', 'DIRECTEUR'] },
+]
+
+export default function CommunicationPage() {
+  const { user } = useAuth()
+  const role = getPrimaryRole(user)
+  const isAdmin = role === 'ADMINISTRATEUR'
+  const TABS = ALL_TABS.filter((t) => t.roles.includes(role))
+  const [selectedEtabId, setSelectedEtabId] = useState(isAdmin ? '' : (user?.etablissementId ?? ''))
+  const [activeTab, setActiveTab] = useState(TABS[0]?.key ?? '')
+
+  const { data: etablissementsData } = useQuery({
+    queryKey: ['etablissements', 'options'],
+    queryFn: () => searchEtablissements({ limit: 100 }),
+    enabled: isAdmin,
+  })
+  const etablissementOptions = (etablissementsData?.items ?? []).map((e) => ({ value: e.id, label: e.nom }))
+
+  const ActiveComponent = TABS.find((t) => t.key === activeTab)?.Component
+
+  return (
+    <div>
+      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-1">Communication</h1>
+      <p className="text-sm text-ink-500 mb-6">Notifications et modèles de message.</p>
+
+      {isAdmin && (
+        <div className="mb-6 max-w-sm">
+          <Combobox
+            id="etablissement-select"
+            label="Établissement"
+            options={etablissementOptions}
+            value={selectedEtabId}
+            onChange={setSelectedEtabId}
+            placeholder="Sélectionner un établissement..."
+            searchPlaceholder="Rechercher une école..."
+          />
+        </div>
+      )}
+
+      {!selectedEtabId ? (
+        <div className="bg-white rounded-2xl border border-dashed border-ink-200 p-16 text-center text-ink-400">
+          <MessageSquare className="h-8 w-8 mx-auto mb-3 opacity-50" />
+          Sélectionne un établissement.
+        </div>
+      ) : (
+        <>
+          {TABS.length > 1 && (
+            <div className="flex flex-wrap gap-1 border-b border-ink-200 mb-5">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={[
+                    'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
+                    activeTab === tab.key
+                      ? 'border-primary-600 text-primary-700'
+                      : 'border-transparent text-ink-500 hover:text-ink-700',
+                  ].join(' ')}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {ActiveComponent && <ActiveComponent etablissementId={selectedEtabId} />}
+        </>
+      )}
+    </div>
+  )
+}

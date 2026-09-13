@@ -1,0 +1,128 @@
+@import 'tailwindcss';
+
+/*
+  Design tokens — Plateforme de Gestion des Écoles
+  - Police titres/menus : Plus Jakarta Sans (géométrique, nette, "pro")
+  - Police texte/paragraphes : Inter (très lisible, standard des interfaces ERP/SaaS)
+  - Palette : bleu nuit "primary" (identité, sidebar, actions) + gris ardoise "ink" (neutres)
+    + couleurs sémantiques (success / warning / danger) pour les statuts (paiements, congés, etc.)
+*/
+@theme {
+  --font-sans: 'Inter', system-ui, 'Segoe UI', sans-serif;
+  --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+
+  /* Bleu principal — identité de la plateforme */
+  --color-primary-50: #eef4ff;
+  --color-primary-100: #dce8ff;
+  --color-primary-200: #b9d1ff;
+  --color-primary-300: #8bb0ff;
+  --color-primary-400: #5c8bfb;
+  --color-primary-500: #3566f0;
+  --color-primary-600: #234ed1;
+  --color-primary-700: #1c3ea8;
+  --color-primary-800: #1b3583;
+  --color-primary-900: #182c67;
+  --color-primary-950: #0f1a3d;
+
+  /* Neutres ardoise à teinte bleutée — texte, fonds, sidebar */
+  --color-ink-50: #f7f8fa;
+  --color-ink-100: #eef1f5;
+  --color-ink-200: #dde2e9;
+  --color-ink-300: #c3cbd6;
+  --color-ink-400: #94a1b3;
+  --color-ink-500: #6b7789;
+  --color-ink-600: #4f5b6d;
+  --color-ink-700: #3a4456;
+  --color-ink-800: #232c3d;
+  --color-ink-900: #141b29;
+  --color-ink-950: #0a0f18;
+
+  /* Statuts */
+  --color-success-50: #ecfdf5;
+  --color-success-500: #10b981;
+  --color-success-600: #059669;
+  --color-warning-50: #fffbeb;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-danger-50: #fef2f2;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink-800);
+  background-color: var(--color-ink-50);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  color: var(--color-ink-900);
+}
+
+/* Scrollbar discrète, globale (fond clair) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-300) transparent;
+}
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-ink-300);
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-ink-400);
+}
+
+/* Variante pour les zones sur fond sombre/bleu (ex: sidebar) */
+.scrollbar-on-dark {
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+.scrollbar-on-dark::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+.scrollbar-on-dark::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+/*
+  Pastille de menu actif "en ruban" : elle touche le bord droit de la
+  sidebar et se rétrécit en douceur juste avant, comme un onglet qui se
+  détache du panneau. Le dégradé radial de chaque pseudo-élément découpe
+  un quart de cercle transparent (qui laisse voir le fond blanc de la
+  pastille) dans un petit carré sinon rempli de la couleur de la sidebar —
+  c'est cette découpe qui dessine la courbe concave en haut et en bas.
+  Couleur du carré = teinte moyenne du dégradé de la sidebar (primary-700).
+*/
+.nav-active-pill {
+  border-radius: 14px 0 0 14px;
+}
+.nav-active-pill::before,
+.nav-active-pill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  z-index: 1;
+}
+.nav-active-pill::before {
+  top: 0;
+  background: radial-gradient(circle at bottom left, transparent 16px, var(--color-primary-700) 0);
+}
+.nav-active-pill::after {
+  bottom: 0;
+  background: radial-gradient(circle at top left, transparent 16px, var(--color-primary-700) 0);
+}
