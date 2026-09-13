@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
   AlertTriangle,
@@ -16,41 +17,15 @@ import {
 import { getGeneralDashboard } from '../../api/dashboard'
 import { useAuth } from '../../auth/AuthContext'
 import { StatTile } from '../../components/ui/StatTile'
+import { AlertTile } from '../../components/ui/AlertTile'
 import { BarChartCard } from '../../components/charts/BarChartCard'
 import { DonutChartCard } from '../../components/charts/DonutChartCard'
 import { CHART_COLORS } from '../../lib/chartColors'
 import { NIVEAU_LABELS } from '../../config/academiqueLabels'
 
-function AlertItem({ icon: Icon, label, count }) {
-  const active = count > 0
-  return (
-    <div
-      className={['flex items-center gap-3 rounded-xl p-3', active ? 'bg-warning-50' : 'bg-ink-50'].join(
-        ' ',
-      )}
-    >
-      <div
-        className={[
-          'h-9 w-9 rounded-lg flex items-center justify-center shrink-0',
-          active ? 'bg-warning-500/15 text-warning-600' : 'bg-white text-ink-400',
-        ].join(' ')}
-      >
-        <Icon className="h-4 w-4" />
-      </div>
-      <div className="min-w-0">
-        <p
-          className={`text-lg font-heading font-bold leading-tight ${active ? 'text-ink-900' : 'text-ink-400'}`}
-        >
-          {count}
-        </p>
-        <p className="text-xs text-ink-500 truncate">{label}</p>
-      </div>
-    </div>
-  )
-}
-
 export default function DirecteurDashboard() {
   const { user } = useAuth()
+  const navigate = useNavigate()
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['dashboard', 'general', user?.etablissementId],
@@ -65,6 +40,13 @@ export default function DirecteurDashboard() {
   const alertes = data?.alertes ?? {}
   const effectifParNiveau = graphiques.effectifParNiveau ?? []
   const meilleursEleves = resultats.meilleursEleves ?? []
+
+  // Chaque stat/alerte mène à l'onglet du module qui la détaille — le
+  // `tab` est repris par la page cible via `location.state` (voir
+  // FinancesPage/AcademiquePage/RhPage/PresencesPage/ResultatsPage/ElevesPage).
+  function goTo(path, tab) {
+    navigate(path, { state: { tab } })
+  }
 
   return (
     <div>
@@ -86,45 +68,64 @@ export default function DirecteurDashboard() {
         <div className="space-y-6">
           {/* Statistiques générales */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatTile icon={Users} label="Élèves" value={stats.nbEleves ?? 0} />
-            <StatTile icon={UserCheck} label="Enseignants" value={stats.nbEnseignants ?? 0} />
-            <StatTile icon={Layers} label="Classes" value={stats.nbClasses ?? 0} />
-            <StatTile icon={BookOpen} label="Matières" value={stats.nbMatieres ?? 0} />
+            <StatTile icon={Users} label="Élèves" value={stats.nbEleves ?? 0} onClick={() => goTo('/directeur/eleves', 'eleves')} />
+            <StatTile icon={UserCheck} label="Enseignants" value={stats.nbEnseignants ?? 0} onClick={() => goTo('/directeur/rh', 'employes')} />
+            <StatTile icon={Layers} label="Classes" value={stats.nbClasses ?? 0} onClick={() => goTo('/directeur/academique', 'classes')} />
+            <StatTile icon={BookOpen} label="Matières" value={stats.nbMatieres ?? 0} onClick={() => goTo('/directeur/academique', 'matieres')} />
             <StatTile
               icon={Wallet}
               label="Encaissé"
-              value={(stats.montantEncaisses ?? 0).toLocaleString('fr-FR')}
+              value={stats.montantEncaisses ?? 0}
+              suffix=" GNF"
+              onClick={() => goTo('/directeur/finances', 'encaissements')}
             />
             <StatTile
               icon={AlertTriangle}
               label="Impayés"
-              value={(stats.montantImpayes ?? 0).toLocaleString('fr-FR')}
+              value={stats.montantImpayes ?? 0}
+              suffix=" GNF"
+              onClick={() => goTo('/directeur/finances', 'impayes')}
             />
             <StatTile
               icon={ClipboardCheck}
               label="Présence du jour"
-              value={`${stats.tauxPresenceJour ?? 0}%`}
+              value={stats.tauxPresenceJour ?? 0}
+              suffix="%"
+              onClick={() => goTo('/directeur/presences', 'acces')}
             />
-            <StatTile icon={TrendingUp} label="Taux de réussite" value={`${stats.tauxReussite ?? 0}%`} />
+            <StatTile
+              icon={TrendingUp}
+              label="Taux de réussite"
+              value={stats.tauxReussite ?? 0}
+              suffix="%"
+              onClick={() => goTo('/directeur/resultats', 'classements')}
+            />
           </div>
 
           {/* Alertes */}
           <div className="bg-white rounded-2xl border border-ink-100 p-5">
             <p className="font-heading font-semibold text-ink-900 mb-4">Alertes</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              <AlertItem icon={AlertTriangle} label="Impayés" count={alertes.nbImpayes ?? 0} />
-              <AlertItem icon={UserX} label="Absences" count={alertes.nbAbsences ?? 0} />
-              <AlertItem
+              <AlertTile icon={AlertTriangle} label="Impayés" count={alertes.nbImpayes ?? 0} onClick={() => goTo('/directeur/finances', 'impayes')} />
+              <AlertTile icon={UserX} label="Absences" count={alertes.nbAbsences ?? 0} onClick={() => goTo('/directeur/presences', 'alertes')} />
+              <AlertTile
                 icon={CalendarClock}
                 label="Examens (semaine)"
                 count={alertes.examensSemaine ?? 0}
+                onClick={() => goTo('/directeur/resultats', 'examens')}
               />
-              <AlertItem
+              <AlertTile
                 icon={FileWarning}
                 label="Documents manquants"
                 count={alertes.nbDocumentsManquants ?? 0}
+                onClick={() => goTo('/directeur/documentation', 'documents')}
               />
-              <AlertItem icon={Cake} label="Anniversaires du jour" count={alertes.anniversairesJour ?? 0} />
+              <AlertTile
+                icon={Cake}
+                label="Anniversaires du jour"
+                count={alertes.anniversairesJour ?? 0}
+                onClick={() => goTo('/directeur/eleves', 'eleves')}
+              />
             </div>
           </div>
 

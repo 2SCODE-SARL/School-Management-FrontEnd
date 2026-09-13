@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { ClipboardList, GraduationCap, IdCard, KeyRound } from 'lucide-react'
 import { searchEleves } from '../../api/eleves'
@@ -15,7 +16,12 @@ import { INSCRIPTION_STATUT_LABELS, INSCRIPTION_STATUT_OPTIONS } from '../../con
  */
 export default function SecretaireDashboard() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const etablissementId = user?.etablissementId
+
+  function goTo(path, tab) {
+    navigate(path, { state: { tab } })
+  }
 
   const { data: elevesData, isLoading: isLoadingEleves } = useQuery({
     queryKey: ['eleves', 'list', etablissementId, { q: '', statut: undefined, page: 1 }],
@@ -74,19 +80,21 @@ export default function SecretaireDashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <StatTile icon={GraduationCap} label="Élèves" value={elevesData?.total ?? 0} />
+          <StatTile icon={GraduationCap} label="Élèves" value={elevesData?.total ?? 0} onClick={() => goTo('/secretaire/eleves', 'eleves')} />
           <StatTile
             icon={ClipboardList}
             label="Inscriptions (année en cours)"
             value={isErrorAnnees ? '—' : (isLoadingInscriptions ? '…' : totalInscriptions)}
             hint={isErrorAnnees ? 'Accès aux années scolaires refusé' : undefined}
+            onClick={isErrorAnnees ? undefined : () => goTo('/secretaire/eleves', 'inscriptions')}
           />
-          <StatTile icon={IdCard} label="Employés" value={employes.length} />
+          <StatTile icon={IdCard} label="Employés" value={employes.length} onClick={() => goTo('/secretaire/rh', 'employes')} />
           <StatTile
             icon={KeyRound}
             label="Employés sans compte"
             value={sansCompte}
             hint={sansCompte > 0 ? 'À provisionner dans Ressources humaines' : undefined}
+            onClick={() => goTo('/secretaire/rh', 'employes')}
           />
         </div>
       )}

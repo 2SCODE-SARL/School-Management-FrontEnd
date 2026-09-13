@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Building2 } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
@@ -27,11 +28,13 @@ const TABS = [
 
 export default function AcademiquePage() {
   const { user } = useAuth()
+  const location = useLocation()
   const isAdmin = getPrimaryRole(user) === 'ADMINISTRATEUR'
+  // Arrivée possible depuis une statistique cliquable d'un tableau de bord.
   const [selectedEtabId, setSelectedEtabId] = useState(
-    isAdmin ? '' : (user?.etablissementId ?? ''),
+    isAdmin ? (location.state?.etablissementId ?? '') : (user?.etablissementId ?? ''),
   )
-  const [activeTab, setActiveTab] = useState('annees')
+  const [activeTab, setActiveTab] = useState(location.state?.tab ?? 'annees')
 
   // L'Admin gère plusieurs écoles : il doit d'abord choisir laquelle
   // configurer. Le Directeur, lui, n'a que la sienne.

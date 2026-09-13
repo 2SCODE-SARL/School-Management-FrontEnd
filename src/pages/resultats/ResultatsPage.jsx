@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { GraduationCap } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
@@ -36,11 +37,15 @@ const ALL_TABS = [
 
 export default function ResultatsPage() {
   const { user } = useAuth()
+  const location = useLocation()
   const role = getPrimaryRole(user)
   const isAdmin = role === 'ADMINISTRATEUR'
   const TABS = ALL_TABS.filter((t) => t.roles.includes(role))
-  const [selectedEtabId, setSelectedEtabId] = useState(isAdmin ? '' : (user?.etablissementId ?? ''))
-  const [activeTab, setActiveTab] = useState(TABS[0]?.key ?? 'examens')
+  // Arrivée possible depuis une statistique cliquable d'un tableau de bord.
+  const [selectedEtabId, setSelectedEtabId] = useState(
+    isAdmin ? (location.state?.etablissementId ?? '') : (user?.etablissementId ?? ''),
+  )
+  const [activeTab, setActiveTab] = useState(location.state?.tab ?? TABS[0]?.key ?? 'examens')
 
   const { data: etablissementsData } = useQuery({
     queryKey: ['etablissements', 'options'],

@@ -8,7 +8,7 @@ import { EMPLOYE_TYPE_LABELS } from '../../config/rhLabels'
  * Vue d'ensemble RH — calculée côté client à partir des listes déjà
  * disponibles (pas d'endpoint de tableau de bord dédié au RH côté API).
  */
-export function RhDashboardTab({ etablissementId, canViewComptesEnAttente }) {
+export function RhDashboardTab({ etablissementId, canViewComptesEnAttente, onGoToTab }) {
   const { data: employesData, isLoading: isLoadingEmployes } = useQuery({
     queryKey: ['rh', 'employes', etablissementId, { q: '', type: '' }],
     queryFn: () => searchEmployes(etablissementId, {}),
@@ -46,15 +46,16 @@ export function RhDashboardTab({ etablissementId, canViewComptesEnAttente }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatTile icon={Users} label="Employés" value={employes.length} />
-        <StatTile icon={UserCheck} label="Actifs" value={actifs} />
-        <StatTile icon={UserX} label="Inactifs" value={inactifs} />
+        <StatTile icon={Users} label="Employés" value={employes.length} onClick={() => onGoToTab?.('employes')} />
+        <StatTile icon={UserCheck} label="Actifs" value={actifs} onClick={() => onGoToTab?.('employes')} />
+        <StatTile icon={UserX} label="Inactifs" value={inactifs} onClick={() => onGoToTab?.('employes')} />
         {canViewComptesEnAttente && (
           <StatTile
             icon={ClipboardCheck}
             label="Comptes en attente"
             value={comptesEnAttente.length}
             hint={comptesEnAttente.length > 0 ? 'À valider dans l\'onglet dédié' : undefined}
+            onClick={() => onGoToTab?.('comptes-en-attente')}
           />
         )}
       </div>

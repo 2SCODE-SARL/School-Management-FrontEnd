@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Users } from 'lucide-react'
 import { searchEtablissements } from '../../api/etablissements'
@@ -19,11 +20,13 @@ const TABS = [
 
 export default function ElevesPage() {
   const { user } = useAuth()
+  const location = useLocation()
   const isAdmin = getPrimaryRole(user) === 'ADMINISTRATEUR'
+  // Arrivée possible depuis une statistique cliquable d'un tableau de bord.
   const [selectedEtabId, setSelectedEtabId] = useState(
-    isAdmin ? '' : (user?.etablissementId ?? ''),
+    isAdmin ? (location.state?.etablissementId ?? '') : (user?.etablissementId ?? ''),
   )
-  const [activeTab, setActiveTab] = useState('eleves')
+  const [activeTab, setActiveTab] = useState(location.state?.tab ?? 'eleves')
 
   const { data: etablissementsData } = useQuery({
     queryKey: ['etablissements', 'options'],

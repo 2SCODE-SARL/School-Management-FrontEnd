@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { IdCard } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
@@ -18,6 +19,7 @@ const ALL_TABS = [
 
 export default function RhPage() {
   const { user } = useAuth()
+  const location = useLocation()
   const role = getPrimaryRole(user)
   const isAdmin = role === 'ADMINISTRATEUR'
   // Modifier/désactiver une fiche, valider/refuser un compte : Admin/Directeur
@@ -27,10 +29,11 @@ export default function RhPage() {
   const canManageComptes = isAdmin || role === 'DIRECTEUR'
   const canViewComptesEnAttente = canManageComptes || role === 'SECRETAIRE'
   const TABS = ALL_TABS.filter((t) => t.requires !== 'view' || canViewComptesEnAttente)
+  // Arrivée possible depuis une statistique cliquable d'un tableau de bord.
   const [selectedEtabId, setSelectedEtabId] = useState(
-    isAdmin ? '' : (user?.etablissementId ?? ''),
+    isAdmin ? (location.state?.etablissementId ?? '') : (user?.etablissementId ?? ''),
   )
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const [activeTab, setActiveTab] = useState(location.state?.tab ?? 'dashboard')
 
   const { data: etablissementsData } = useQuery({
     queryKey: ['etablissements', 'options'],
@@ -109,6 +112,7 @@ export default function RhPage() {
               etablissementId={selectedEtabId}
               canManageComptes={canManageComptes}
               canViewComptesEnAttente={canViewComptesEnAttente}
+              onGoToTab={setActiveTab}
             />
           )}
         </>

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { CalendarClock, ClipboardCheck, GraduationCap, UserX } from 'lucide-react'
 import { getEnseignantDashboard } from '../../api/dashboard'
@@ -6,6 +7,7 @@ import { StatTile } from '../../components/ui/StatTile'
 
 export default function EnseignantDashboard() {
   const { user } = useAuth()
+  const navigate = useNavigate()
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['dashboard', 'enseignant', user?.etablissementId],
@@ -43,8 +45,18 @@ export default function EnseignantDashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatTile icon={GraduationCap} label="Mes classes" value={classes.length} />
             <StatTile icon={CalendarClock} label="Cours à venir" value={cours.length} />
-            <StatTile icon={ClipboardCheck} label="À pointer aujourd'hui" value={aPointer.length} />
-            <StatTile icon={UserX} label="Absences (total)" value={totalAbsences} />
+            <StatTile
+              icon={ClipboardCheck}
+              label="À pointer aujourd'hui"
+              value={aPointer.length}
+              onClick={() => navigate('/enseignant/presences', { state: { tab: 'personnel' } })}
+            />
+            <StatTile
+              icon={UserX}
+              label="Absences (total)"
+              value={totalAbsences}
+              onClick={() => navigate('/enseignant/presences', { state: { tab: 'personnel' } })}
+            />
           </div>
 
           <div className="bg-white rounded-2xl border border-ink-100 p-5">

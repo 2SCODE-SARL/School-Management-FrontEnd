@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Wallet } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
@@ -41,11 +42,18 @@ const ALL_TABS = [
 
 export default function FinancesPage() {
   const { user } = useAuth()
+  const location = useLocation()
   const role = getPrimaryRole(user)
   const isAdmin = role === 'ADMINISTRATEUR'
   const TABS = ALL_TABS.filter((t) => t.roles.includes(role))
-  const [selectedEtabId, setSelectedEtabId] = useState(isAdmin ? '' : (user?.etablissementId ?? ''))
-  const [activeTab, setActiveTab] = useState(TABS[0]?.key ?? '')
+  // `location.state` : arrivée depuis une statistique cliquable du tableau
+  // de bord (voir DirecteurDashboard/AdminDashboard) — ouvre directement le
+  // bon onglet (et le bon établissement pour l'Admin) au lieu de l'onglet
+  // par défaut.
+  const [selectedEtabId, setSelectedEtabId] = useState(
+    isAdmin ? (location.state?.etablissementId ?? '') : (user?.etablissementId ?? ''),
+  )
+  const [activeTab, setActiveTab] = useState(location.state?.tab ?? TABS[0]?.key ?? '')
 
   const { data: etablissementsData } = useQuery({
     queryKey: ['etablissements', 'options'],
