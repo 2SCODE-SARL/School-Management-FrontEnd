@@ -100,11 +100,16 @@ const ENSEIGNANT_BUILT_PAGES = {
 
 // Le Secrétaire n'a ni Établissements ni Utilisateurs ni Académique — son
 // accès réel (vérifié dans la doc) se limite à Élèves & Inscriptions et à
-// une partie de RH (créer une fiche, provisionner un compte).
+// une partie de RH (créer une fiche, provisionner un compte). Pour
+// Finances, il a Échéances/Impayés/Encaissements (pas Paie/Frais/Dépenses/
+// Budgets) — FinancesPage filtre déjà ses onglets par rôle en interne, il
+// manquait juste l'enregistrement de la page ici (oubli, la page réelle
+// n'était jamais montée malgré le lien visible dans le menu).
 const SECRETAIRE_BUILT_PAGES = {
   '/secretaire/eleves': ElevesPage,
   '/secretaire/rh': RhPage,
   '/secretaire/emplois-du-temps': EmploisDuTempsPage,
+  '/secretaire/finances': FinancesPage,
   '/secretaire/demandes': StaffDemandesPage,
   '/secretaire/communication': CommunicationPage,
   '/secretaire/documentation': DocumentationPage,
