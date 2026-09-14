@@ -1,16 +1,28 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { KeyRound, Mail, Phone, ShieldCheck, UserCircle2 } from 'lucide-react'
+import { Briefcase, Cake, IdCard, KeyRound, Mail, MapPin, Phone, ShieldCheck, UserCircle2 } from 'lucide-react'
 import { getMyProfile } from '../../api/profile'
 import { getEtablissement } from '../../api/etablissements'
+import { getProfil as getEleveProfil } from '../../api/portailEleve'
+import { getEmployeLinkStatus } from '../../api/rh'
 import { useAuth } from '../../auth/AuthContext'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Alert } from '../../components/ui/Alert'
 import { ROLE_LABELS } from '../../config/roles'
+import { EMPLOYE_TYPE_LABELS, TYPE_CONTRAT_LABELS } from '../../config/rhLabels'
+import { formatDate } from '../../lib/formatDate'
 import { pick } from '../../lib/pick'
 import { ChangePasswordModal } from './ChangePasswordModal'
+
+// Rôles pour lesquels on peut retrouver le dossier RH (Employé) du compte
+// connecté via `GET .../utilisateurs/{utilisateurId}/employe` — seuls ces
+// rôles y ont accès côté API (confirmé par le tag Swagger de l'endpoint).
+// Enseignant/Comptable/Surveillant n'ont aujourd'hui AUCUN endpoint pour
+// consulter leur propre fiche Employé (poste, matricule, contrat) — gap
+// backend signalé, voir le fichier de suivi.
+const ROLES_AVEC_ACCES_DOSSIER_RH = ['ADMINISTRATEUR', 'DIRECTEUR', 'SECRETAIRE']
 
 /** Petite tuile d'info dans le bandeau coloré — valeur en blanc, libellé discret. */
 function InfoTile({ label, value }) {
@@ -70,11 +82,6 @@ export default function ProfilePage() {
   const langue = pick(user, ['langue'], null)
   const fuseauHoraire = pick(user, ['fuseauHoraire'], null)
 
-  // `profilId` (CreateUserDto) rattache le compte à un dossier RH (Employé) —
-  // pertinent seulement pour les rôles "personnel" ; on n'affiche la tuile
-  // que si le champ est présent, pour ne pas polluer le profil Élève/Parent.
-  const profilId = pick(user, ['profilId'], null)
-
   // Nom/code de l'établissement — champ confirmé (`etablissementId` est
   // présent dans CreateUserDto et déjà utilisé partout ailleurs dans l'app).
   // Absent pour un super-admin sans établissement rattaché — la requête
@@ -85,6 +92,25 @@ export default function ProfilePage() {
     queryFn: () => getEtablissement(etablissementId),
     enabled: Boolean(etablissementId),
   })
+
+  // Dossier Élève (`/portail-eleves/me`, correctement typé côté API) —
+  // apporte matricule, date/lieu de naissance, sexe, nationalité, statut :
+  // aucun de ces champs n'existe sur le compte Utilisateur générique.
+  const { data: eleveProfil } = useQuery({
+    queryKey: ['portail-eleve', 'profil'],
+    queryFn: getEleveProfil,
+    enabled: primaryRole === 'ELEVE',
+  })
+
+  // Dossier RH (Employé) lié au compte — seuls Admin/Directeur/Secrétaire
+  // ont accès à cet endpoint, même pour consulter LEUR PROPRE dossier (voir
+  // ROLES_AVEC_ACCES_DOSSIER_RH ci-dessus).
+  const { data: employeLink } = useQuery({
+    queryKey: ['rh', 'employe-link-status', etablissementId, user?.id],
+    queryFn: () => getEmployeLinkStatus(etablissementId, user.id),
+    enabled: Boolean(etablissementId && user?.id && ROLES_AVEC_ACCES_DOSSIER_RH.includes(primaryRole)),
+  })
+  const employe = employeLink?.linked ? employeLink.employe : null
 
   return (
     <div className="max-w-3xl">
@@ -164,10 +190,43 @@ export default function ProfilePage() {
                 <InfoTile label="Code établissement" value={etablissement?.code} />
                 <InfoTile label="Langue" value={langue} />
                 <InfoTile label="Fuseau horaire" value={fuseauHoraire} />
-                {profilId && <InfoTile label="Dossier RH" value="Lié" />}
               </div>
             </div>
           </div>
+
+          {/* Dossier Élève — champs propres à l'inscription, absents du compte Utilisateur générique */}
+          {primaryRole === 'ELEVE' && eleveProfil && (
+            <div className="mt-6">
+              <p className="text-xs font-semibold text-ink-400 uppercase tracking-wide mb-3">Dossier élève</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <InfoRow icon={IdCard} label="Matricule" value={eleveProfil.matricule} />
+                <InfoRow
+                  icon={Cake}
+                  label="Date et lieu de naissance"
+                  value={
+                    eleveProfil.dateNaissance
+                      ? `${formatDate(eleveProfil.dateNaissance)}${eleveProfil.lieuNaissance ? ` — ${eleveProfil.lieuNaissance}` : ''}`
+                      : null
+                  }
+                />
+                <InfoRow icon={UserCircle2} label="Sexe" value={eleveProfil.sexe === 'M' ? 'Masculin' : eleveProfil.sexe === 'F' ? 'Féminin' : null} />
+                <InfoRow icon={MapPin} label="Nationalité" value={eleveProfil.nationalite} />
+              </div>
+            </div>
+          )}
+
+          {/* Dossier RH — champs propres à la fiche Employé (poste, contrat), absents du compte Utilisateur générique */}
+          {employe && (
+            <div className="mt-6">
+              <p className="text-xs font-semibold text-ink-400 uppercase tracking-wide mb-3">Dossier RH</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <InfoRow icon={IdCard} label="Matricule" value={employe.matricule} />
+                <InfoRow icon={Briefcase} label="Type de poste" value={EMPLOYE_TYPE_LABELS[employe.type] ?? employe.type} />
+                <InfoRow icon={Briefcase} label="Type de contrat" value={TYPE_CONTRAT_LABELS[employe.typeContrat] ?? employe.typeContrat} />
+                <InfoRow icon={ShieldCheck} label="Statut du dossier" value={employe.actif ? 'Actif' : 'Inactif'} />
+              </div>
+            </div>
+          )}
 
           {/* Sécurité */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 mt-6 bg-ink-50 rounded-xl">
