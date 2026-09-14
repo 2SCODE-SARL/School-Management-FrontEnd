@@ -14,9 +14,10 @@ import {
   UserX,
   Wallet,
 } from 'lucide-react'
-import { Inbox } from 'lucide-react'
+import { IdCard, Inbox } from 'lucide-react'
 import { getGeneralDashboard } from '../../api/dashboard'
 import { listDemandes } from '../../api/demandes'
+import { searchEmployes } from '../../api/rh'
 import { useAuth } from '../../auth/AuthContext'
 import { StatTile } from '../../components/ui/StatTile'
 import { AlertTile } from '../../components/ui/AlertTile'
@@ -28,6 +29,7 @@ import { DonutChartCard } from '../../components/charts/DonutChartCard'
 import { CHART_COLORS } from '../../lib/chartColors'
 import { NIVEAU_LABELS } from '../../config/academiqueLabels'
 import { DEMANDE_STATUT_LABELS, demandeStatutBadgeVariant } from '../../config/demandesLabels'
+import { EMPLOYE_TYPE_LABELS } from '../../config/rhLabels'
 import { formatDate } from '../../lib/formatDate'
 
 export default function DirecteurDashboard() {
@@ -51,6 +53,16 @@ export default function DirecteurDashboard() {
   const demandesEnAttente = (Array.isArray(demandesData) ? demandesData : (demandesData?.items ?? []))
     .slice()
     .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
+
+  // Aperçus "Employés" / "Enseignants" — un seul appel (déjà utilisé
+  // ailleurs, ex: RhDashboardTab), deux vues dérivées côté client.
+  const { data: employesData, isLoading: isLoadingEmployes } = useQuery({
+    queryKey: ['rh', 'employes', etablissementId, { q: '', type: '' }],
+    queryFn: () => searchEmployes(etablissementId, {}),
+    enabled: Boolean(etablissementId),
+  })
+  const employes = Array.isArray(employesData) ? employesData : (employesData?.items ?? [])
+  const enseignants = employes.filter((e) => e.type === 'ENSEIGNANT')
 
   const stats = data?.statistiqueGenerale ?? {}
   const evolution = data?.evolutionInscriptions ?? {}
@@ -245,6 +257,48 @@ export default function DirecteurDashboard() {
               </div>
             )}
           />
+
+          {/* Aperçus de listes — le détail complet est à un clic */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <DashboardListCard
+              title="Employés"
+              total={employes.length}
+              items={employes.slice(0, 5)}
+              isLoading={isLoadingEmployes}
+              onSeeAll={() => goTo('/directeur/rh', 'employes')}
+              emptyMessage="Aucun employé pour le moment."
+              renderItem={(e) => (
+                <div key={e.id} className="flex items-center justify-between gap-3 px-5 py-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <IdCard className="h-4 w-4 text-ink-400 shrink-0" />
+                    <span className="text-sm text-ink-800 truncate">{e.prenom} {e.nom}</span>
+                  </div>
+                  <Badge variant={e.actif === false ? 'danger' : 'neutral'} className="shrink-0">
+                    {EMPLOYE_TYPE_LABELS[e.type] ?? e.type ?? '—'}
+                  </Badge>
+                </div>
+              )}
+            />
+            <DashboardListCard
+              title="Enseignants"
+              total={enseignants.length}
+              items={enseignants.slice(0, 5)}
+              isLoading={isLoadingEmployes}
+              onSeeAll={() => goTo('/directeur/rh', 'employes')}
+              emptyMessage="Aucun enseignant pour le moment."
+              renderItem={(e) => (
+                <div key={e.id} className="flex items-center justify-between gap-3 px-5 py-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <UserCheck className="h-4 w-4 text-ink-400 shrink-0" />
+                    <span className="text-sm text-ink-800 truncate">{e.prenom} {e.nom}</span>
+                  </div>
+                  <Badge variant={e.actif === false ? 'danger' : 'success'} className="shrink-0">
+                    {e.actif === false ? 'Inactif' : 'Actif'}
+                  </Badge>
+                </div>
+              )}
+            />
+          </div>
         </div>
       )}
     </div>

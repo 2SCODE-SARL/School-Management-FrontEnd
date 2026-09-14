@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useQueries, useQuery } from '@tanstack/react-query'
-import { ClipboardList, GraduationCap, IdCard, KeyRound } from 'lucide-react'
+import { ClipboardList, GraduationCap, IdCard, KeyRound, UserX } from 'lucide-react'
 import { searchEleves } from '../../api/eleves'
 import { listInscriptions } from '../../api/inscriptions'
 import { listAnneesScolaires } from '../../api/etablissements'
@@ -15,6 +15,7 @@ import {
   INSCRIPTION_STATUT_OPTIONS,
   inscriptionStatutBadgeVariant,
 } from '../../config/eleveLabels'
+import { EMPLOYE_TYPE_LABELS } from '../../config/rhLabels'
 import { formatDate } from '../../lib/formatDate'
 
 /**
@@ -160,6 +161,33 @@ export default function SecretaireDashboard() {
           }}
         />
       </div>
+
+      {/* Aperçu de liste — le détail complet est à un clic */}
+      <DashboardListCard
+        title="Employés"
+        total={employes.length}
+        items={employes.slice(0, 5)}
+        isLoading={isLoadingEmployes}
+        onSeeAll={() => goTo('/secretaire/rh', 'employes')}
+        emptyMessage="Aucun employé pour le moment."
+        renderItem={(e) => (
+          <div key={e.id} className="flex items-center justify-between gap-3 px-5 py-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <IdCard className="h-4 w-4 text-ink-400 shrink-0" />
+              <span className="text-sm text-ink-800 truncate">{e.prenom} {e.nom}</span>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Badge variant="neutral">{EMPLOYE_TYPE_LABELS[e.type] ?? e.type ?? '—'}</Badge>
+              {!e.utilisateurId && (
+                <Badge variant="warning">
+                  <UserX className="h-3 w-3 mr-1 inline" />
+                  Sans compte
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
+      />
     </div>
   )
 }
