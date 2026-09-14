@@ -24,7 +24,7 @@ export function WelcomeBanner({ name, subtitle = 'Gère ton établissement facil
       </div>
 
       <div className="relative max-w-md">
-        <h2 className="font-heading text-xl sm:text-2xl font-bold text-white mb-1.5">
+        <h2 className="font-heading text-xl sm:text-2xl font-bold !text-white mb-1.5">
           Bienvenue{name ? ` ${name}` : ''} !
         </h2>
         <p className="text-sm text-white/80">{subtitle}</p>
