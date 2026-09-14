@@ -68,8 +68,12 @@ export default function SecretaireDashboard() {
   })
   const inscriptionsParStatut = INSCRIPTION_STATUT_OPTIONS.map(({ value: statut }, i) => {
     const data = inscriptionsQueries[i]?.data
+    // `data.total` (compte réel côté serveur) plutôt que `items.length` —
+    // ce dernier serait plafonné à une seule page dès qu'il y a beaucoup
+    // d'inscriptions pour ce statut (l'API pagine désormais réellement).
     const items = Array.isArray(data) ? data : (data?.items ?? [])
-    return { statut, count: items.length }
+    const count = Array.isArray(data) ? items.length : (data?.total ?? items.length)
+    return { statut, count }
   })
   const totalInscriptions = inscriptionsParStatut.reduce((sum, s) => sum + s.count, 0)
   const isLoadingInscriptions = isLoadingAnnees || inscriptionsQueries.some((q) => q.isLoading)

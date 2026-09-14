@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { BookOpen, FileText, IdCard, KeyRound, Pencil, Plus, Power, Search, Trash2, UserCheck, Wallet } from 'lucide-react'
 import {
@@ -24,6 +24,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
 import { InfoRow } from '../../components/ui/InfoRow'
+import { Pagination } from '../../components/ui/Pagination'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import {
   CONTRAT_STATUT_LABELS,
@@ -43,6 +44,8 @@ import { ContratForm } from './ContratForm'
 
 const TYPE_FILTER_OPTIONS = [{ value: '', label: 'Tous les types' }, ...EMPLOYE_TYPE_OPTIONS]
 
+const PAGE_SIZE = 20
+
 /**
  * Fiches Employé (RH) : le dossier de référence pour toute personne
  * travaillant à l'école (contrat, salaire...). Le compte de connexion peut
@@ -50,10 +53,17 @@ const TYPE_FILTER_OPTIONS = [{ value: '', label: 'Tous les types' }, ...EMPLOYE_
  * détail (ProvisionnerCompteForm) — `utilisateurId` indique s'il en a déjà un.
  * Pas d'édition possible côté API pour la fiche elle-même : création +
  * liste + activer/désactiver.
+ *
+ * `searchEmployes` fusionne jusqu'à 3 appels (un par type) quand aucun
+ * filtre n'est choisi — la pagination serveur (page/limit, pourtant
+ * supportée par l'API) ne peut donc pas s'appliquer proprement à cette
+ * liste fusionnée. Pagination côté client à la place : correcte dans
+ * tous les cas, au prix de charger la liste complète en mémoire.
  */
 export function EmployesTab({ etablissementId, canManageComptes, canViewComptesEnAttente }) {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
+  const [page, setPage] = useState(1)
   const [isCreateOpen, setCreateOpen] = useState(false)
   const [viewingEmploye, setViewingEmploye] = useState(null)
   const [isEditOpen, setEditOpen] = useState(false)
@@ -99,6 +109,13 @@ export function EmployesTab({ etablissementId, canManageComptes, canViewComptesE
     enabled: Boolean(etablissementId),
   })
   const employes = Array.isArray(data) ? data : (data?.items ?? [])
+
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch, typeFilter, etablissementId])
+
+  const totalPages = Math.max(1, Math.ceil(employes.length / PAGE_SIZE))
+  const pagedEmployes = employes.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   function invalidateAll() {
     queryClient.invalidateQueries({ queryKey: ['rh', 'employes', etablissementId] })
@@ -281,7 +298,7 @@ export function EmployesTab({ etablissementId, canManageComptes, canViewComptesE
                 </tr>
               </thead>
               <tbody>
-                {employes.map((employe) => (
+                {pagedEmployes.map((employe) => (
                   <tr
                     key={employe.id}
                     onClick={() => setViewingEmploye(employe)}
@@ -309,6 +326,12 @@ export function EmployesTab({ etablissementId, canManageComptes, canViewComptesE
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {!isLoading && !isError && employes.length > 0 && (
+          <div className="px-4 pb-4">
+            <Pagination page={page} totalPages={totalPages} total={employes.length} onPageChange={setPage} />
           </div>
         )}
       </div>

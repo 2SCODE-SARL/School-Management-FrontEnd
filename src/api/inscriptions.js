@@ -15,8 +15,8 @@ export function preinscrire(etablissementId, data) {
 }
 
 /** `anneeScolaireId` et `statut` sont tous les deux requis côté API. */
-export function listInscriptions(etablissementId, { anneeScolaireId, statut }) {
-  return apiClient.get(withQuery(`${base(etablissementId)}/inscriptions`, { anneeScolaireId, statut }))
+export function listInscriptions(etablissementId, { anneeScolaireId, statut, page, limit }) {
+  return apiClient.get(withQuery(`${base(etablissementId)}/inscriptions`, { anneeScolaireId, statut, page, limit }))
 }
 
 export function getInscription(etablissementId, inscriptionId) {

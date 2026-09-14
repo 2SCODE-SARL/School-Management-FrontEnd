@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
 import { Badge } from '../../components/ui/Badge'
+import { Pagination } from '../../components/ui/Pagination'
 import { INSCRIPTION_STATUT_LABELS, INSCRIPTION_STATUT_OPTIONS, inscriptionStatutBadgeVariant } from '../../config/eleveLabels'
 import { NIVEAU_LABELS } from '../../config/academiqueLabels'
 import { pick } from '../../lib/pick'
@@ -18,6 +19,7 @@ import { InscriptionDetailModal } from './InscriptionDetailModal'
 export function InscriptionsTab({ etablissementId }) {
   const [anneeScolaireId, setAnneeScolaireId] = useState('')
   const [statutFilter, setStatutFilter] = useState('BROUILLON')
+  const [page, setPage] = useState(1)
   const [isPreinscrireOpen, setPreinscrireOpen] = useState(false)
   const [isReinscrireOpen, setReinscrireOpen] = useState(false)
   const [viewingInscriptionId, setViewingInscriptionId] = useState(null)
@@ -47,13 +49,18 @@ export function InscriptionsTab({ etablissementId }) {
     setAnneeScolaireId((enCours ?? fallback)?.id ?? '')
   }, [annees, anneeScolaireId])
 
-  const listQueryKey = ['inscriptions', 'list', etablissementId, anneeScolaireId, statutFilter]
+  const listQueryKey = ['inscriptions', 'list', etablissementId, anneeScolaireId, statutFilter, page]
   const { data, isLoading, isError } = useQuery({
     queryKey: listQueryKey,
-    queryFn: () => listInscriptions(etablissementId, { anneeScolaireId, statut: statutFilter }),
+    queryFn: () => listInscriptions(etablissementId, { anneeScolaireId, statut: statutFilter, page }),
     enabled: Boolean(etablissementId && anneeScolaireId && statutFilter),
+    placeholderData: (previous) => previous,
   })
   const inscriptions = Array.isArray(data) ? data : (data?.items ?? [])
+
+  useEffect(() => {
+    setPage(1)
+  }, [anneeScolaireId, statutFilter])
 
   // `niveauDemandeId`/`classeDemandeeId`/`affectation` sont des ids à plat
   // (confirmé par un vrai payload) — on les résout via ces listes déjà
@@ -224,6 +231,12 @@ export function InscriptionsTab({ etablissementId }) {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {data && !Array.isArray(data) && (
+          <div className="px-4 pb-4">
+            <Pagination page={data.page} totalPages={data.totalPages} total={data.total} onPageChange={setPage} />
           </div>
         )}
       </div>

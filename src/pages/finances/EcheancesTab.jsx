@@ -16,6 +16,7 @@ import { TextField } from '../../components/ui/TextField'
 import { Combobox } from '../../components/ui/Combobox'
 import { Badge } from '../../components/ui/Badge'
 import { Alert } from '../../components/ui/Alert'
+import { Pagination } from '../../components/ui/Pagination'
 import { ApiError } from '../../api/client'
 import { ECHEANCE_STATUT_LABELS, ECHEANCE_STATUT_OPTIONS, MOBILE_MONEY_FOURNISSEUR_OPTIONS, MODE_PAIEMENT_OPTIONS, echeanceStatutBadgeVariant } from '../../config/financesLabels'
 import { formatDate } from '../../lib/formatDate'
@@ -233,16 +234,18 @@ function MobileMoneyForm({ onSubmit, onCancel, isSubmitting }) {
 /** Échéances de paiement — génération, encaissement, réduction, Mobile Money. */
 export function EcheancesTab({ etablissementId, canGererFrais }) {
   const [statutFilter, setStatutFilter] = useState('')
+  const [page, setPage] = useState(1)
   const [encaissantId, setEncaissantId] = useState(null)
   const [reductionForId, setReductionForId] = useState(null)
   const [mobileMoneyForId, setMobileMoneyForId] = useState(null)
   const queryClient = useQueryClient()
 
-  const queryKey = ['finances', 'echeances', etablissementId, statutFilter]
+  const queryKey = ['finances', 'echeances', etablissementId, statutFilter, page]
   const { data, isLoading, isError } = useQuery({
     queryKey,
-    queryFn: () => listEcheances(etablissementId, { statut: statutFilter || undefined }),
+    queryFn: () => listEcheances(etablissementId, { statut: statutFilter || undefined, page }),
     enabled: Boolean(etablissementId),
+    placeholderData: (previous) => previous,
   })
   const echeances = Array.isArray(data) ? data : (data?.items ?? [])
 
@@ -278,7 +281,16 @@ export function EcheancesTab({ etablissementId, canGererFrais }) {
       {canGererFrais && <GenererEcheancesForm etablissementId={etablissementId} isSubmitting={genererMutation.isPending} onSubmit={(id) => genererMutation.mutateAsync(id)} />}
 
       <div className="max-w-xs">
-        <Select id="statut-filter" label="Statut" options={[{ value: '', label: 'Tous' }, ...ECHEANCE_STATUT_OPTIONS]} value={statutFilter} onChange={(e) => setStatutFilter(e.target.value)} />
+        <Select
+          id="statut-filter"
+          label="Statut"
+          options={[{ value: '', label: 'Tous' }, ...ECHEANCE_STATUT_OPTIONS]}
+          value={statutFilter}
+          onChange={(e) => {
+            setStatutFilter(e.target.value)
+            setPage(1)
+          }}
+        />
       </div>
 
       <div className="bg-white rounded-2xl border border-ink-100 overflow-hidden">
@@ -344,6 +356,12 @@ export function EcheancesTab({ etablissementId, canGererFrais }) {
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {data && !Array.isArray(data) && (
+          <div className="px-4 pb-4">
+            <Pagination page={data.page} totalPages={data.totalPages} total={data.total} onPageChange={setPage} />
           </div>
         )}
       </div>
