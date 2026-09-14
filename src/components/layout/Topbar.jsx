@@ -65,7 +65,7 @@ export function Topbar() {
   const roleLabel = ROLE_LABELS[primaryRole] ?? primaryRole ?? '—'
 
   return (
-    <header className="sticky top-0 z-10 flex items-center gap-3 sm:gap-4 bg-white border-b border-ink-100 px-4 sm:px-6 py-3.5">
+    <header className="sticky top-0 z-30 flex items-center gap-3 sm:gap-4 bg-white border-b border-ink-100 px-4 sm:px-6 py-3.5">
       <button
         type="button"
         onClick={() => setMobileOpen(true)}
