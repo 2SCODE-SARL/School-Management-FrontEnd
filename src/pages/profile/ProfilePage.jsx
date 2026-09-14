@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { KeyRound, Mail, Phone, ShieldCheck } from 'lucide-react'
+import { KeyRound, Mail, Phone, ShieldCheck, UserCircle2 } from 'lucide-react'
 import { getMyProfile } from '../../api/profile'
 import { getEtablissement } from '../../api/etablissements'
 import { useAuth } from '../../auth/AuthContext'
@@ -9,6 +9,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Alert } from '../../components/ui/Alert'
 import { ROLE_LABELS } from '../../config/roles'
+import { pick } from '../../lib/pick'
 import { ChangePasswordModal } from './ChangePasswordModal'
 
 /** Petite tuile d'info dans le bandeau coloré — valeur en blanc, libellé discret. */
@@ -17,6 +18,21 @@ function InfoTile({ label, value }) {
     <div>
       <p className="text-xs font-medium text-white/60 uppercase tracking-wide mb-1">{label}</p>
       <p className="text-sm font-semibold text-white truncate">{value || '—'}</p>
+    </div>
+  )
+}
+
+/** Ligne d'info avec icône, réutilisée pour toute la section "Informations personnelles". */
+function InfoRow({ icon: Icon, label, value }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="h-9 w-9 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
+        <Icon className="h-4 w-4 text-primary-600" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-sm text-ink-900 truncate">{value || '—'}</p>
+        <p className="text-xs text-ink-400">{label}</p>
+      </div>
     </div>
   )
 }
@@ -35,14 +51,34 @@ export default function ProfilePage() {
   // Fallback sur les infos déjà connues de la session le temps du chargement.
   const user = profile ?? sessionUser
   const displayName = `${user?.prenom ?? ''} ${user?.nom ?? ''}`.trim() || user?.email
+  // Tous les rôles du compte (généralement un seul, mais le champ est un
+  // tableau côté API) — affichés en badges pour une lecture complète.
+  const roleLabels = (user?.roles ?? []).map((r) => ROLE_LABELS[r] ?? r)
   const primaryRole = user?.roles?.[0]
   const roleLabel = ROLE_LABELS[primaryRole] ?? primaryRole ?? '—'
 
-  // Nom/code de l'établissement — plus utile que Langue/Fuseau horaire
-  // (jamais confirmés sur `GET /users/me`) pour ce bandeau. `etablissementId`
-  // est en revanche un champ confirmé (présent dans CreateUserDto et déjà
-  // utilisé partout ailleurs dans l'app). Absent pour un super-admin sans
-  // établissement rattaché — la requête reste alors simplement désactivée.
+  // `actif` fait partie d'UpdateUserDto mais sa présence sur `GET /users/me`
+  // n'est pas confirmée en live — via `pick`, on retombe sur "actif" par
+  // défaut (un compte désactivé ne pourrait de toute façon pas se connecter).
+  const actif = pick(user, ['actif'], true)
+  const statutLabel = actif ? 'Actif' : 'Inactif'
+
+  // `langue`/`fuseauHoraire` existent dans UpdateUserDto — présence en
+  // lecture non confirmée non plus, mais l'utilisateur veut voir tous les
+  // paramètres du DTO profil ici, donc on les affiche quand même (tiret si
+  // absents plutôt que de deviner une valeur).
+  const langue = pick(user, ['langue'], null)
+  const fuseauHoraire = pick(user, ['fuseauHoraire'], null)
+
+  // `profilId` (CreateUserDto) rattache le compte à un dossier RH (Employé) —
+  // pertinent seulement pour les rôles "personnel" ; on n'affiche la tuile
+  // que si le champ est présent, pour ne pas polluer le profil Élève/Parent.
+  const profilId = pick(user, ['profilId'], null)
+
+  // Nom/code de l'établissement — champ confirmé (`etablissementId` est
+  // présent dans CreateUserDto et déjà utilisé partout ailleurs dans l'app).
+  // Absent pour un super-admin sans établissement rattaché — la requête
+  // reste alors simplement désactivée.
   const etablissementId = user?.etablissementId
   const { data: etablissement } = useQuery({
     queryKey: ['etablissement', etablissementId],
@@ -85,8 +121,14 @@ export default function ProfilePage() {
                 <p className="font-heading text-xl font-bold text-ink-900 truncate">{displayName}</p>
                 <p className="text-sm text-ink-400 mb-2 truncate">{user?.email}</p>
                 <div className="flex flex-wrap gap-1.5">
-                  <Badge variant="primary">{roleLabel}</Badge>
-                  <Badge variant="success">Compte actif</Badge>
+                  {roleLabels.length > 0 ? (
+                    roleLabels.map((label) => (
+                      <Badge key={label} variant="primary">{label}</Badge>
+                    ))
+                  ) : (
+                    <Badge variant="primary">{roleLabel}</Badge>
+                  )}
+                  <Badge variant={actif ? 'success' : 'danger'}>{actif ? 'Compte actif' : 'Compte inactif'}</Badge>
                 </div>
               </div>
             </div>
@@ -101,39 +143,28 @@ export default function ProfilePage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Coordonnées */}
+            {/* Informations personnelles — tous les champs "identité" du DTO profil */}
             <div>
-              <p className="text-xs font-semibold text-ink-400 uppercase tracking-wide mb-3">Coordonnées</p>
+              <p className="text-xs font-semibold text-ink-400 uppercase tracking-wide mb-3">Informations personnelles</p>
               <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
-                    <Mail className="h-4 w-4 text-primary-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm text-ink-900 truncate">{user?.email || '—'}</p>
-                    <p className="text-xs text-ink-400">Adresse e-mail</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
-                    <Phone className="h-4 w-4 text-primary-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm text-ink-900 truncate">{user?.telephone || '—'}</p>
-                    <p className="text-xs text-ink-400">Téléphone</p>
-                  </div>
-                </div>
+                <InfoRow icon={UserCircle2} label="Nom" value={user?.nom} />
+                <InfoRow icon={UserCircle2} label="Prénom" value={user?.prenom} />
+                <InfoRow icon={Mail} label="Adresse e-mail" value={user?.email} />
+                <InfoRow icon={Phone} label="Téléphone" value={user?.telephone} />
               </div>
             </div>
 
-            {/* Bandeau coloré — infos de compte */}
+            {/* Bandeau coloré — tous les champs "compte" du DTO profil */}
             <div className="rounded-2xl bg-gradient-to-br from-primary-600 to-primary-800 p-5">
               <p className="text-xs font-semibold text-white/70 uppercase tracking-wide mb-4">Informations du compte</p>
               <div className="grid grid-cols-2 gap-4">
                 <InfoTile label="Rôle" value={roleLabel} />
-                <InfoTile label="Statut" value="Actif" />
+                <InfoTile label="Statut" value={statutLabel} />
                 <InfoTile label="Établissement" value={etablissement?.nom} />
                 <InfoTile label="Code établissement" value={etablissement?.code} />
+                <InfoTile label="Langue" value={langue} />
+                <InfoTile label="Fuseau horaire" value={fuseauHoraire} />
+                {profilId && <InfoTile label="Dossier RH" value="Lié" />}
               </div>
             </div>
           </div>
