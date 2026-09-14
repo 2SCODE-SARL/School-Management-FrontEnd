@@ -4,6 +4,7 @@ import { CalendarClock, ClipboardCheck, GraduationCap, UserX } from 'lucide-reac
 import { getEnseignantDashboard } from '../../api/dashboard'
 import { useAuth } from '../../auth/AuthContext'
 import { StatTile } from '../../components/ui/StatTile'
+import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
 
 export default function EnseignantDashboard() {
   const { user } = useAuth()
@@ -24,9 +25,7 @@ export default function EnseignantDashboard() {
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-6">
-        Tableau de bord
-      </h1>
+      <WelcomeBanner name={user?.prenom} subtitle="Retrouve tes classes, ton emploi du temps et les présences à pointer." />
 
       {isLoading && (
         <div className="p-16 flex justify-center bg-white rounded-2xl border border-ink-100">

@@ -7,6 +7,7 @@ import { getPrimaryRole } from '../../auth/roleHome'
 import { searchEtablissements } from '../../api/etablissements'
 import { listComptesEnAttente } from '../../api/rh'
 import { Combobox } from '../../components/ui/Combobox'
+import { TabBar } from '../../components/ui/TabBar'
 import { RhDashboardTab } from './RhDashboardTab'
 import { EmployesTab } from './EmployesTab'
 import { ComptesEnAttenteTab } from './ComptesEnAttenteTab'
@@ -84,28 +85,19 @@ export default function RhPage() {
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap gap-1 border-b border-ink-200 mb-5">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveTab(tab.key)}
-                className={[
-                  'flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
-                  activeTab === tab.key
-                    ? 'border-primary-600 text-primary-700'
-                    : 'border-transparent text-ink-500 hover:text-ink-700',
-                ].join(' ')}
-              >
-                {tab.label}
-                {tab.key === 'comptes-en-attente' && comptesEnAttenteCount > 0 && (
+          <TabBar
+            tabs={TABS.map((tab) => ({
+              ...tab,
+              badge:
+                tab.key === 'comptes-en-attente' && comptesEnAttenteCount > 0 ? (
                   <span className="inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full bg-danger-500 text-white text-xs font-semibold">
                     {comptesEnAttenteCount}
                   </span>
-                )}
-              </button>
-            ))}
-          </div>
+                ) : null,
+            }))}
+            active={activeTab}
+            onChange={setActiveTab}
+          />
 
           {ActiveComponent && (
             <ActiveComponent

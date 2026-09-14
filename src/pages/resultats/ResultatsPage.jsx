@@ -6,6 +6,7 @@ import { useAuth } from '../../auth/AuthContext'
 import { getPrimaryRole } from '../../auth/roleHome'
 import { searchEtablissements } from '../../api/etablissements'
 import { Combobox } from '../../components/ui/Combobox'
+import { TabBar } from '../../components/ui/TabBar'
 import { ExamensTab } from './ExamensTab'
 import { ClassementsTab } from './ClassementsTab'
 import { BulletinGenererTab } from './BulletinGenererTab'
@@ -87,23 +88,7 @@ export default function ResultatsPage() {
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap gap-1 border-b border-ink-200 mb-5">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveTab(tab.key)}
-                className={[
-                  'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
-                  activeTab === tab.key
-                    ? 'border-primary-600 text-primary-700'
-                    : 'border-transparent text-ink-500 hover:text-ink-700',
-                ].join(' ')}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <TabBar tabs={TABS} active={activeTab} onChange={setActiveTab} />
 
           {ActiveComponent && <ActiveComponent etablissementId={selectedEtabId} {...extraProps} />}
         </>

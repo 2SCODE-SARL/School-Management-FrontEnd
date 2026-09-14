@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { Users } from 'lucide-react'
 import { getMesEnfants } from '../../api/portailParent'
+import { useAuth } from '../../auth/AuthContext'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
+import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
 import { STATUT_ELEVE_LABELS, statutEleveBadgeVariant } from '../../config/eleveLabels'
 import { DemandesRattachement } from './DemandesRattachement'
 
@@ -13,6 +15,7 @@ import { DemandesRattachement } from './DemandesRattachement'
  * testé en live.
  */
 export default function ParentDashboard() {
+  const { user } = useAuth()
   const { data, isLoading, isError } = useQuery({
     queryKey: ['portail-parent', 'mes-enfants'],
     queryFn: getMesEnfants,
@@ -21,9 +24,11 @@ export default function ParentDashboard() {
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-6">Mes enfants</h1>
+      <WelcomeBanner name={user?.prenom} subtitle="Suis la scolarité de tes enfants au même endroit." />
 
       <DemandesRattachement />
+
+      <h2 className="font-heading text-lg font-semibold text-ink-900 mb-4">Mes enfants</h2>
 
       {isLoading && (
         <div className="p-16 flex justify-center bg-white rounded-2xl border border-ink-100">

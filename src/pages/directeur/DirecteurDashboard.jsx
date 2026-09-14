@@ -18,6 +18,7 @@ import { getGeneralDashboard } from '../../api/dashboard'
 import { useAuth } from '../../auth/AuthContext'
 import { StatTile } from '../../components/ui/StatTile'
 import { AlertTile } from '../../components/ui/AlertTile'
+import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
 import { BarChartCard } from '../../components/charts/BarChartCard'
 import { DonutChartCard } from '../../components/charts/DonutChartCard'
 import { CHART_COLORS } from '../../lib/chartColors'
@@ -50,7 +51,7 @@ export default function DirecteurDashboard() {
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-6">Tableau de bord</h1>
+      <WelcomeBanner name={user?.prenom} />
 
       {isLoading && (
         <div className="p-16 flex justify-center bg-white rounded-2xl border border-ink-100">

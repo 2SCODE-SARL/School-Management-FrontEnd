@@ -18,9 +18,11 @@ import {
 } from 'lucide-react'
 import { getGeneralDashboard } from '../../api/dashboard'
 import { searchEtablissements } from '../../api/etablissements'
+import { useAuth } from '../../auth/AuthContext'
 import { Combobox } from '../../components/ui/Combobox'
 import { StatTile } from '../../components/ui/StatTile'
 import { AlertTile } from '../../components/ui/AlertTile'
+import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
 import { BarChartCard } from '../../components/charts/BarChartCard'
 import { DonutChartCard } from '../../components/charts/DonutChartCard'
 import { CHART_COLORS } from '../../lib/chartColors'
@@ -28,6 +30,7 @@ import { NIVEAU_LABELS } from '../../config/academiqueLabels'
 
 /** Même tableau de bord général que le Directeur, avec un sélecteur d'établissement (l'Admin en gère plusieurs). */
 export default function AdminDashboard() {
+  const { user } = useAuth()
   const [etablissementId, setEtablissementId] = useState('')
   const navigate = useNavigate()
 
@@ -60,7 +63,7 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-6">Tableau de bord</h1>
+      <WelcomeBanner name={user?.prenom} />
 
       <div className="mb-6 max-w-sm">
         <Combobox

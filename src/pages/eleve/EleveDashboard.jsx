@@ -4,6 +4,7 @@ import { getClasseCourante, getProfil } from '../../api/portailEleve'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { InfoRow } from '../../components/ui/InfoRow'
+import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
 import { NIVEAU_LABELS } from '../../config/academiqueLabels'
 import { SEXE_LABELS, STATUT_ELEVE_LABELS, statutEleveBadgeVariant } from '../../config/eleveLabels'
 import { formatDate } from '../../lib/formatDate'
@@ -40,7 +41,7 @@ export default function EleveDashboard() {
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-6">Mon dossier</h1>
+      <WelcomeBanner name={profil.prenom} subtitle="Consulte ton dossier, tes notes et ton emploi du temps." />
 
       <div className="bg-white rounded-2xl border border-ink-100 p-5 mb-6">
         <div className="flex items-center gap-4 mb-4">

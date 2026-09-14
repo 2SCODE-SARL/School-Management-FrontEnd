@@ -4,6 +4,7 @@ import { AlertTriangle, ArrowDownCircle, ArrowUpCircle, Wallet } from 'lucide-re
 import { getComptableDashboard } from '../../api/dashboard'
 import { useAuth } from '../../auth/AuthContext'
 import { StatTile } from '../../components/ui/StatTile'
+import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
 import { pick } from '../../lib/pick'
 
 /**
@@ -34,7 +35,7 @@ export default function ComptableDashboard() {
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-6">Tableau de bord</h1>
+      <WelcomeBanner name={user?.prenom} subtitle="Suis les encaissements, dépenses et bulletins de paie de ton établissement." />
 
       {isLoading && (
         <div className="p-16 flex justify-center bg-white rounded-2xl border border-ink-100">

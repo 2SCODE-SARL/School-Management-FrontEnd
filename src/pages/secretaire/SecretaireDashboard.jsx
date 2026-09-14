@@ -7,6 +7,7 @@ import { listAnneesScolaires } from '../../api/etablissements'
 import { searchEmployes } from '../../api/rh'
 import { useAuth } from '../../auth/AuthContext'
 import { StatTile } from '../../components/ui/StatTile'
+import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
 import { INSCRIPTION_STATUT_LABELS, INSCRIPTION_STATUT_OPTIONS } from '../../config/eleveLabels'
 
 /**
@@ -69,10 +70,7 @@ export default function SecretaireDashboard() {
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-1">Tableau de bord</h1>
-      <p className="text-sm text-ink-500 mb-6">
-        Élèves, inscriptions, employés et documents de l'établissement.
-      </p>
+      <WelcomeBanner name={user?.prenom} subtitle="Élèves, inscriptions, employés et documents de l'établissement." />
 
       {isLoading ? (
         <div className="p-16 flex justify-center bg-white rounded-2xl border border-ink-100">

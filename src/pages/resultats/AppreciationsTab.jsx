@@ -8,6 +8,7 @@ import { listElevesClasse } from '../../api/eleves'
 import { Button } from '../../components/ui/Button'
 import { Select } from '../../components/ui/Select'
 import { Alert } from '../../components/ui/Alert'
+import { TabBar } from '../../components/ui/TabBar'
 import { ApiError } from '../../api/client'
 import { NIVEAU_LABELS } from '../../config/academiqueLabels'
 
@@ -362,28 +363,14 @@ export function AppreciationsTab({ etablissementId, canAvisDirection }) {
   return (
     <div>
       {canAvisDirection && (
-        <div className="flex flex-wrap gap-1 border-b border-ink-200 mb-5">
-          <button
-            type="button"
-            onClick={() => setSubTab('appreciations')}
-            className={[
-              'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
-              subTab === 'appreciations' ? 'border-primary-600 text-primary-700' : 'border-transparent text-ink-500 hover:text-ink-700',
-            ].join(' ')}
-          >
-            Appréciations par matière
-          </button>
-          <button
-            type="button"
-            onClick={() => setSubTab('avis')}
-            className={[
-              'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
-              subTab === 'avis' ? 'border-primary-600 text-primary-700' : 'border-transparent text-ink-500 hover:text-ink-700',
-            ].join(' ')}
-          >
-            Avis de direction
-          </button>
-        </div>
+        <TabBar
+          tabs={[
+            { key: 'appreciations', label: 'Appréciations par matière' },
+            { key: 'avis', label: 'Avis de direction' },
+          ]}
+          active={subTab}
+          onChange={setSubTab}
+        />
       )}
 
       {subTab === 'appreciations' || !canAvisDirection ? <AppreciationParMatiere etablissementId={etablissementId} /> : <AvisDirection etablissementId={etablissementId} />}
