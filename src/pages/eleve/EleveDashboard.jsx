@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Cake, FileEdit, GraduationCap, MapPin, School, User, Users } from 'lucide-react'
-import { getClasseCourante, getNotes, getProfil } from '../../api/portailEleve'
+import { Cake, CalendarClock, FileEdit, GraduationCap, MapPin, School, User, Users } from 'lucide-react'
+import { getClasseCourante, getEmploiDuTemps, getNotes, getProfil } from '../../api/portailEleve'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { InfoRow } from '../../components/ui/InfoRow'
@@ -9,7 +9,11 @@ import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
 import { DashboardListCard } from '../../components/ui/DashboardListCard'
 import { NIVEAU_LABELS } from '../../config/academiqueLabels'
 import { SEXE_LABELS, STATUT_ELEVE_LABELS, statutEleveBadgeVariant } from '../../config/eleveLabels'
+import { coursStatutBadgeVariant } from '../../config/emploiDuTempsLabels'
+import { ELEVE_COURS_ETAT_LABELS } from '../../config/portailEleveLabels'
 import { formatDate } from '../../lib/formatDate'
+
+const JOURS_COURTS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
 
 /** "Mon dossier" — profil académique de l'élève + sa classe de l'année en cours. */
 export default function EleveDashboard() {
@@ -31,6 +35,17 @@ export default function EleveDashboard() {
   const notes = (Array.isArray(notesData) ? notesData : [])
     .slice()
     .sort((a, b) => (b.examen?.date ?? '').localeCompare(a.examen?.date ?? ''))
+
+  // Aperçu "Aujourd'hui" — même endpoint que l'onglet Emploi du temps,
+  // filtré sur le jour courant (`jourSemaine` : 0=dimanche, comme Date.getDay()).
+  const { data: emploiData, isLoading: isLoadingEmploi } = useQuery({
+    queryKey: ['portail-eleve', 'emploi-du-temps'],
+    queryFn: getEmploiDuTemps,
+  })
+  const aujourdhui = new Date().getDay()
+  const coursAujourdhui = (Array.isArray(emploiData) ? emploiData : [])
+    .filter((c) => c.jourSemaine === aujourdhui)
+    .sort((a, b) => (a.heureDebut ?? '').localeCompare(b.heureDebut ?? ''))
 
   if (isLoadingProfil) {
     return (
@@ -101,6 +116,34 @@ export default function EleveDashboard() {
               </div>
             )}
           </div>
+
+          {/* Aperçu de liste — le détail complet est à un clic */}
+          <DashboardListCard
+            title={`Emploi du temps — ${JOURS_COURTS[aujourdhui]}`}
+            total={coursAujourdhui.length}
+            items={coursAujourdhui}
+            isLoading={isLoadingEmploi}
+            onSeeAll={() => navigate('/eleve/emplois-du-temps')}
+            emptyMessage="Aucun cours prévu aujourd'hui."
+            renderItem={(c) => (
+              <div key={c.id} className="flex items-center justify-between gap-3 px-5 py-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <CalendarClock className="h-4 w-4 text-ink-400 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-ink-900 truncate">{c.matiere?.intitule}</p>
+                    <p className="text-xs text-ink-400 truncate">
+                      {c.heureDebut}–{c.heureFin} · Salle {c.salle?.numero ?? '—'}
+                    </p>
+                  </div>
+                </div>
+                {c.etat && c.etat !== 'PLANIFIE' && (
+                  <Badge variant={coursStatutBadgeVariant(c.etat)} className="shrink-0">
+                    {ELEVE_COURS_ETAT_LABELS[c.etat] ?? c.etat}
+                  </Badge>
+                )}
+              </div>
+            )}
+          />
         </div>
 
         {/* Aperçu de liste — le détail complet est à un clic */}
