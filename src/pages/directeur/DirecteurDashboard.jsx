@@ -14,25 +14,43 @@ import {
   UserX,
   Wallet,
 } from 'lucide-react'
+import { Inbox } from 'lucide-react'
 import { getGeneralDashboard } from '../../api/dashboard'
+import { listDemandes } from '../../api/demandes'
 import { useAuth } from '../../auth/AuthContext'
 import { StatTile } from '../../components/ui/StatTile'
 import { AlertTile } from '../../components/ui/AlertTile'
 import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
+import { DashboardListCard } from '../../components/ui/DashboardListCard'
+import { Badge } from '../../components/ui/Badge'
 import { BarChartCard } from '../../components/charts/BarChartCard'
 import { DonutChartCard } from '../../components/charts/DonutChartCard'
 import { CHART_COLORS } from '../../lib/chartColors'
 import { NIVEAU_LABELS } from '../../config/academiqueLabels'
+import { DEMANDE_STATUT_LABELS, demandeStatutBadgeVariant } from '../../config/demandesLabels'
+import { formatDate } from '../../lib/formatDate'
 
 export default function DirecteurDashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const etablissementId = user?.etablissementId
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['dashboard', 'general', user?.etablissementId],
-    queryFn: () => getGeneralDashboard(user.etablissementId),
-    enabled: Boolean(user?.etablissementId),
+    queryKey: ['dashboard', 'general', etablissementId],
+    queryFn: () => getGeneralDashboard(etablissementId),
+    enabled: Boolean(etablissementId),
   })
+
+  // Aperçu "Demandes en attente" — appel dédié (pas dans le payload du
+  // tableau de bord général), même endpoint que la page Demandes.
+  const { data: demandesData, isLoading: isLoadingDemandes } = useQuery({
+    queryKey: ['demandes', etablissementId, 'EN_ATTENTE'],
+    queryFn: () => listDemandes(etablissementId, 'EN_ATTENTE'),
+    enabled: Boolean(etablissementId),
+  })
+  const demandesEnAttente = (Array.isArray(demandesData) ? demandesData : (demandesData?.items ?? []))
+    .slice()
+    .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
 
   const stats = data?.statistiqueGenerale ?? {}
   const evolution = data?.evolutionInscriptions ?? {}
@@ -178,36 +196,55 @@ export default function DirecteurDashboard() {
               color={CHART_COLORS.primaryLight}
             />
 
-            {/* Résultats & inscriptions */}
-            <div className="bg-white rounded-2xl border border-ink-100 p-5">
-              <p className="font-heading font-semibold text-ink-900 mb-4">
-                Résultats
-              </p>
-
-              <div className="flex items-center justify-between text-sm mb-4">
-                <span className="text-ink-600">Moyenne générale de l'établissement</span>
-                <span className="font-heading font-bold text-ink-900">
-                  {resultats.moyenneGenerale ?? 0}/20
-                </span>
-              </div>
-
-              <p className="text-xs font-medium text-ink-500 mb-2">Meilleurs élèves</p>
-              {meilleursEleves.length === 0 ? (
-                <p className="text-sm text-ink-400">Pas encore de classement disponible.</p>
-              ) : (
-                <BarChartCard
-                  bare
-                  data={meilleursEleves.map((eleve, i) => ({
-                    name: eleve.nomComplet ?? `${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.trim() ?? `Élève ${i + 1}`,
-                    value: eleve.moyenne ?? 0,
-                  }))}
-                  color={CHART_COLORS.primary}
-                  valueFormatter={(v) => `${v}/20`}
-                  height={180}
-                />
+            {/* Meilleurs élèves — aperçu, classement complet dans Résultats */}
+            <DashboardListCard
+              title="Meilleurs élèves"
+              total={meilleursEleves.length}
+              items={meilleursEleves.slice(0, 5)}
+              onSeeAll={() => goTo('/directeur/resultats', 'classements')}
+              emptyMessage="Pas encore de classement disponible."
+              renderItem={(eleve, i) => (
+                <div key={eleve.id ?? i} className="flex items-center justify-between gap-3 px-5 py-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="h-6 w-6 rounded-full bg-primary-50 text-primary-700 text-xs font-bold flex items-center justify-center shrink-0">
+                      {i + 1}
+                    </span>
+                    <span className="text-sm text-ink-800 truncate">
+                      {eleve.nomComplet ?? `${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.trim() ?? `Élève ${i + 1}`}
+                    </span>
+                  </div>
+                  <span className="text-sm font-semibold text-ink-900 shrink-0">{eleve.moyenne ?? '—'}/20</span>
+                </div>
               )}
-            </div>
+            />
           </div>
+
+          {/* Aperçu de liste — le détail complet est à un clic */}
+          <DashboardListCard
+            title="Demandes en attente"
+            total={demandesEnAttente.length}
+            items={demandesEnAttente.slice(0, 5)}
+            isLoading={isLoadingDemandes}
+            onSeeAll={() => goTo('/directeur/demandes')}
+            emptyMessage="Aucune demande en attente."
+            renderItem={(d) => (
+              <div key={d.id} className="flex items-center justify-between gap-3 px-5 py-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Inbox className="h-4 w-4 text-ink-400 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-ink-900 truncate">{d.sujet}</p>
+                    <p className="text-xs text-ink-400 truncate">
+                      {d.eleve ? `${d.eleve.prenom ?? ''} ${d.eleve.nom ?? ''}`.trim() + ' · ' : ''}
+                      {formatDate(d.createdAt)}
+                    </p>
+                  </div>
+                </div>
+                <Badge variant={demandeStatutBadgeVariant(d.statut)} className="shrink-0">
+                  {DEMANDE_STATUT_LABELS[d.statut] ?? d.statut}
+                </Badge>
+              </div>
+            )}
+          />
         </div>
       )}
     </div>

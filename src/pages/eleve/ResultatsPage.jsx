@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { TabBar } from '../../components/ui/TabBar'
 import { NotesTab } from './NotesTab'
 import { MoyennesTab } from './MoyennesTab'
@@ -11,7 +12,8 @@ const TABS = [
 ]
 
 export default function ResultatsPage() {
-  const [activeTab, setActiveTab] = useState('notes')
+  const location = useLocation()
+  const [activeTab, setActiveTab] = useState(location.state?.tab ?? 'notes')
   const ActiveComponent = TABS.find((t) => t.key === activeTab)?.Component
 
   return (

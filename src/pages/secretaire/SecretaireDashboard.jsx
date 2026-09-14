@@ -8,7 +8,14 @@ import { searchEmployes } from '../../api/rh'
 import { useAuth } from '../../auth/AuthContext'
 import { StatTile } from '../../components/ui/StatTile'
 import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
-import { INSCRIPTION_STATUT_LABELS, INSCRIPTION_STATUT_OPTIONS } from '../../config/eleveLabels'
+import { DashboardListCard } from '../../components/ui/DashboardListCard'
+import { Badge } from '../../components/ui/Badge'
+import {
+  INSCRIPTION_STATUT_LABELS,
+  INSCRIPTION_STATUT_OPTIONS,
+  inscriptionStatutBadgeVariant,
+} from '../../config/eleveLabels'
+import { formatDate } from '../../lib/formatDate'
 
 /**
  * Pas de tableau de bord dédié côté API pour ce rôle (seuls
@@ -66,6 +73,15 @@ export default function SecretaireDashboard() {
   const totalInscriptions = inscriptionsParStatut.reduce((sum, s) => sum + s.count, 0)
   const isLoadingInscriptions = isLoadingAnnees || inscriptionsQueries.some((q) => q.isLoading)
 
+  // Aperçu "Dernières inscriptions soumises" — réutilise l'appel déjà fait
+  // pour la répartition par statut (index 1 = 'SOUMISE'), pas de requête
+  // supplémentaire.
+  const soumisesIndex = INSCRIPTION_STATUT_OPTIONS.findIndex((o) => o.value === 'SOUMISE')
+  const soumisesData = inscriptionsQueries[soumisesIndex]?.data
+  const inscriptionsSoumises = (Array.isArray(soumisesData) ? soumisesData : (soumisesData?.items ?? []))
+    .slice()
+    .sort((a, b) => (b.dateInscription ?? b.createdAt ?? '').localeCompare(a.dateInscription ?? a.createdAt ?? ''))
+
   const isLoading = isLoadingEleves || isLoadingEmployes
 
   return (
@@ -119,14 +135,30 @@ export default function SecretaireDashboard() {
           )}
         </div>
 
-        <div className="bg-white rounded-2xl border border-ink-100 p-5">
-          <p className="font-heading font-semibold text-ink-900 mb-4">Accès rapides</p>
-          <ul className="text-sm text-ink-600 space-y-1.5 list-disc list-inside">
-            <li>Préinscrire ou réinscrire un élève dans "Élèves & Inscriptions"</li>
-            <li>Créer une fiche employé ou provisionner un compte dans "Ressources humaines"</li>
-            <li>Suivre les demandes des parents et documents dans "Demandes"</li>
-          </ul>
-        </div>
+        <DashboardListCard
+          title="Dernières inscriptions soumises"
+          total={inscriptionsSoumises.length}
+          items={inscriptionsSoumises.slice(0, 5)}
+          isLoading={isLoadingInscriptions}
+          onSeeAll={() => goTo('/secretaire/eleves', 'inscriptions')}
+          emptyMessage="Aucune inscription soumise pour l'instant."
+          renderItem={(item) => {
+            const eleve = item.eleve ?? {}
+            return (
+              <div key={item.id} className="flex items-center justify-between gap-3 px-5 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-ink-900 truncate">
+                    {`${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.trim() || '—'}
+                  </p>
+                  <p className="text-xs text-ink-400">{formatDate(item.dateInscription ?? item.createdAt) ?? '—'}</p>
+                </div>
+                <Badge variant={inscriptionStatutBadgeVariant(item.statut)} className="shrink-0">
+                  {INSCRIPTION_STATUT_LABELS[item.statut] ?? item.statut}
+                </Badge>
+              </div>
+            )
+          }}
+        />
       </div>
     </div>
   )

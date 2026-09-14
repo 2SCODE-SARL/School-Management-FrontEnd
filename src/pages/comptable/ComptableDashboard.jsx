@@ -2,9 +2,14 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, ArrowDownCircle, ArrowUpCircle, Wallet } from 'lucide-react'
 import { getComptableDashboard } from '../../api/dashboard'
+import { listImpayes } from '../../api/finances'
 import { useAuth } from '../../auth/AuthContext'
 import { StatTile } from '../../components/ui/StatTile'
 import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
+import { DashboardListCard } from '../../components/ui/DashboardListCard'
+import { ECHEANCE_STATUT_LABELS, echeanceStatutBadgeVariant } from '../../config/financesLabels'
+import { Badge } from '../../components/ui/Badge'
+import { formatDate } from '../../lib/formatDate'
 import { pick } from '../../lib/pick'
 
 /**
@@ -17,12 +22,21 @@ import { pick } from '../../lib/pick'
 export default function ComptableDashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const etablissementId = user?.etablissementId
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['dashboard', 'comptable', user?.etablissementId],
-    queryFn: () => getComptableDashboard(user.etablissementId),
-    enabled: Boolean(user?.etablissementId),
+    queryKey: ['dashboard', 'comptable', etablissementId],
+    queryFn: () => getComptableDashboard(etablissementId),
+    enabled: Boolean(etablissementId),
   })
+
+  // Aperçu "Échéances impayées" — même endpoint que l'onglet Impayés.
+  const { data: impayesData, isLoading: isLoadingImpayes } = useQuery({
+    queryKey: ['finances', 'impayes', etablissementId],
+    queryFn: () => listImpayes(etablissementId),
+    enabled: Boolean(etablissementId),
+  })
+  const impayes = Array.isArray(impayesData) ? impayesData : (impayesData?.items ?? [])
 
   const totalEncaisse = pick(data, ['totalEncaisse', 'encaissementsMois', 'totalEncaissements'], 0)
   const totalDepenses = pick(data, ['totalDepenses', 'depensesMois'], 0)
@@ -58,9 +72,37 @@ export default function ComptableDashboard() {
             <StatTile icon={Wallet} label="Bulletins en attente" value={Number(bulletinsEnAttente) || 0} onClick={() => goTo('paie')} />
           </div>
 
-          <div className="bg-white rounded-2xl border border-dashed border-ink-200 p-10 text-center text-ink-400">
-            Clique une statistique ci-dessus pour ouvrir directement l'onglet Finances correspondant.
-          </div>
+          {/* Aperçu de liste — le détail complet est à un clic */}
+          <DashboardListCard
+            title="Échéances impayées"
+            total={impayes.length}
+            items={impayes.slice(0, 5)}
+            isLoading={isLoadingImpayes}
+            onSeeAll={() => goTo('impayes')}
+            emptyMessage="Aucun impayé pour l'instant."
+            renderItem={(it, i) => {
+              const statut = pick(it, ['statut'], null)
+              const libelle = it.typeFrais?.libelle ?? 'Échéance'
+              const eleve = it.inscription?.eleve
+              const eleveNom = eleve ? `${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.trim() : null
+              return (
+                <div key={pick(it, ['id'], i)} className="flex items-center justify-between gap-3 px-5 py-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-ink-900 truncate">
+                      {libelle}
+                      {eleveNom ? ` — ${eleveNom}` : ''}
+                    </p>
+                    <p className="text-xs text-ink-400">
+                      {pick(it, ['montantRestant', 'montantNet'])} GNF restant · échéance {formatDate(pick(it, ['echeanceDate'], null)) ?? '—'}
+                    </p>
+                  </div>
+                  <Badge variant={echeanceStatutBadgeVariant(statut)} className="shrink-0">
+                    {ECHEANCE_STATUT_LABELS[statut] ?? statut ?? 'À payer'}
+                  </Badge>
+                </div>
+              )
+            }}
+          />
         </>
       )}
     </div>
