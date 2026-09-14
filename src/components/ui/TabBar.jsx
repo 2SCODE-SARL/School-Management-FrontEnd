@@ -13,9 +13,11 @@
 export function TabBar({ tabs, active, onChange, className = '' }) {
   return (
     <div className={`relative mb-6 ${className}`}>
-      {/* Barre pleine sur laquelle "reposent" tous les onglets — dans la
-          couleur de l'onglet actif, qui s'y prolonge sans coupure. */}
-      <div className="absolute inset-x-0 bottom-0 h-1.5 rounded-full bg-primary-600" aria-hidden="true" />
+      {/* Ligne fine par-dessus tous les onglets — ils semblent glissés
+          derrière elle plutôt que posés dessus (z-index au-dessus de
+          l'onglet actif, dont le z-10 sert seulement à passer devant les
+          autres onglets, pas devant cette ligne). */}
+      <div className="absolute inset-x-0 bottom-0 h-1 rounded-full bg-primary-600 z-20" aria-hidden="true" />
 
       <div className="relative flex items-end gap-1.5 overflow-x-auto pt-1">
         {tabs.map((tab) => {
