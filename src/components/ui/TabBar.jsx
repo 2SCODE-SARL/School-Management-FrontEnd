@@ -29,7 +29,7 @@ export function TabBar({ tabs, active, onChange, className = '' }) {
                 'relative flex items-center gap-1.5 px-5 shrink-0 text-sm font-semibold whitespace-nowrap transition-all duration-200 rounded-t-2xl',
                 isActive
                   ? 'h-11 z-10 bg-primary-600 text-white shadow-lg shadow-primary-900/20'
-                  : 'h-10 mb-0.5 bg-ink-800 text-white/85 hover:bg-ink-700 hover:text-white',
+                  : 'h-10 mb-0.5 bg-ink-500 text-white/85 hover:bg-ink-600 hover:text-white',
               ].join(' ')}
             >
               {tab.label}
