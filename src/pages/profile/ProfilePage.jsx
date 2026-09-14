@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { KeyRound, Mail, Phone, ShieldCheck } from 'lucide-react'
 import { getMyProfile } from '../../api/profile'
+import { getEtablissement } from '../../api/etablissements'
 import { useAuth } from '../../auth/AuthContext'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Alert } from '../../components/ui/Alert'
 import { ROLE_LABELS } from '../../config/roles'
-import { pick } from '../../lib/pick'
 import { ChangePasswordModal } from './ChangePasswordModal'
 
 /** Petite tuile d'info dans le bandeau coloré — valeur en blanc, libellé discret. */
@@ -37,11 +37,18 @@ export default function ProfilePage() {
   const displayName = `${user?.prenom ?? ''} ${user?.nom ?? ''}`.trim() || user?.email
   const primaryRole = user?.roles?.[0]
   const roleLabel = ROLE_LABELS[primaryRole] ?? primaryRole ?? '—'
-  // `langue`/`fuseauHoraire` existent dans le DTO d'édition (UpdateUserDto)
-  // mais leur présence sur `GET /users/me` n'est pas confirmée en live —
-  // via `pick`, avec un tiret si absents plutôt que de deviner.
-  const langue = pick(user, ['langue'], null)
-  const fuseauHoraire = pick(user, ['fuseauHoraire'], null)
+
+  // Nom/code de l'établissement — plus utile que Langue/Fuseau horaire
+  // (jamais confirmés sur `GET /users/me`) pour ce bandeau. `etablissementId`
+  // est en revanche un champ confirmé (présent dans CreateUserDto et déjà
+  // utilisé partout ailleurs dans l'app). Absent pour un super-admin sans
+  // établissement rattaché — la requête reste alors simplement désactivée.
+  const etablissementId = user?.etablissementId
+  const { data: etablissement } = useQuery({
+    queryKey: ['etablissement', etablissementId],
+    queryFn: () => getEtablissement(etablissementId),
+    enabled: Boolean(etablissementId),
+  })
 
   return (
     <div className="max-w-3xl">
@@ -125,8 +132,8 @@ export default function ProfilePage() {
               <div className="grid grid-cols-2 gap-4">
                 <InfoTile label="Rôle" value={roleLabel} />
                 <InfoTile label="Statut" value="Actif" />
-                <InfoTile label="Langue" value={langue} />
-                <InfoTile label="Fuseau horaire" value={fuseauHoraire} />
+                <InfoTile label="Établissement" value={etablissement?.nom} />
+                <InfoTile label="Code établissement" value={etablissement?.code} />
               </div>
             </div>
           </div>
