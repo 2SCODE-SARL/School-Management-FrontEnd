@@ -64,12 +64,13 @@ export default function ProfilePage() {
   })
 
   // Fusion champ par champ (pas juste "l'un ou l'autre") : `sessionUser`
-  // (déjà lui-même une fusion `/auth/me` + `/users/me`, voir AuthContext)
   // sert de base, et cette requête `/users/me` dédiée à la page vient la
-  // rafraîchir — sans effacer un champ qu'elle ne renverrait pas (constaté
-  // en live : le rôle affiché ici tombait à "—" quand `profile` remplaçait
-  // `sessionUser` en bloc au lieu de le compléter).
-  const user = { ...sessionUser, ...profile }
+  // compléter. `roles` reste EXPLICITEMENT celui de `sessionUser` : un test
+  // live a montré que `/users/me` le renvoie absent/vide sur au moins un
+  // rôle, ce qui — en le laissant `...profile` écraser sans garde-fou — a
+  // fait tomber le rôle affiché ici à "—" ET cassé la redirection
+  // post-connexion ailleurs dans l'app (même piège, voir AuthContext).
+  const user = { ...sessionUser, ...profile, roles: sessionUser?.roles ?? profile?.roles }
   const displayName = `${user?.prenom ?? ''} ${user?.nom ?? ''}`.trim() || user?.email
   // Tous les rôles du compte (généralement un seul, mais le champ est un
   // tableau côté API) — affichés en badges pour une lecture complète.

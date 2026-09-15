@@ -8,16 +8,29 @@ const AuthContext = createContext(null)
 /**
  * `GET /auth/me` (identité/rôles) et `GET /users/me` (photo, adresse,
  * téléphone...) sont deux endpoints distincts qui ne renvoient pas les
- * mêmes champs — constaté en live : la photo de profil n'apparaît que sur
- * `/users/me`, mais les rôles sont fiables sur `/auth/me`. On les fusionne
- * ici une bonne fois pour toutes pour que TOUT ce qui lit `useAuth().user`
- * (Topbar, Sidebar...) ait la vue la plus complète, pas seulement la page
- * Profil. `/users/me` reste secondaire : un échec ne bloque pas la connexion.
+ * mêmes champs. ATTENTION : une première version fusionnait l'objet
+ * `profile` en bloc par-dessus `identity`, ce qui s'est avéré cassant en
+ * live — sur un compte Élève, `/users/me` renvoie un `roles` absent/vide,
+ * et l'écrasait par-dessus le `roles` correct de `/auth/me`, cassant la
+ * redirection post-connexion ("Espace pas encore disponible", rôle « »).
+ * On ne reprend donc de `profile` QUE les champs "profil personnel" qu'il
+ * est seul à exposer de façon fiable — jamais `roles`, `id`,
+ * `etablissementId` ni rien qui touche à l'autorisation, qui restent
+ * exclusivement ceux d'`identity`. `/users/me` reste secondaire : un échec
+ * ne bloque pas la connexion.
  */
 async function loadFullUser() {
   const identity = await fetchCurrentUser()
   const profile = await getMyProfile().catch(() => null)
-  return { ...identity, ...profile }
+  if (!profile) return identity
+  return {
+    ...identity,
+    photoUrl: profile.photoUrl ?? identity.photoUrl,
+    adresse: profile.adresse ?? identity.adresse,
+    telephone: profile.telephone ?? identity.telephone,
+    langue: profile.langue ?? identity.langue,
+    fuseauHoraire: profile.fuseauHoraire ?? identity.fuseauHoraire,
+  }
 }
 
 export function AuthProvider({ children }) {
