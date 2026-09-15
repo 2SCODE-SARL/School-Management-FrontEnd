@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Bell, Check, Plus } from 'lucide-react'
 import { createAlerte, listAlertes, marquerAlerteLue } from '../../api/presences'
@@ -8,6 +8,7 @@ import { Select } from '../../components/ui/Select'
 import { TextField } from '../../components/ui/TextField'
 import { Badge } from '../../components/ui/Badge'
 import { Alert } from '../../components/ui/Alert'
+import { Pagination } from '../../components/ui/Pagination'
 import { ApiError } from '../../api/client'
 import { rules, validate } from '../../lib/validate'
 import {
@@ -23,6 +24,8 @@ const LUE_FILTER_OPTIONS = [
   { value: 'false', label: 'Non lues' },
   { value: 'true', label: 'Lues' },
 ]
+
+const PAGE_SIZE = 20
 
 function CreateAlerteForm({ onCancel, onSubmit, isSubmitting }) {
   const [type, setType] = useState(ALERTE_TYPE_OPTIONS[0].value)
@@ -87,6 +90,7 @@ function CreateAlerteForm({ onCancel, onSubmit, isSubmitting }) {
 export function AlertesTab({ etablissementId }) {
   const [typeFilter, setTypeFilter] = useState('')
   const [lueFilter, setLueFilter] = useState('')
+  const [page, setPage] = useState(1)
   const [isCreateOpen, setCreateOpen] = useState(false)
   const queryClient = useQueryClient()
 
@@ -97,6 +101,14 @@ export function AlertesTab({ etablissementId }) {
     enabled: Boolean(etablissementId),
   })
   const alertes = Array.isArray(data) ? data : (data?.items ?? [])
+
+  // Pas de `page`/`limit` documentés sur cet endpoint — pagination côté
+  // client, ce flux (absences, impayés, anniversaires...) peut grossir vite.
+  useEffect(() => {
+    setPage(1)
+  }, [etablissementId, typeFilter, lueFilter])
+  const totalPages = Math.max(1, Math.ceil(alertes.length / PAGE_SIZE))
+  const pagedAlertes = alertes.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const createMutation = useMutation({
     mutationFn: (payload) => createAlerte(etablissementId, payload),
@@ -155,7 +167,7 @@ export function AlertesTab({ etablissementId }) {
         )}
         {!isLoading && !isError && alertes.length > 0 && (
           <div className="divide-y divide-ink-50">
-            {alertes.map((a, i) => (
+            {pagedAlertes.map((a, i) => (
               <div key={a.id ?? i} className="flex items-start gap-3 p-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -180,6 +192,11 @@ export function AlertesTab({ etablissementId }) {
                 )}
               </div>
             ))}
+          </div>
+        )}
+        {!isLoading && !isError && alertes.length > 0 && (
+          <div className="px-4 pb-4">
+            <Pagination page={page} totalPages={totalPages} total={alertes.length} onPageChange={setPage} />
           </div>
         )}
       </div>
