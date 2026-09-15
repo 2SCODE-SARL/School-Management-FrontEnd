@@ -1,6 +1,26 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Award, BookOpen, GraduationCap, Lock, Mail, Eye, EyeOff, LogIn, PenLine, Send, Sparkles } from 'lucide-react'
+import {
+  Atom,
+  Award,
+  BookOpen,
+  Calculator,
+  Compass,
+  FlaskConical,
+  GraduationCap,
+  Lightbulb,
+  Lock,
+  Mail,
+  Eye,
+  EyeOff,
+  LogIn,
+  Palette,
+  PenLine,
+  Ruler,
+  Send,
+  Sparkles,
+  Star,
+} from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { getHomePathForRole, getPrimaryRole } from '../auth/roleHome'
 import { ApiError } from '../api/client'
@@ -18,13 +38,22 @@ const FLOATING_ICONS = [
   { Icon: PenLine, style: { top: '22%', right: '11%' }, size: 'h-7 w-7', anim: 'motion-safe:animate-float-a', delay: '2.4s' },
   { Icon: Award, style: { top: '68%', right: '9%' }, size: 'h-9 w-9', anim: 'motion-safe:animate-float-b', delay: '0.6s' },
   { Icon: Sparkles, style: { top: '42%', left: '4%' }, size: 'h-6 w-6 hidden sm:block', anim: 'motion-safe:animate-float-a', delay: '3.2s' },
+  { Icon: Calculator, style: { top: '8%', right: '28%' }, size: 'h-7 w-7 hidden sm:block', anim: 'motion-safe:animate-float-b', delay: '1.8s' },
+  { Icon: Ruler, style: { top: '85%', left: '24%' }, size: 'h-8 w-8 hidden sm:block', anim: 'motion-safe:animate-float-a', delay: '2.8s' },
+  { Icon: Atom, style: { top: '10%', left: '30%' }, size: 'h-7 w-7 hidden sm:block', anim: 'motion-safe:animate-float-b', delay: '0.3s' },
+  { Icon: FlaskConical, style: { top: '80%', right: '26%' }, size: 'h-7 w-7 hidden sm:block', anim: 'motion-safe:animate-float-a', delay: '1.5s' },
+  { Icon: Compass, style: { top: '48%', right: '4%' }, size: 'h-6 w-6', anim: 'motion-safe:animate-float-b', delay: '2.1s' },
+  { Icon: Lightbulb, style: { top: '5%', left: '48%' }, size: 'h-6 w-6 hidden sm:block', anim: 'motion-safe:animate-float-a', delay: '3.6s' },
+  { Icon: Palette, style: { top: '90%', right: '42%' }, size: 'h-7 w-7 hidden sm:block', anim: 'motion-safe:animate-float-b', delay: '1s' },
+  { Icon: Star, style: { top: '58%', left: '2%' }, size: 'h-5 w-5', anim: 'motion-safe:animate-float-a', delay: '4s' },
 ]
 
 // Avions en papier qui traversent lentement le ciel en diagonale, en boucle
 // (24s), décalés dans le temps et en hauteur pour ne jamais se superposer.
 const PAPER_PLANES = [
   { style: { top: '30%', left: 0 }, delay: '0s' },
-  { style: { top: '58%', left: 0 }, delay: '12s' },
+  { style: { top: '52%', left: 0 }, delay: '8s' },
+  { style: { top: '74%', left: 0 }, delay: '16s' },
 ]
 
 export default function Login() {
