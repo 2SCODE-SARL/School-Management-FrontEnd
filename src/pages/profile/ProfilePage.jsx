@@ -63,8 +63,13 @@ export default function ProfilePage() {
     retry: false,
   })
 
-  // Fallback sur les infos déjà connues de la session le temps du chargement.
-  const user = profile ?? sessionUser
+  // Fusion champ par champ (pas juste "l'un ou l'autre") : `sessionUser`
+  // (déjà lui-même une fusion `/auth/me` + `/users/me`, voir AuthContext)
+  // sert de base, et cette requête `/users/me` dédiée à la page vient la
+  // rafraîchir — sans effacer un champ qu'elle ne renverrait pas (constaté
+  // en live : le rôle affiché ici tombait à "—" quand `profile` remplaçait
+  // `sessionUser` en bloc au lieu de le compléter).
+  const user = { ...sessionUser, ...profile }
   const displayName = `${user?.prenom ?? ''} ${user?.nom ?? ''}`.trim() || user?.email
   // Tous les rôles du compte (généralement un seul, mais le champ est un
   // tableau côté API) — affichés en badges pour une lecture complète.

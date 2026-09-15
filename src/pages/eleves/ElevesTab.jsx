@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { GraduationCap, Pencil, Search } from 'lucide-react'
 import { searchEleves, updateEleve } from '../../api/eleves'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue'
+import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
@@ -126,11 +127,14 @@ export function ElevesTab({ etablissementId }) {
                     className="border-b border-ink-50 last:border-0 hover:bg-ink-50/60 cursor-pointer transition-colors"
                   >
                     <td className="px-4 py-3">
-                      <TruncatedText
-                        text={`${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.trim()}
-                        maxWidth={200}
-                        className="font-medium text-ink-900"
-                      />
+                      <div className="flex items-center gap-2.5">
+                        <Avatar name={`${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.trim()} src={eleve.photoUrl} size={32} />
+                        <TruncatedText
+                          text={`${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.trim()}
+                          maxWidth={180}
+                          className="font-medium text-ink-900"
+                        />
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-ink-600">{eleve.matricule ?? '—'}</td>
                     <td className="px-4 py-3 text-ink-600">

@@ -19,6 +19,7 @@ import {
   unlinkParentFromEleve,
 } from '../../api/parents'
 import { Modal } from '../../components/ui/Modal'
+import { Avatar } from '../../components/ui/Avatar'
 import { InfoRow } from '../../components/ui/InfoRow'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -187,9 +188,7 @@ export function EleveDetailModal({ eleveId, etablissementId, onClose, onEdit }) 
         {eleve && (
           <>
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-12 w-12 rounded-xl bg-primary-50 flex items-center justify-center shrink-0">
-                <User className="h-5 w-5 text-primary-600" />
-              </div>
+              <Avatar name={`${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.trim()} src={eleve.photoUrl} size={48} />
               <div className="min-w-0 flex-1">
                 <p className="font-heading font-bold text-ink-900 truncate">
                   {eleve.prenom} {eleve.nom}
