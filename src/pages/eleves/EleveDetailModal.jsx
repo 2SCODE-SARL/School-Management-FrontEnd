@@ -242,14 +242,19 @@ export function EleveDetailModal({ eleveId, etablissementId, onClose, onEdit }) 
                         key={parentId ?? index}
                         className="flex items-center justify-between gap-3 rounded-lg border border-ink-100 px-3 py-2"
                       >
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-ink-900 truncate">
-                            {parent.nomPrenom ?? 'Parent'}
-                          </p>
-                          <p className="text-xs text-ink-400">
-                            {PARENT_TYPE_LABELS[type] ?? type ?? '—'}
-                            {parent.telephone ? ` · ${parent.telephone}` : ''}
-                          </p>
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {/* Pas de `photoUrl` confirmé côté Parent (signalé
+                              au backend) — initiales en attendant. */}
+                          <Avatar name={parent.nomPrenom ?? 'Parent'} src={parent.photoUrl} size={36} />
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-ink-900 truncate">
+                              {parent.nomPrenom ?? 'Parent'}
+                            </p>
+                            <p className="text-xs text-ink-400">
+                              {PARENT_TYPE_LABELS[type] ?? type ?? '—'}
+                              {parent.telephone ? ` · ${parent.telephone}` : ''}
+                            </p>
+                          </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           {hasCompte ? (

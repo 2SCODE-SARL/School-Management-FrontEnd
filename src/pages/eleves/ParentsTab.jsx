@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Search, Users } from 'lucide-react'
 import { listParentsEtablissement } from '../../api/parents'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue'
+import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { Pagination } from '../../components/ui/Pagination'
 import { TruncatedText } from '../../components/ui/TruncatedText'
@@ -105,11 +106,20 @@ export function ParentsTab({ etablissementId }) {
                       className="border-b border-ink-50 last:border-0 hover:bg-ink-50/60 cursor-pointer transition-colors"
                     >
                       <td className="px-4 py-3">
-                        <TruncatedText
-                          text={pick(p, ['nomPrenom'], 'Parent')}
-                          maxWidth={200}
-                          className="font-medium text-ink-900"
-                        />
+                        <div className="flex items-center gap-2.5">
+                          {/* `photoUrl` n'existe pas dans la forme confirmée en
+                              live (voir doc en tête de fichier) — lu quand
+                              même défensivement, signalé au backend comme
+                              lacune (aucune photo consultable pour un
+                              Parent) : s'affichera automatiquement le jour où
+                              le champ existera, initiales en attendant. */}
+                          <Avatar name={pick(p, ['nomPrenom'], 'Parent')} src={pick(p, ['photoUrl'], null)} size={32} />
+                          <TruncatedText
+                            text={pick(p, ['nomPrenom'], 'Parent')}
+                            maxWidth={180}
+                            className="font-medium text-ink-900"
+                          />
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-ink-600">{PARENT_TYPE_LABELS[type] ?? type ?? '—'}</td>
                       <td className="px-4 py-3 text-ink-600">

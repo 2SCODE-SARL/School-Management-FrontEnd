@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { GraduationCap, KeyRound, Mail, MapPin, Phone, User, Users } from 'lucide-react'
+import { GraduationCap, KeyRound, Mail, MapPin, Phone, User } from 'lucide-react'
 import { provisionAccesPortailParent, reinviteAccesPortailParent } from '../../api/parents'
 import { Modal } from '../../components/ui/Modal'
+import { Avatar } from '../../components/ui/Avatar'
 import { InfoRow } from '../../components/ui/InfoRow'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -33,9 +34,10 @@ export function ParentDetailModal({ parent, etablissementId, onClose }) {
   return (
     <Modal open={Boolean(parent)} onClose={onClose} title="Détail du parent">
       <div className="flex items-center gap-3 mb-4">
-        <div className="h-12 w-12 rounded-xl bg-primary-50 flex items-center justify-center shrink-0">
-          <User className="h-5 w-5 text-primary-600" />
-        </div>
+        {/* `photoUrl` n'existe pas dans la forme confirmée en live (voir
+            ParentsTab) — lu quand même défensivement, en attendant que le
+            backend l'ajoute (signalé) : initiales sinon. */}
+        <Avatar name={parent.nomPrenom} src={parent.photoUrl} size={48} />
         <div className="min-w-0 flex-1">
           <p className="font-heading font-bold text-ink-900 truncate">{parent.nomPrenom}</p>
           <p className="text-xs text-ink-400">
