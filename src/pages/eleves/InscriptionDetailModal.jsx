@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowRightCircle, CheckCircle2, ClipboardList, Shuffle, UserCheck } from 'lucide-react'
+import { ArrowRightCircle, CheckCircle2, Shuffle, UserCheck } from 'lucide-react'
 import {
   affectationAutoInscription,
   affecterInscription,
@@ -10,6 +10,7 @@ import {
 } from '../../api/inscriptions'
 import { listClasses, listNiveaux } from '../../api/academique'
 import { Modal } from '../../components/ui/Modal'
+import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Select } from '../../components/ui/Select'
@@ -166,9 +167,7 @@ export function InscriptionDetailModal({ etablissementId, anneeScolaireId, inscr
     <>
       <Modal open={Boolean(inscriptionId)} onClose={onClose} title="Détail de l'inscription">
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-12 w-12 rounded-xl bg-primary-50 flex items-center justify-center shrink-0">
-            <ClipboardList className="h-5 w-5 text-primary-600" />
-          </div>
+          <Avatar name={nomComplet} src={pick(eleve, ['photoUrl'], null)} size={48} />
           <div className="min-w-0 flex-1">
             <p className="font-heading font-bold text-ink-900 truncate">{nomComplet}</p>
             <p className="text-xs text-ink-400">{eleve?.matricule ?? '—'}</p>

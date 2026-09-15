@@ -7,6 +7,7 @@ import { listClasses, listNiveaux } from '../../api/academique'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
+import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { Pagination } from '../../components/ui/Pagination'
 import { INSCRIPTION_STATUT_LABELS, INSCRIPTION_STATUT_OPTIONS, inscriptionStatutBadgeVariant } from '../../config/eleveLabels'
@@ -211,7 +212,14 @@ export function InscriptionsTab({ etablissementId }) {
                       className="border-b border-ink-50 last:border-0 hover:bg-ink-50/60 cursor-pointer transition-colors"
                     >
                       <td className="px-4 py-3 font-medium text-ink-900">
-                        {`${eleve?.prenom ?? ''} ${eleve?.nom ?? ''}`.trim() || '—'}
+                        <div className="flex items-center gap-2.5">
+                          <Avatar
+                            name={`${eleve?.prenom ?? ''} ${eleve?.nom ?? ''}`.trim()}
+                            src={pick(eleve, ['photoUrl'], null)}
+                            size={32}
+                          />
+                          {`${eleve?.prenom ?? ''} ${eleve?.nom ?? ''}`.trim() || '—'}
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-ink-600">
                         {niveauLabelById[item.niveauDemandeId] ?? '—'}
