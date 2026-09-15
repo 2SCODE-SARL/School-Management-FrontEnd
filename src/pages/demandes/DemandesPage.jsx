@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Inbox, Send } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
@@ -11,8 +11,11 @@ import { Select } from '../../components/ui/Select'
 import { Badge } from '../../components/ui/Badge'
 import { Combobox } from '../../components/ui/Combobox'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
+import { Pagination } from '../../components/ui/Pagination'
 import { DEMANDE_STATUT_LABELS, DEMANDE_STATUT_OPTIONS, demandeStatutBadgeVariant } from '../../config/demandesLabels'
 import { formatDate } from '../../lib/formatDate'
+
+const PAGE_SIZE = 20
 
 /** Demandes envoyées par les parents (certificat, correction de note, congé...) — à traiter. */
 export default function DemandesPage() {
@@ -20,6 +23,7 @@ export default function DemandesPage() {
   const isAdmin = getPrimaryRole(user) === 'ADMINISTRATEUR'
   const [selectedEtabId, setSelectedEtabId] = useState(isAdmin ? '' : (user?.etablissementId ?? ''))
   const [statutFilter, setStatutFilter] = useState('')
+  const [page, setPage] = useState(1)
   const [respondingDemande, setRespondingDemande] = useState(null)
   const [reponse, setReponse] = useState('')
   const [cloturingDemande, setCloturingDemande] = useState(null)
@@ -41,6 +45,14 @@ export default function DemandesPage() {
   const demandes = (Array.isArray(data) ? data : (data?.items ?? []))
     .slice()
     .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
+
+  // Pas de `page`/`limit` documentés sur cet endpoint (seul `statut` existe)
+  // — pagination côté client, comme pour Employés (RH) dans le même cas.
+  useEffect(() => {
+    setPage(1)
+  }, [selectedEtabId, statutFilter])
+  const totalPages = Math.max(1, Math.ceil(demandes.length / PAGE_SIZE))
+  const pagedDemandes = demandes.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   function invalidateAll() {
     queryClient.invalidateQueries({ queryKey })
@@ -113,7 +125,7 @@ export default function DemandesPage() {
           )}
           {!isLoading && !isError && demandes.length > 0 && (
             <div className="divide-y divide-ink-50">
-              {demandes.map((d) => {
+              {pagedDemandes.map((d) => {
                 const dejaClos = d.statut === 'CLOTUREE'
                 return (
                   <div key={d.id} className="px-4 py-3">
@@ -148,6 +160,11 @@ export default function DemandesPage() {
                   </div>
                 )
               })}
+            </div>
+          )}
+          {!isLoading && !isError && demandes.length > 0 && (
+            <div className="px-4 pb-4">
+              <Pagination page={page} totalPages={totalPages} total={demandes.length} onPageChange={setPage} />
             </div>
           )}
         </div>
