@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Cake, CalendarClock, FileEdit, GraduationCap, MapPin, School, User, Users } from 'lucide-react'
 import { getClasseCourante, getEmploiDuTemps, getNotes, getProfil } from '../../api/portailEleve'
+import { useAuth } from '../../auth/AuthContext'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { InfoRow } from '../../components/ui/InfoRow'
@@ -18,6 +19,7 @@ const JOURS_COURTS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
 /** "Mon dossier" — profil académique de l'élève + sa classe de l'année en cours. */
 export default function EleveDashboard() {
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   const { data: profil, isLoading: isLoadingProfil, isError: isErrorProfil } = useQuery({
     queryKey: ['portail-eleve', 'profil'],
@@ -74,7 +76,12 @@ export default function EleveDashboard() {
         <div className="space-y-6">
           <div className="bg-white rounded-2xl border border-ink-100 p-5">
             <div className="flex items-center gap-4 mb-4">
-              <Avatar name={`${profil.prenom} ${profil.nom}`} src={profil.photoUrl} size={56} />
+              {/* `photoUrl` du dossier Élève (`/portail-eleves/me`) est
+                  souvent vide alors que le compte Utilisateur lié, lui, en a
+                  une (visible sur "Mon profil") — même personne, deux
+                  entités distinctes côté API : on retombe sur la photo du
+                  compte si le dossier n'en a pas. */}
+              <Avatar name={`${profil.prenom} ${profil.nom}`} src={profil.photoUrl || user?.photoUrl} size={56} />
               <div className="min-w-0 flex-1">
                 <p className="font-heading font-bold text-lg text-ink-900 truncate">
                   {profil.prenom} {profil.nom}
