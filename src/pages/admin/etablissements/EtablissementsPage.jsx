@@ -158,7 +158,7 @@ export default function EtablissementsPage() {
         {!isLoading && !isError && items.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
+              <thead className="bg-ink-50/80">
                 <tr className="text-left text-xs text-ink-500 uppercase tracking-wide border-b border-ink-100">
                   <th className="px-4 py-3 font-medium">Établissement</th>
                   <th className="px-4 py-3 font-medium">Code</th>
