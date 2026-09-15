@@ -27,6 +27,13 @@ const STATUT_FILTER_OPTIONS = [
   { value: 'ARCHIVE', label: 'Archivé' },
 ]
 
+/**
+ * Confirmé en live (données brutes d'un document) : la lecture renvoie
+ * `categorie: { id, code, libelle }` (objet imbriqué), pas `categorieCode`
+ * à plat — ce dernier n'existe que côté écriture
+ * (`DocumentationUploadDocumentDto`, pour créer/filtrer). `tags` est un
+ * tableau de chaînes, pas une chaîne unique.
+ */
 export function DocumentsTab({ etablissementId }) {
   const [search, setSearch] = useState('')
   const [categorieFilter, setCategorieFilter] = useState('')
@@ -148,7 +155,9 @@ export function DocumentsTab({ etablissementId }) {
                     <td className="px-4 py-3">
                       <TruncatedText text={doc.titre} maxWidth={240} className="font-medium text-ink-900" />
                     </td>
-                    <td className="px-4 py-3 text-ink-600">{CATEGORIE_DOCUMENT_LABELS[doc.categorieCode] ?? doc.categorieCode ?? '—'}</td>
+                    <td className="px-4 py-3 text-ink-600">
+                      {doc.categorie?.libelle ?? CATEGORIE_DOCUMENT_LABELS[doc.categorie?.code] ?? doc.categorie?.code ?? '—'}
+                    </td>
                     <td className="px-4 py-3 text-ink-600">
                       <TruncatedText text={doc.type} maxWidth={160} />
                     </td>

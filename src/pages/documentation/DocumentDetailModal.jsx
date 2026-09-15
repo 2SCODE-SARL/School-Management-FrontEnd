@@ -22,6 +22,10 @@ import { formatDateTime } from '../../lib/formatDate'
  * à notre remontée) `GET .../documents/{id}/telechargement` -> URL signée
  * temporaire — plus besoin de compter sur `fichierUrl` (chemin de stockage
  * brut, jamais ouvrable directement).
+ *
+ * Confirmé en live (données brutes) : `categorie` est un objet imbriqué
+ * `{ id, code, libelle }`, pas `categorieCode` à plat (celui-ci n'existe
+ * que côté écriture) ; `tags` est un tableau de chaînes.
  */
 export function DocumentDetailModal({ document, etablissementId, onClose }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -83,21 +87,17 @@ export function DocumentDetailModal({ document, etablissementId, onClose }) {
         </div>
 
         <div className="mb-2">
-          <InfoRow icon={Tag} label="Catégorie" value={CATEGORIE_DOCUMENT_LABELS[document.categorieCode] ?? document.categorieCode} />
+          <InfoRow
+            icon={Tag}
+            label="Catégorie"
+            value={document.categorie?.libelle ?? CATEGORIE_DOCUMENT_LABELS[document.categorie?.code] ?? document.categorie?.code}
+          />
           <InfoRow icon={Tag} label="Type" value={document.type} />
           <InfoRow icon={Tag} label="Format" value={FORMAT_DOCUMENT_LABELS[document.format] ?? document.format} />
           <InfoRow icon={Tag} label="Confidentialité" value={document.confidentialite} />
-          <InfoRow icon={Tag} label="Tags" value={document.tags} />
+          <InfoRow icon={Tag} label="Tags" value={Array.isArray(document.tags) ? document.tags.join(', ') : document.tags} />
           <InfoRow icon={Tag} label="Téléversé le" value={formatDateTime(document.createdAt)} />
         </div>
-
-        {/* Temporaire — juste pour confirmer en live le vrai nom du champ
-            catégorie (pas documenté côté API) sans avoir besoin des
-            DevTools. À retirer une fois confirmé. */}
-        <details className="mt-3 rounded-lg bg-ink-50 px-3 py-2">
-          <summary className="text-xs font-medium text-ink-500 cursor-pointer">Données brutes (debug)</summary>
-          <pre className="mt-2 text-xs text-ink-600 whitespace-pre-wrap break-all">{JSON.stringify(document, null, 2)}</pre>
-        </details>
 
         {document.description && (
           <div className="pt-3 border-t border-ink-100">
