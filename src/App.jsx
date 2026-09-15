@@ -38,6 +38,7 @@ import StaffDemandesPage from './pages/demandes/DemandesPage'
 import CommunicationPage from './pages/communication/CommunicationPage'
 import PlaceholderPage from './pages/admin/PlaceholderPage'
 import ProfilePage from './pages/profile/ProfilePage'
+import NotificationsPage from './pages/notifications/NotificationsPage'
 import { getNavigationForSpace } from './config/modules'
 
 const adminNavigation = getNavigationForSpace('/admin')
@@ -197,6 +198,7 @@ function App() {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="profil" element={<ProfilePage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         {buildModuleRoutes(adminNavigation, '/admin', ADMIN_BUILT_PAGES)}
       </Route>
 
@@ -210,6 +212,7 @@ function App() {
       >
         <Route index element={<DirecteurDashboard />} />
         <Route path="profil" element={<ProfilePage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         {buildModuleRoutes(directeurNavigation, '/directeur', DIRECTEUR_BUILT_PAGES)}
       </Route>
 
@@ -223,6 +226,7 @@ function App() {
       >
         <Route index element={<SurveillantDashboard />} />
         <Route path="profil" element={<ProfilePage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         {buildModuleRoutes(surveillantNavigation, '/surveillant', SURVEILLANT_BUILT_PAGES)}
       </Route>
 
@@ -236,6 +240,7 @@ function App() {
       >
         <Route index element={<EnseignantDashboard />} />
         <Route path="profil" element={<ProfilePage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         {buildModuleRoutes(enseignantNavigation, '/enseignant', ENSEIGNANT_BUILT_PAGES)}
       </Route>
 
@@ -249,6 +254,7 @@ function App() {
       >
         <Route index element={<SecretaireDashboard />} />
         <Route path="profil" element={<ProfilePage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         {buildModuleRoutes(secretaireNavigation, '/secretaire', SECRETAIRE_BUILT_PAGES)}
       </Route>
 
@@ -262,6 +268,7 @@ function App() {
       >
         <Route index element={<ComptableDashboard />} />
         <Route path="profil" element={<ProfilePage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         {buildModuleRoutes(comptableNavigation, '/comptable', COMPTABLE_BUILT_PAGES)}
       </Route>
 
@@ -275,6 +282,7 @@ function App() {
       >
         <Route index element={<EleveDashboard />} />
         <Route path="profil" element={<ProfilePage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         {buildModuleRoutes(eleveNavigation, '/eleve', ELEVE_BUILT_PAGES)}
       </Route>
 
@@ -288,6 +296,7 @@ function App() {
       >
         <Route index element={<ParentDashboard />} />
         <Route path="profil" element={<ProfilePage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         {buildModuleRoutes(parentNavigation, '/parent', PARENT_BUILT_PAGES)}
       </Route>
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Bell, ChevronDown, LogOut, Menu, Search, User } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
@@ -12,6 +12,7 @@ import { useSidebar } from './SidebarContext'
 export function Topbar() {
   const { user, logout } = useAuth()
   const { setMobileOpen } = useSidebar()
+  const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const menuRef = useRef(null)
@@ -41,7 +42,14 @@ export function Topbar() {
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
   })
-  const nonLues = Array.isArray(nonLuesData) ? nonLuesData : (nonLuesData?.items ?? [])
+  // `CommunicationController_compteurNonLues` ("compteur" = compteur) renvoie
+  // directement un nombre, pas une liste — deviné à tort comme un tableau au
+  // départ, ce qui faisait échouer silencieusement tout affichage (toujours
+  // 0). Fallbacks défensifs gardés au cas où la forme évoluerait.
+  const nonLuesCount =
+    typeof nonLuesData === 'number'
+      ? nonLuesData
+      : (Array.isArray(nonLuesData) ? nonLuesData.length : (nonLuesData?.total ?? nonLuesData?.count ?? 0))
 
   const { data: recentesData, isLoading: isLoadingRecentes } = useQuery({
     queryKey: ['communication', 'notifications', 'recentes'],
@@ -96,8 +104,10 @@ export function Topbar() {
             aria-label="Notifications"
           >
             <Bell className="h-4.5 w-4.5" />
-            {nonLues.length > 0 && (
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-danger-500" />
+            {nonLuesCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full bg-danger-500 text-[10px] font-semibold leading-none text-white">
+                {nonLuesCount > 9 ? '9+' : nonLuesCount}
+              </span>
             )}
           </button>
 
@@ -117,7 +127,11 @@ export function Topbar() {
                     <button
                       key={n.id}
                       type="button"
-                      onClick={() => nonLue && marquerLueMutation.mutate(n.id)}
+                      onClick={() => {
+                        if (nonLue) marquerLueMutation.mutate(n.id)
+                        setNotifOpen(false)
+                        navigate('notifications')
+                      }}
                       className={[
                         'flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left transition-colors hover:bg-ink-50',
                         nonLue ? 'bg-primary-50/50' : '',
@@ -133,6 +147,15 @@ export function Topbar() {
                   )
                 })
               )}
+              <div className="mt-1 pt-2 border-t border-ink-100 px-3">
+                <Link
+                  to="notifications"
+                  onClick={() => setNotifOpen(false)}
+                  className="block text-center text-xs font-medium text-primary-600 hover:underline"
+                >
+                  Voir toutes les notifications
+                </Link>
+              </div>
             </div>
           )}
         </div>
