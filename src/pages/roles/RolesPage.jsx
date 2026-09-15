@@ -30,7 +30,7 @@ export default function RolesPage() {
   const queryClient = useQueryClient()
 
   const queryKey = ['rbac', 'roles', { q: debouncedSearch, actif: actifFilter, page }]
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey,
     queryFn: () => listRoles({ q: debouncedSearch || undefined, actif: actifFilter || undefined, page }),
     placeholderData: (previous) => previous,
@@ -91,7 +91,12 @@ export default function RolesPage() {
             <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
           </div>
         )}
-        {isError && <p className="p-8 text-center text-sm text-danger-600">Impossible de charger les rôles.</p>}
+        {isError && (
+          <p className="p-8 text-center text-sm text-danger-600">
+            {error?.statusCode ? `Erreur ${error.statusCode} : ` : ''}
+            {error?.message || 'Impossible de charger les rôles.'}
+          </p>
+        )}
         {!isLoading && !isError && items.length === 0 && (
           <div className="p-16 text-center text-ink-400">
             <ShieldCheck className="h-8 w-8 mx-auto mb-3 opacity-50" />
