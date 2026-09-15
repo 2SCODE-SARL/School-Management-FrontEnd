@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Archive, ArchiveRestore, Eye, Tag, Trash2 } from 'lucide-react'
-import { archiverDocument, deleteDocument, restaurerDocument } from '../../api/documentation'
+import { archiverDocument, deleteDocument, getDocumentTelechargement, restaurerDocument } from '../../api/documentation'
 import { Modal } from '../../components/ui/Modal'
 import { InfoRow } from '../../components/ui/InfoRow'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { Alert } from '../../components/ui/Alert'
+import { ApiError } from '../../api/client'
 import {
   CATEGORIE_DOCUMENT_LABELS,
   FORMAT_DOCUMENT_LABELS,
@@ -17,15 +18,30 @@ import {
 import { formatDateTime } from '../../lib/formatDate'
 
 /**
- * Détail d'un document du module Documentation. Comme signalé au backend
- * (aucun lien de visualisation côté staff, seulement `fichierUrl: "s3://..."`),
- * on ouvre directement seulement si c'est déjà une URL http(s) — sinon on
- * explique clairement la limitation plutôt que d'échouer silencieusement.
+ * Détail d'un document du module Documentation. Le backend a ajouté (suite
+ * à notre remontée) `GET .../documents/{id}/telechargement` -> URL signée
+ * temporaire — plus besoin de compter sur `fichierUrl` (chemin de stockage
+ * brut, jamais ouvrable directement).
  */
 export function DocumentDetailModal({ document, etablissementId, onClose }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [viewError, setViewError] = useState('')
   const queryClient = useQueryClient()
+
+  const telechargerMutation = useMutation({
+    mutationFn: () => getDocumentTelechargement(etablissementId, document?.id),
+    onSuccess: (result) => {
+      const url = result?.url
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer')
+      } else {
+        setViewError("Le serveur n'a pas renvoyé de lien de téléchargement.")
+      }
+    },
+    onError: (err) => {
+      setViewError(err instanceof ApiError ? err.message : 'Impossible de récupérer le lien de téléchargement.')
+    },
+  })
 
   function invalidateAll() {
     queryClient.invalidateQueries({ queryKey: ['documentation', 'documents'] })
@@ -53,13 +69,7 @@ export function DocumentDetailModal({ document, etablissementId, onClose }) {
 
   function handleView() {
     setViewError('')
-    if (/^https?:\/\//i.test(document.fichierUrl ?? '')) {
-      window.open(document.fichierUrl, '_blank', 'noopener,noreferrer')
-      return
-    }
-    setViewError(
-      "Ce document est stocké en interne (chemin de stockage brut) — le backend ne fournit pas encore de lien de visualisation pour le personnel. Signalé, en attente d'un endpoint dédié.",
-    )
+    telechargerMutation.mutate()
   }
 
   return (
@@ -110,7 +120,7 @@ export function DocumentDetailModal({ document, etablissementId, onClose }) {
               Archiver
             </Button>
           )}
-          <Button size="sm" onClick={handleView}>
+          <Button size="sm" isLoading={telechargerMutation.isPending} onClick={handleView}>
             <Eye className="h-3.5 w-3.5" />
             Voir
           </Button>

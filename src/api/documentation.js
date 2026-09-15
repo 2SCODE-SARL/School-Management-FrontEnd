@@ -43,6 +43,16 @@ export function restaurerDocument(etablissementId, documentId) {
   return apiClient.patch(`${base(etablissementId)}/documents/${documentId}/restaurer`)
 }
 
+/**
+ * Nouveau (ajouté par le backend suite à notre remontée -5) : renvoie une
+ * URL signée temporaire `{ url, expirationSecondes }` — jusqu'ici l'API ne
+ * renvoyait que le chemin de stockage brut (`s3://...`), pas ouvrable par
+ * le staff.
+ */
+export function getDocumentTelechargement(etablissementId, documentId) {
+  return apiClient.get(`${base(etablissementId)}/documents/${documentId}/telechargement`)
+}
+
 // Import / Export — transferts tenantisés avec traçabilité (`TransfertDto` :
 // entite, format (CSV/XLSX/PDF/JSON), perimetre?).
 export function importerFichier(etablissementId, formData) {
