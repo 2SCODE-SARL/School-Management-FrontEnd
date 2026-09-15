@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Briefcase, Cake, IdCard, KeyRound, Mail, MapPin, Phone, ShieldCheck, UserCircle2 } from 'lucide-react'
 import { getMyProfile } from '../../api/profile'
 import { getEtablissement } from '../../api/etablissements'
@@ -15,6 +15,7 @@ import { EMPLOYE_TYPE_LABELS, TYPE_CONTRAT_LABELS } from '../../config/rhLabels'
 import { formatDate } from '../../lib/formatDate'
 import { pick } from '../../lib/pick'
 import { ChangePasswordModal } from './ChangePasswordModal'
+import { EditProfileModal } from './EditProfileModal'
 
 // Rôles pour lesquels on peut retrouver le dossier RH (Employé) du compte
 // connecté via `GET .../utilisateurs/{utilisateurId}/employe` — seuls ces
@@ -50,8 +51,10 @@ function InfoRow({ icon: Icon, label, value }) {
 }
 
 export default function ProfilePage() {
-  const { user: sessionUser } = useAuth()
+  const { user: sessionUser, refreshUser } = useAuth()
+  const queryClient = useQueryClient()
   const [isPasswordModalOpen, setPasswordModalOpen] = useState(false)
+  const [isEditModalOpen, setEditModalOpen] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
 
   const { data: profile, isLoading, isError, error } = useQuery({
@@ -158,12 +161,7 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
-            <Button
-              variant="secondary"
-              disabled
-              title="Bientôt disponible — en attente d'un endpoint d'auto-édition côté backend"
-              className="opacity-60 cursor-not-allowed shrink-0"
-            >
+            <Button variant="secondary" onClick={() => setEditModalOpen(true)} className="shrink-0">
               Modifier le profil
             </Button>
           </div>
@@ -177,6 +175,7 @@ export default function ProfilePage() {
                 <InfoRow icon={UserCircle2} label="Prénom" value={user?.prenom} />
                 <InfoRow icon={Mail} label="Adresse e-mail" value={user?.email} />
                 <InfoRow icon={Phone} label="Téléphone" value={user?.telephone} />
+                <InfoRow icon={MapPin} label="Adresse" value={user?.adresse} />
               </div>
             </div>
 
@@ -253,6 +252,20 @@ export default function ProfilePage() {
         onSuccess={() => {
           setPasswordModalOpen(false)
           setSuccessMessage('Mot de passe changé avec succès.')
+          setTimeout(() => setSuccessMessage(''), 4000)
+        }}
+      />
+
+      <EditProfileModal
+        open={isEditModalOpen}
+        user={user}
+        displayName={displayName}
+        onClose={() => setEditModalOpen(false)}
+        onSuccess={() => {
+          setEditModalOpen(false)
+          queryClient.invalidateQueries({ queryKey: ['me-profile'] })
+          refreshUser()
+          setSuccessMessage('Profil mis à jour avec succès.')
           setTimeout(() => setSuccessMessage(''), 4000)
         }}
       />

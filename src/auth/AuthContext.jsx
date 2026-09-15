@@ -41,8 +41,18 @@ export function AuthProvider({ children }) {
     setStatus('guest')
   }
 
+  // Recharge le compte connecté sans repasser par le login — utilisé après
+  // une auto-édition du profil (photo/téléphone/adresse) pour que le
+  // Topbar/Sidebar (qui lisent `useAuth().user`, pas la query "me-profile"
+  // de la page Profil) reflètent le changement sans attendre une reconnexion.
+  async function refreshUser() {
+    const currentUser = await fetchCurrentUser()
+    setUser(currentUser)
+    return currentUser
+  }
+
   return (
-    <AuthContext.Provider value={{ user, status, login, logout }}>
+    <AuthContext.Provider value={{ user, status, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )
