@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle, ClipboardList, Plus, UserPlus } from 'lucide-react'
+import { getAccesPortailEleveStatus } from '../../api/eleves'
 import { listInscriptions, preinscrire, reinscrire } from '../../api/inscriptions'
 import { listAnneesScolaires } from '../../api/etablissements'
 import { listClasses, listNiveaux } from '../../api/academique'
@@ -62,6 +63,23 @@ export function InscriptionsTab({ etablissementId }) {
   useEffect(() => {
     setPage(1)
   }, [anneeScolaireId, statutFilter])
+
+  // Comble "dossier Élève sans photo" avec celle du compte portail lié
+  // quand elle existe — même mécanisme et même clé de cache que ElevesTab/
+  // EleveDetailModal (partagée entre les trois écrans).
+  const accesQueries = useQueries({
+    queries: inscriptions.map((item) => {
+      const eleveId = pick(item, ['eleve'], {})?.id
+      return {
+        queryKey: ['eleves', 'acces-portail-status', etablissementId, eleveId],
+        queryFn: () => getAccesPortailEleveStatus(etablissementId, eleveId),
+        enabled: Boolean(etablissementId && eleveId),
+      }
+    }),
+  })
+  const photoByEleveId = Object.fromEntries(
+    inscriptions.map((item, i) => [pick(item, ['eleve'], {})?.id, accesQueries[i]?.data?.utilisateur?.photoUrl]),
+  )
 
   // `niveauDemandeId`/`classeDemandeeId`/`affectation` sont des ids à plat
   // (confirmé par un vrai payload) — on les résout via ces listes déjà
@@ -215,7 +233,7 @@ export function InscriptionsTab({ etablissementId }) {
                         <div className="flex items-center gap-2.5">
                           <Avatar
                             name={`${eleve?.prenom ?? ''} ${eleve?.nom ?? ''}`.trim()}
-                            src={pick(eleve, ['photoUrl'], null)}
+                            src={pick(eleve, ['photoUrl'], null) || photoByEleveId[eleve?.id]}
                             size={32}
                           />
                           {`${eleve?.prenom ?? ''} ${eleve?.nom ?? ''}`.trim() || '—'}

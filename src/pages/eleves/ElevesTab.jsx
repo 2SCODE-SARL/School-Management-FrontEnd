@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import { GraduationCap, Pencil, Search } from 'lucide-react'
-import { searchEleves, updateEleve } from '../../api/eleves'
+import { getAccesPortailEleveStatus, searchEleves, updateEleve } from '../../api/eleves'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
@@ -61,6 +61,21 @@ export function ElevesTab({ etablissementId }) {
   }
 
   const items = data?.items ?? []
+
+  // Comble "dossier Élève sans photo" (signalé au backend) avec celle du
+  // compte portail lié quand elle existe — un appel léger par ligne
+  // affichée (page paginée, pas tout l'effectif), même clé de cache que la
+  // fiche détail donc pas de double appel en enchaînant liste -> détail.
+  const accesQueries = useQueries({
+    queries: items.map((eleve) => ({
+      queryKey: ['eleves', 'acces-portail-status', etablissementId, eleve.id],
+      queryFn: () => getAccesPortailEleveStatus(etablissementId, eleve.id),
+      enabled: Boolean(etablissementId && eleve.id),
+    })),
+  })
+  const photoByEleveId = Object.fromEntries(
+    items.map((eleve, i) => [eleve.id, accesQueries[i]?.data?.utilisateur?.photoUrl]),
+  )
 
   return (
     <div>
@@ -128,7 +143,11 @@ export function ElevesTab({ etablissementId }) {
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
-                        <Avatar name={`${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.trim()} src={eleve.photoUrl} size={32} />
+                        <Avatar
+                          name={`${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.trim()}
+                          src={eleve.photoUrl || photoByEleveId[eleve.id]}
+                          size={32}
+                        />
                         <TruncatedText
                           text={`${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.trim()}
                           maxWidth={180}
