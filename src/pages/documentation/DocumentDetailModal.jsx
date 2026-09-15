@@ -91,6 +91,14 @@ export function DocumentDetailModal({ document, etablissementId, onClose }) {
           <InfoRow icon={Tag} label="Téléversé le" value={formatDateTime(document.createdAt)} />
         </div>
 
+        {/* Temporaire — juste pour confirmer en live le vrai nom du champ
+            catégorie (pas documenté côté API) sans avoir besoin des
+            DevTools. À retirer une fois confirmé. */}
+        <details className="mt-3 rounded-lg bg-ink-50 px-3 py-2">
+          <summary className="text-xs font-medium text-ink-500 cursor-pointer">Données brutes (debug)</summary>
+          <pre className="mt-2 text-xs text-ink-600 whitespace-pre-wrap break-all">{JSON.stringify(document, null, 2)}</pre>
+        </details>
+
         {document.description && (
           <div className="pt-3 border-t border-ink-100">
             <p className="text-xs text-ink-400 mb-1">Description</p>
