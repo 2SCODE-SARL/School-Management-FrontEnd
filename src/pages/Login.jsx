@@ -1,12 +1,31 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { GraduationCap, Lock, Mail, Eye, EyeOff, LogIn } from 'lucide-react'
+import { Award, BookOpen, GraduationCap, Lock, Mail, Eye, EyeOff, LogIn, PenLine, Send, Sparkles } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { getHomePathForRole, getPrimaryRole } from '../auth/roleHome'
 import { ApiError } from '../api/client'
 import { Button } from '../components/ui/Button'
 import { TextField } from '../components/ui/TextField'
 import { Alert } from '../components/ui/Alert'
+
+// Icônes flottantes du décor — discrètes (basse opacité, mouvement lent et
+// de faible amplitude), scolaires par thème. Positions en % pour rester
+// cohérentes à toutes les tailles d'écran ; les plus petites/proches du
+// centre sont masquées sur mobile pour ne pas gêner la carte de connexion.
+const FLOATING_ICONS = [
+  { Icon: GraduationCap, style: { top: '14%', left: '9%' }, size: 'h-10 w-10', anim: 'motion-safe:animate-float-a', delay: '0s' },
+  { Icon: BookOpen, style: { top: '72%', left: '7%' }, size: 'h-8 w-8', anim: 'motion-safe:animate-float-b', delay: '1.2s' },
+  { Icon: PenLine, style: { top: '22%', right: '11%' }, size: 'h-7 w-7', anim: 'motion-safe:animate-float-a', delay: '2.4s' },
+  { Icon: Award, style: { top: '68%', right: '9%' }, size: 'h-9 w-9', anim: 'motion-safe:animate-float-b', delay: '0.6s' },
+  { Icon: Sparkles, style: { top: '42%', left: '4%' }, size: 'h-6 w-6 hidden sm:block', anim: 'motion-safe:animate-float-a', delay: '3.2s' },
+]
+
+// Avions en papier qui traversent lentement le ciel en diagonale, en boucle
+// (24s), décalés dans le temps et en hauteur pour ne jamais se superposer.
+const PAPER_PLANES = [
+  { style: { top: '30%', left: 0 }, delay: '0s' },
+  { style: { top: '58%', left: 0 }, delay: '12s' },
+]
 
 export default function Login() {
   const { login } = useAuth()
@@ -40,9 +59,31 @@ export default function Login() {
   }
 
   return (
-    <main className="relative min-h-screen bg-[url('/images/loginBG.png')] bg-cover bg-center bg-ink-50">
+    <main className="relative min-h-screen overflow-hidden bg-[url('/images/loginBG.png')] bg-cover bg-center bg-ink-50">
+      {/* Décor animé, discret : icônes scolaires flottantes + avions en
+          papier traversant le ciel. Purement décoratif (aria-hidden,
+          pointer-events-none) et respecte prefers-reduced-motion. */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        {FLOATING_ICONS.map(({ Icon, style, size, anim, delay }, i) => (
+          <Icon
+            key={i}
+            className={`absolute text-primary-700/10 ${size} ${anim}`}
+            style={{ ...style, animationDelay: delay }}
+            strokeWidth={1.5}
+          />
+        ))}
+        {PAPER_PLANES.map((plane, i) => (
+          <Send
+            key={i}
+            className="absolute h-6 w-6 text-primary-700/15 motion-safe:animate-drift"
+            style={{ ...plane.style, animationDelay: plane.delay }}
+            strokeWidth={1.5}
+          />
+        ))}
+      </div>
+
       {/* Marque de la plateforme, coin haut-gauche */}
-      <div className="absolute top-6 left-6 flex items-center gap-2">
+      <div className="absolute top-6 left-6 z-10 flex items-center gap-2">
         <div className="h-7 w-7 rounded-lg bg-ink-900 flex items-center justify-center">
           <GraduationCap className="h-4 w-4 text-white" strokeWidth={2.5} />
         </div>
@@ -51,7 +92,7 @@ export default function Login() {
         </span>
       </div>
 
-      <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
           <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl shadow-ink-900/10 border border-white/60 p-8">
             <div className="flex flex-col items-center text-center mb-6">

@@ -47,6 +47,25 @@
   --color-danger-50: #fef2f2;
   --color-danger-500: #ef4444;
   --color-danger-600: #dc2626;
+
+  /* Décor animé de la page de connexion (icônes flottantes + avions en
+     papier) — discret et lent à dessein, voir Login.jsx. */
+  --animate-float-a: float 8s ease-in-out infinite;
+  --animate-float-b: float 11s ease-in-out infinite;
+  --animate-drift: drift 24s linear infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+
+@keyframes drift {
+  0% { transform: translate(-8vw, 4vh) rotate(8deg); opacity: 0; }
+  8% { opacity: 0.5; }
+  50% { transform: translate(55vw, -18vh) rotate(8deg); }
+  92% { opacity: 0.5; }
+  100% { transform: translate(112vw, -32vh) rotate(8deg); opacity: 0; }
 }
 
 body {
