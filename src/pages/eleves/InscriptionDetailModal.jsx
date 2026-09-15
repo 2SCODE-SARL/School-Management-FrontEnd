@@ -8,6 +8,7 @@ import {
   getInscription,
   validerInscription,
 } from '../../api/inscriptions'
+import { getAccesPortailEleveStatus } from '../../api/eleves'
 import { listClasses, listNiveaux } from '../../api/academique'
 import { Modal } from '../../components/ui/Modal'
 import { Avatar } from '../../components/ui/Avatar'
@@ -57,6 +58,16 @@ export function InscriptionDetailModal({ etablissementId, anneeScolaireId, inscr
     queryKey: ['academique', 'classes', etablissementId, anneeScolaireId],
     queryFn: () => listClasses(etablissementId, anneeScolaireId),
     enabled: Boolean(etablissementId && anneeScolaireId),
+  })
+
+  // Comble le trou "dossier Élève sans photo" (signalé au backend) quand le
+  // compte portail de l'élève, lui, en a une — un seul appel léger, pas de
+  // souci de perf ici puisqu'on n'affiche qu'un seul dossier à la fois.
+  const eleveIdForAcces = inscription?.eleve?.id
+  const { data: accesStatus } = useQuery({
+    queryKey: ['eleves', 'acces-portail-status', etablissementId, eleveIdForAcces],
+    queryFn: () => getAccesPortailEleveStatus(etablissementId, eleveIdForAcces),
+    enabled: Boolean(etablissementId && eleveIdForAcces),
   })
   const classes = Array.isArray(classesData) ? classesData : (classesData?.items ?? [])
   const classeOptions = classes.map((c) => ({ value: c.id, label: c.nom }))
@@ -167,7 +178,7 @@ export function InscriptionDetailModal({ etablissementId, anneeScolaireId, inscr
     <>
       <Modal open={Boolean(inscriptionId)} onClose={onClose} title="Détail de l'inscription">
         <div className="flex items-center gap-3 mb-4">
-          <Avatar name={nomComplet} src={pick(eleve, ['photoUrl'], null)} size={48} />
+          <Avatar name={nomComplet} src={pick(eleve, ['photoUrl'], null) || accesStatus?.utilisateur?.photoUrl} size={48} />
           <div className="min-w-0 flex-1">
             <p className="font-heading font-bold text-ink-900 truncate">{nomComplet}</p>
             <p className="text-xs text-ink-400">{eleve?.matricule ?? '—'}</p>

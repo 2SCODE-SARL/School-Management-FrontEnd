@@ -188,7 +188,17 @@ export function EleveDetailModal({ eleveId, etablissementId, onClose, onEdit }) 
         {eleve && (
           <>
             <div className="flex items-center gap-3 mb-4">
-              <Avatar name={`${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.trim()} src={eleve.photoUrl} size={48} />
+              {/* Le dossier Élève et son compte Utilisateur (portail) sont
+                  deux entités distinctes côté API, jamais synchronisées
+                  (signalé au backend) : `accesStatus.utilisateur.photoUrl`,
+                  déjà chargé ici pour la gestion de l'accès portail, comble
+                  ce trou sans appel supplémentaire quand le dossier Élève
+                  lui-même n'a pas de photo. */}
+              <Avatar
+                name={`${eleve.prenom ?? ''} ${eleve.nom ?? ''}`.trim()}
+                src={eleve.photoUrl || accesStatus?.utilisateur?.photoUrl}
+                size={48}
+              />
               <div className="min-w-0 flex-1">
                 <p className="font-heading font-bold text-ink-900 truncate">
                   {eleve.prenom} {eleve.nom}
