@@ -1,23 +1,36 @@
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle } from 'lucide-react'
 import { listImpayes } from '../../api/finances'
+import { Pagination } from '../../components/ui/Pagination'
 import { ECHEANCE_STATUT_LABELS, echeanceStatutBadgeVariant } from '../../config/financesLabels'
 import { pick } from '../../lib/pick'
 import { formatDate } from '../../lib/formatDate'
 import { Badge } from '../../components/ui/Badge'
 
+const PAGE_SIZE = 20
+
 /**
  * `GET .../impayes` — vue de relance des échéances non réglées. Même
  * forme imbriquée que `GET .../echeances` (typeFrais/inscription.eleve),
  * confirmée en live sur ce dernier — on applique le même mapping ici.
+ * Pagination côté client faute de `page`/`limit` documentés sur cet
+ * endpoint (même lacune qu'Encaissements).
  */
 export function ImpayesTab({ etablissementId }) {
+  const [page, setPage] = useState(1)
   const { data, isLoading, isError } = useQuery({
     queryKey: ['finances', 'impayes', etablissementId],
     queryFn: () => listImpayes(etablissementId),
     enabled: Boolean(etablissementId),
   })
   const items = Array.isArray(data) ? data : (data?.items ?? [])
+
+  useEffect(() => {
+    setPage(1)
+  }, [etablissementId])
+  const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE))
+  const pagedItems = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
     <div className="bg-white rounded-2xl border border-ink-100 overflow-hidden">
@@ -35,7 +48,7 @@ export function ImpayesTab({ etablissementId }) {
       )}
       {!isLoading && !isError && items.length > 0 && (
         <div className="divide-y divide-ink-50">
-          {items.map((it, index) => {
+          {pagedItems.map((it, index) => {
             const id = pick(it, ['id'], index)
             const statut = pick(it, ['statut'], null)
             const libelle = it.typeFrais?.libelle ?? 'Échéance'
@@ -57,6 +70,11 @@ export function ImpayesTab({ etablissementId }) {
               </div>
             )
           })}
+        </div>
+      )}
+      {!isLoading && !isError && items.length > 0 && (
+        <div className="px-4 pb-4">
+          <Pagination page={page} totalPages={totalPages} total={items.length} onPageChange={setPage} />
         </div>
       )}
     </div>
