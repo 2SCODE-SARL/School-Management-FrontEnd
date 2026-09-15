@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Search, Users } from 'lucide-react'
 import { listParentsEtablissement } from '../../api/parents'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { Pagination } from '../../components/ui/Pagination'
@@ -28,7 +29,7 @@ export function ParentsTab({ etablissementId }) {
   const [viewingParent, setViewingParent] = useState(null)
   const debouncedSearch = useDebouncedValue(search)
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['parents', 'list', etablissementId, { q: debouncedSearch, page }],
     queryFn: () => listParentsEtablissement(etablissementId, { q: debouncedSearch || undefined, page }),
     enabled: Boolean(etablissementId),
@@ -67,9 +68,7 @@ export function ParentsTab({ etablissementId }) {
             <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
           </div>
         )}
-        {isError && (
-          <p className="p-8 text-center text-sm text-danger-600">Impossible de charger les parents.</p>
-        )}
+        {isError && <ApiErrorMessage error={error} fallback="Impossible de charger les parents." />}
         {!isLoading && !isError && items.length === 0 && (
           <div className="p-16 text-center text-ink-400">
             <Users className="h-8 w-8 mx-auto mb-3 opacity-50" />

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle } from 'lucide-react'
 import { listImpayes } from '../../api/finances'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Pagination } from '../../components/ui/Pagination'
 import { ECHEANCE_STATUT_LABELS, echeanceStatutBadgeVariant } from '../../config/financesLabels'
 import { pick } from '../../lib/pick'
@@ -19,7 +20,7 @@ const PAGE_SIZE = 20
  */
 export function ImpayesTab({ etablissementId }) {
   const [page, setPage] = useState(1)
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['finances', 'impayes', etablissementId],
     queryFn: () => listImpayes(etablissementId),
     enabled: Boolean(etablissementId),
@@ -39,7 +40,7 @@ export function ImpayesTab({ etablissementId }) {
           <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
         </div>
       )}
-      {isError && <p className="p-8 text-center text-sm text-danger-600">Impossible de charger les impayés.</p>}
+      {isError && <ApiErrorMessage error={error} fallback="Impossible de charger les impayés." />}
       {!isLoading && !isError && items.length === 0 && (
         <div className="p-16 text-center text-ink-400">
           <AlertTriangle className="h-8 w-8 mx-auto mb-3 opacity-50" />

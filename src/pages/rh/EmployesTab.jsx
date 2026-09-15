@@ -19,6 +19,7 @@ import {
 } from '../../api/rh'
 import { listMatieres } from '../../api/academique'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
@@ -103,7 +104,7 @@ export function EmployesTab({ etablissementId, canManageComptes, canViewComptesE
   const matiereLabelById = Object.fromEntries(allMatieres.map((m) => [m.id, m.intitule]))
 
   const queryKey = ['rh', 'employes', etablissementId, { q: debouncedSearch, type: typeFilter }]
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey,
     queryFn: () => searchEmployes(etablissementId, { q: debouncedSearch, type: typeFilter }),
     enabled: Boolean(etablissementId),
@@ -273,11 +274,7 @@ export function EmployesTab({ etablissementId, canManageComptes, canViewComptesE
             <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
           </div>
         )}
-        {isError && (
-          <p className="p-8 text-center text-sm text-danger-600">
-            Impossible de charger les employés.
-          </p>
-        )}
+        {isError && <ApiErrorMessage error={error} fallback="Impossible de charger les employés." />}
         {!isLoading && !isError && employes.length === 0 && (
           <div className="p-16 text-center text-ink-400">
             <IdCard className="h-8 w-8 mx-auto mb-3 opacity-50" />

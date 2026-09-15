@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { LogIn, Plus } from 'lucide-react'
 import { listAccesParDate, pointerAcces } from '../../api/presences'
 import { searchEleves } from '../../api/eleves'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
@@ -77,7 +78,7 @@ export function AccesTab({ etablissementId }) {
   }))
 
   const queryKey = ['presences', 'acces', etablissementId, date]
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey,
     queryFn: () => listAccesParDate(etablissementId, date),
     enabled: Boolean(etablissementId && date),
@@ -114,7 +115,7 @@ export function AccesTab({ etablissementId }) {
             <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
           </div>
         )}
-        {isError && <p className="p-8 text-center text-sm text-danger-600">Impossible de charger les pointages.</p>}
+        {isError && <ApiErrorMessage error={error} fallback="Impossible de charger les pointages." />}
         {!isLoading && !isError && acces.length === 0 && (
           <div className="p-16 text-center text-ink-400">
             <LogIn className="h-8 w-8 mx-auto mb-3 opacity-50" />

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FileOutput, LayoutTemplate, Plus } from 'lucide-react'
 import { createModele, genererPdf, listModeles } from '../../api/documentation'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Modal } from '../../components/ui/Modal'
 import { Button } from '../../components/ui/Button'
 import { MODELE_CODE_LABELS } from '../../config/documentationLabels'
@@ -14,7 +15,7 @@ export function ModelesTab({ etablissementId }) {
   const queryClient = useQueryClient()
 
   const queryKey = ['documentation', 'modeles', etablissementId]
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey,
     queryFn: () => listModeles(etablissementId),
     enabled: Boolean(etablissementId),
@@ -48,7 +49,7 @@ export function ModelesTab({ etablissementId }) {
             <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
           </div>
         )}
-        {isError && <p className="p-8 text-center text-sm text-danger-600">Impossible de charger les modèles.</p>}
+        {isError && <ApiErrorMessage error={error} fallback="Impossible de charger les modèles." />}
         {!isLoading && !isError && modeles.length === 0 && (
           <div className="p-16 text-center text-ink-400">
             <LayoutTemplate className="h-8 w-8 mx-auto mb-3 opacity-50" />

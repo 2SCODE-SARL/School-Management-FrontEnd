@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle, Send } from 'lucide-react'
 import { listReclamations, repondreReclamation } from '../../api/resultats'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
@@ -98,7 +99,7 @@ export function ReclamationsTab({ etablissementId }) {
   const queryClient = useQueryClient()
 
   const queryKey = ['resultats', 'reclamations', etablissementId, statutFilter]
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey,
     queryFn: () => listReclamations(etablissementId, statutFilter),
     enabled: Boolean(etablissementId),
@@ -133,7 +134,7 @@ export function ReclamationsTab({ etablissementId }) {
             <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
           </div>
         )}
-        {isError && <p className="p-8 text-center text-sm text-danger-600">Impossible de charger les réclamations.</p>}
+        {isError && <ApiErrorMessage error={error} fallback="Impossible de charger les réclamations." />}
         {!isLoading && !isError && reclamations.length === 0 && (
           <div className="p-16 text-center text-ink-400">
             <AlertTriangle className="h-8 w-8 mx-auto mb-3 opacity-50" />

@@ -5,6 +5,7 @@ import { getClassement } from '../../api/resultats'
 import { listClasses } from '../../api/academique'
 import { getAnneeScolaire, listAnneesScolaires } from '../../api/etablissements'
 import { listElevesClasse } from '../../api/eleves'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Select } from '../../components/ui/Select'
 import { NIVEAU_LABELS } from '../../config/academiqueLabels'
 
@@ -81,7 +82,7 @@ export function ClassementsTab({ etablissementId }) {
     (elevesData?.items ?? []).map((e) => [e.id, `${e.prenom ?? ''} ${e.nom ?? ''}`.trim()]),
   )
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['resultats', 'classement', etablissementId, classeId, trimestreId],
     queryFn: () => getClassement(etablissementId, classeId, trimestreId),
     enabled: Boolean(etablissementId && classeId && trimestreId),
@@ -131,7 +132,7 @@ export function ClassementsTab({ etablissementId }) {
             <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
           </div>
         )}
-        {isError && <p className="p-8 text-center text-sm text-danger-600">Impossible de charger le classement.</p>}
+        {isError && <ApiErrorMessage error={error} fallback="Impossible de charger le classement." />}
         {!isLoading && !isError && classement.length === 0 && (
           <div className="p-16 text-center text-ink-400">
             <Trophy className="h-8 w-8 mx-auto mb-3 opacity-50" />

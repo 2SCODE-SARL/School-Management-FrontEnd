@@ -6,6 +6,7 @@ import {
   listAnneesScolaires,
   updateAnneeScolaire,
 } from '../../api/etablissements'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { Badge } from '../../components/ui/Badge'
@@ -39,7 +40,7 @@ export function AnneesTab({ etablissementId }) {
   const queryClient = useQueryClient()
 
   const queryKey = ['academique', 'annees', etablissementId]
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey,
     queryFn: () => listAnneesScolaires(etablissementId),
   })
@@ -86,11 +87,7 @@ export function AnneesTab({ etablissementId }) {
             <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
           </div>
         )}
-        {isError && (
-          <p className="p-8 text-center text-sm text-danger-600">
-            Impossible de charger les années scolaires.
-          </p>
-        )}
+        {isError && <ApiErrorMessage error={error} fallback="Impossible de charger les années scolaires." />}
         {!isLoading && !isError && annees.length === 0 && (
           <div className="p-16 text-center text-ink-400">
             <CalendarRange className="h-8 w-8 mx-auto mb-3 opacity-50" />

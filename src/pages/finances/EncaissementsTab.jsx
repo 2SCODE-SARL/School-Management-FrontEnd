@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Receipt } from 'lucide-react'
 import { listEncaissements } from '../../api/finances'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Pagination } from '../../components/ui/Pagination'
 import { MODE_PAIEMENT_LABELS } from '../../config/financesLabels'
 import { pick } from '../../lib/pick'
@@ -18,7 +19,7 @@ const PAGE_SIZE = 20
  */
 export function EncaissementsTab({ etablissementId }) {
   const [page, setPage] = useState(1)
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['finances', 'encaissements', etablissementId],
     queryFn: () => listEncaissements(etablissementId),
     enabled: Boolean(etablissementId),
@@ -38,7 +39,7 @@ export function EncaissementsTab({ etablissementId }) {
           <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
         </div>
       )}
-      {isError && <p className="p-8 text-center text-sm text-danger-600">Impossible de charger les encaissements.</p>}
+      {isError && <ApiErrorMessage error={error} fallback="Impossible de charger les encaissements." />}
       {!isLoading && !isError && items.length === 0 && (
         <div className="p-16 text-center text-ink-400">
           <Receipt className="h-8 w-8 mx-auto mb-3 opacity-50" />

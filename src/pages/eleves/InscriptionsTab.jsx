@@ -8,6 +8,7 @@ import { listClasses, listNiveaux } from '../../api/academique'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { Pagination } from '../../components/ui/Pagination'
@@ -52,7 +53,7 @@ export function InscriptionsTab({ etablissementId }) {
   }, [annees, anneeScolaireId])
 
   const listQueryKey = ['inscriptions', 'list', etablissementId, anneeScolaireId, statutFilter, page]
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: listQueryKey,
     queryFn: () => listInscriptions(etablissementId, { anneeScolaireId, statut: statutFilter, page }),
     enabled: Boolean(etablissementId && anneeScolaireId && statutFilter),
@@ -191,11 +192,7 @@ export function InscriptionsTab({ etablissementId }) {
             <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
           </div>
         )}
-        {isError && (
-          <p className="p-8 text-center text-sm text-danger-600">
-            Impossible de charger les inscriptions.
-          </p>
-        )}
+        {isError && <ApiErrorMessage error={error} fallback="Impossible de charger les inscriptions." />}
         {!isLoading && !isError && inscriptions.length === 0 && (
           <div className="p-16 text-center text-ink-400">
             <ClipboardList className="h-8 w-8 mx-auto mb-3 opacity-50" />
