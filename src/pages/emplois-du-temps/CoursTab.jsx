@@ -4,6 +4,7 @@ import { AlertTriangle, CalendarClock, Plus } from 'lucide-react'
 import { createCours, listCours } from '../../api/emploisDuTemps'
 import { listClasses } from '../../api/academique'
 import { listAnneesScolaires } from '../../api/etablissements'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
@@ -73,7 +74,7 @@ export function CoursTab({ etablissementId }) {
   }, [classes, classeId])
 
   const coursQueryKey = ['emplois-du-temps', 'cours', etablissementId, classeId]
-  const { data: coursData, isLoading, isError } = useQuery({
+  const { data: coursData, isLoading, isError, error } = useQuery({
     queryKey: coursQueryKey,
     queryFn: () => listCours(etablissementId, { classeId }),
     enabled: Boolean(etablissementId && classeId),
@@ -179,7 +180,7 @@ export function CoursTab({ etablissementId }) {
             </div>
           )}
           {isError && (
-            <p className="p-8 text-center text-sm text-danger-600">Impossible de charger les cours.</p>
+            <ApiErrorMessage error={error} fallback="Impossible de charger les cours." />
           )}
           {!isLoading && !isError && cours.length === 0 && (
             <div className="p-16 text-center text-ink-400">
