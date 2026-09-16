@@ -21,7 +21,7 @@ export function Modal({ open, onClose, title, children, maxWidth = 'max-w-lg' })
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-ink-900/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-ink-900/40 backdrop-blur-[2px] animate-backdrop-in"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -29,7 +29,7 @@ export function Modal({ open, onClose, title, children, maxWidth = 'max-w-lg' })
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`relative w-full ${maxWidth} bg-white rounded-2xl shadow-xl shadow-ink-900/10 max-h-[90vh] flex flex-col`}
+        className={`relative w-full ${maxWidth} bg-white rounded-2xl shadow-xl shadow-ink-900/10 max-h-[90vh] flex flex-col animate-modal-in`}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-ink-100 shrink-0">
           <h2 className="font-heading text-base font-bold text-ink-900">{title}</h2>

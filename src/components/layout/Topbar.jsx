@@ -114,7 +114,7 @@ export function Topbar() {
           </button>
 
           {notifOpen && (
-            <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl border border-ink-100 shadow-lg shadow-ink-900/5 py-2 z-20 max-h-96 overflow-y-auto">
+            <div className="absolute right-0 mt-2 w-80 origin-top-right animate-dropdown-in bg-white rounded-xl border border-ink-100 shadow-lg shadow-ink-900/5 py-2 z-20 max-h-96 overflow-y-auto">
               <p className="px-3 pb-2 text-xs font-semibold text-ink-500 uppercase tracking-wide">Notifications</p>
               {isLoadingRecentes ? (
                 <div className="px-3 py-6 flex justify-center">
@@ -181,7 +181,7 @@ export function Topbar() {
           </button>
 
           {menuOpen && (
-            <div className="absolute right-0 mt-2 w-44 bg-white rounded-xl border border-ink-100 shadow-lg shadow-ink-900/5 py-1.5 z-20">
+            <div className="absolute right-0 mt-2 w-44 origin-top-right animate-dropdown-in bg-white rounded-xl border border-ink-100 shadow-lg shadow-ink-900/5 py-1.5 z-20">
               <Link
                 to="profil"
                 onClick={() => setMenuOpen(false)}
