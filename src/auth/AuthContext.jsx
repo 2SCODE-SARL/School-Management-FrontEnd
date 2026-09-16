@@ -20,8 +20,11 @@ const AuthContext = createContext(null)
  * ne bloque pas la connexion.
  */
 async function loadFullUser() {
-  const identity = await fetchCurrentUser()
-  const profile = await getMyProfile().catch(() => null)
+  // En parallèle (pas l'un après l'autre) — sur le staging Render.com,
+  // chaque aller-retour peut déjà être lent (cold start) ; les enchaîner
+  // doublait inutilement le temps avant que tout l'appli (Topbar inclus,
+  // donc le compteur de notifications) ne s'affiche après connexion.
+  const [identity, profile] = await Promise.all([fetchCurrentUser(), getMyProfile().catch(() => null)])
   if (!profile) return identity
   return {
     ...identity,

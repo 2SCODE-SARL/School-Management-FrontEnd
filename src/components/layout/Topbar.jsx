@@ -34,12 +34,14 @@ export function Topbar() {
 
   // Accessible à tout utilisateur connecté quel que soit son rôle ("01 —
   // Commun | Communication"). Pas de WebSocket disponible : on interroge
-  // régulièrement (30s) + on force un rafraîchissement à l'ouverture de la
-  // cloche, sinon la pastille reste figée sur l'état du premier chargement.
+  // régulièrement (10s, réduit depuis 30s pour que le badge reflète une
+  // nouvelle notification plus vite) + on force un rafraîchissement à
+  // l'ouverture de la cloche. Se charge dès le montage (connexion), sans
+  // attendre ce délai, comme toute query sans `enabled`.
   const { data: nonLuesData } = useQuery({
     queryKey: ['communication', 'notifications', 'non-lues'],
     queryFn: listMesNotificationsNonLues,
-    refetchInterval: 30_000,
+    refetchInterval: 10_000,
     refetchOnWindowFocus: true,
   })
   // `CommunicationController_compteurNonLues` ("compteur" = compteur) renvoie
