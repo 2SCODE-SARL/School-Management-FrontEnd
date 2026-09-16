@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Eye, FolderOpen } from 'lucide-react'
 import { listDocuments } from '../../api/portailEleve'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Badge } from '../../components/ui/Badge'
 import { Select } from '../../components/ui/Select'
 import { Pagination } from '../../components/ui/Pagination'
@@ -14,7 +15,7 @@ export default function DocumentsPage() {
   const [type, setType] = useState('')
   const [page, setPage] = useState(1)
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['portail-eleve', 'documents', type, page],
     queryFn: () => listDocuments({ type, page, limit: 20 }),
   })
@@ -43,7 +44,7 @@ export default function DocumentsPage() {
             <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
           </div>
         )}
-        {isError && <p className="p-8 text-center text-sm text-danger-600">Impossible de charger tes documents.</p>}
+        {isError && <ApiErrorMessage error={error} fallback="Impossible de charger tes documents." />}
         {!isLoading && !isError && documents.length === 0 && (
           <div className="p-16 text-center text-ink-400">
             <FolderOpen className="h-8 w-8 mx-auto mb-3 opacity-50" />

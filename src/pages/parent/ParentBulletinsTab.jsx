@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { FileText, GraduationCap } from 'lucide-react'
 import { getEnfantBulletins } from '../../api/portailParent'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Badge } from '../../components/ui/Badge'
 import { BULLETIN_STATUT_LABELS, bulletinStatutBadgeVariant } from '../../config/portailEleveLabels'
 
@@ -11,7 +12,7 @@ function displayValue(value) {
 }
 
 export function ParentBulletinsTab({ eleveId }) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['portail-parent', 'bulletins', eleveId],
     queryFn: () => getEnfantBulletins(eleveId),
     enabled: Boolean(eleveId),
@@ -28,9 +29,11 @@ export function ParentBulletinsTab({ eleveId }) {
         </div>
       )}
       {isError && (
-        <p className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100">
-          Impossible de charger les bulletins.
-        </p>
+        <ApiErrorMessage
+          error={error}
+          fallback="Impossible de charger les bulletins."
+          className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100"
+        />
       )}
       {!isLoading && !isError && bulletins.length === 0 && (
         <div className="p-16 text-center text-ink-400 bg-white rounded-2xl border border-dashed border-ink-200">

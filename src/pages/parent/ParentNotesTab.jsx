@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { FileEdit } from 'lucide-react'
 import { getEnfantNotes } from '../../api/portailParent'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { formatDate } from '../../lib/formatDate'
 
 /**
@@ -12,7 +13,7 @@ import { formatDate } from '../../lib/formatDate'
  */
 export function ParentNotesTab({ eleveId }) {
   const queryKey = ['portail-parent', 'notes', eleveId]
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey,
     queryFn: () => getEnfantNotes(eleveId),
     enabled: Boolean(eleveId),
@@ -28,7 +29,7 @@ export function ParentNotesTab({ eleveId }) {
           <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
         </div>
       )}
-      {isError && <p className="p-8 text-center text-sm text-danger-600">Impossible de charger les notes.</p>}
+      {isError && <ApiErrorMessage error={error} fallback="Impossible de charger les notes." />}
       {!isLoading && !isError && notes.length === 0 && (
         <div className="p-16 text-center text-ink-400">
           <FileEdit className="h-8 w-8 mx-auto mb-3 opacity-50" />

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { FileText, GraduationCap } from 'lucide-react'
 import { getBulletinPdf, listBulletins } from '../../api/portailEleve'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Alert } from '../../components/ui/Alert'
@@ -20,7 +21,7 @@ export function BulletinsTab() {
   const [openingId, setOpeningId] = useState(null)
   const [pdfError, setPdfError] = useState('')
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['portail-eleve', 'bulletins'],
     queryFn: listBulletins,
   })
@@ -53,9 +54,11 @@ export function BulletinsTab() {
         </div>
       )}
       {isError && (
-        <p className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100">
-          Impossible de charger tes bulletins.
-        </p>
+        <ApiErrorMessage
+          error={error}
+          fallback="Impossible de charger tes bulletins."
+          className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100"
+        />
       )}
       {!isLoading && !isError && bulletins.length === 0 && (
         <div className="p-16 text-center text-ink-400 bg-white rounded-2xl border border-dashed border-ink-200">

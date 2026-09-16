@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { TrendingUp } from 'lucide-react'
 import { getEnfantResultats } from '../../api/portailParent'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Badge } from '../../components/ui/Badge'
 import { DECISION_LABELS, decisionBadgeVariant } from '../../config/portailEleveLabels'
 
 export function ParentMoyennesTab({ eleveId }) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['portail-parent', 'resultats', eleveId],
     queryFn: () => getEnfantResultats(eleveId),
     enabled: Boolean(eleveId),
@@ -22,9 +23,11 @@ export function ParentMoyennesTab({ eleveId }) {
         </div>
       )}
       {isError && (
-        <p className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100">
-          Impossible de charger les résultats.
-        </p>
+        <ApiErrorMessage
+          error={error}
+          fallback="Impossible de charger les résultats."
+          className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100"
+        />
       )}
       {!isLoading && !isError && resultats.length === 0 && (
         <div className="p-16 text-center text-ink-400 bg-white rounded-2xl border border-dashed border-ink-200">

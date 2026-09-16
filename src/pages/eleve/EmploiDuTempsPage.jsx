@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { CalendarClock } from 'lucide-react'
 import { getEmploiDuTemps } from '../../api/portailEleve'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Badge } from '../../components/ui/Badge'
 import { JOUR_SEMAINE_LABELS, TYPE_ACTIVITE_LABELS, coursStatutBadgeVariant } from '../../config/emploiDuTempsLabels'
 import { ELEVE_COURS_ETAT_LABELS } from '../../config/portailEleveLabels'
@@ -8,7 +9,7 @@ import { ELEVE_COURS_ETAT_LABELS } from '../../config/portailEleveLabels'
 const JOUR_ORDER = [1, 2, 3, 4, 5, 6, 0] // Lundi -> Dimanche
 
 export default function EmploiDuTempsPage() {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['portail-eleve', 'emploi-du-temps'],
     queryFn: getEmploiDuTemps,
   })
@@ -31,9 +32,11 @@ export default function EmploiDuTempsPage() {
         </div>
       )}
       {isError && (
-        <p className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100">
-          Impossible de charger l'emploi du temps.
-        </p>
+        <ApiErrorMessage
+          error={error}
+          fallback="Impossible de charger l'emploi du temps."
+          className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100"
+        />
       )}
 
       {!isLoading && !isError && cours.length === 0 && (

@@ -7,6 +7,7 @@ import {
   listDemandesRattachement,
   refuserRattachement,
 } from '../../api/portailParent'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Modal } from '../../components/ui/Modal'
 import { Button } from '../../components/ui/Button'
 import { Alert } from '../../components/ui/Alert'
@@ -113,7 +114,7 @@ export function DemandesRattachement() {
           </div>
         )}
         {detailQuery.isError && (
-          <p className="text-sm text-danger-600 text-center py-8">Impossible de charger cette demande.</p>
+          <ApiErrorMessage error={detailQuery.error} fallback="Impossible de charger cette demande." className="text-sm text-danger-600 text-center py-8" />
         )}
         {detail && (
           <div className="space-y-4">
