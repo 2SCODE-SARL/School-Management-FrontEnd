@@ -24,7 +24,7 @@ export default function EnseignantDashboard() {
 
   // Aperçu "Réclamations à traiter" — scopé à l'enseignant côté backend
   // (voir ReclamationsTab.jsx), même endpoint que l'onglet dédié.
-  const { data: reclamationsData, isLoading: isLoadingReclamations } = useQuery({
+  const { data: reclamationsData, isLoading: isLoadingReclamations, isError: isErrorReclamations, error: errorReclamations } = useQuery({
     queryKey: ['resultats', 'reclamations', etablissementId, 'EN_ATTENTE'],
     queryFn: () => listReclamations(etablissementId, 'EN_ATTENTE'),
     enabled: Boolean(etablissementId),
@@ -107,6 +107,8 @@ export default function EnseignantDashboard() {
               total={reclamations.length}
               items={reclamations.slice(0, 5)}
               isLoading={isLoadingReclamations}
+              isError={isErrorReclamations}
+              error={errorReclamations}
               onSeeAll={() => navigate('/enseignant/resultats', { state: { tab: 'reclamations' } })}
               emptyMessage="Aucune réclamation en attente."
               renderItem={(r, i) => (

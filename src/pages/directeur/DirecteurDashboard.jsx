@@ -46,7 +46,7 @@ export default function DirecteurDashboard() {
 
   // Aperçu "Demandes en attente" — appel dédié (pas dans le payload du
   // tableau de bord général), même endpoint que la page Demandes.
-  const { data: demandesData, isLoading: isLoadingDemandes } = useQuery({
+  const { data: demandesData, isLoading: isLoadingDemandes, isError: isErrorDemandes, error: errorDemandes } = useQuery({
     queryKey: ['demandes', etablissementId, 'EN_ATTENTE'],
     queryFn: () => listDemandes(etablissementId, 'EN_ATTENTE'),
     enabled: Boolean(etablissementId),
@@ -57,7 +57,7 @@ export default function DirecteurDashboard() {
 
   // Aperçus "Employés" / "Enseignants" — un seul appel (déjà utilisé
   // ailleurs, ex: RhDashboardTab), deux vues dérivées côté client.
-  const { data: employesData, isLoading: isLoadingEmployes } = useQuery({
+  const { data: employesData, isLoading: isLoadingEmployes, isError: isErrorEmployes, error: errorEmployes } = useQuery({
     queryKey: ['rh', 'employes', etablissementId, { q: '', type: '' }],
     queryFn: () => searchEmployes(etablissementId, {}),
     enabled: Boolean(etablissementId),
@@ -240,6 +240,8 @@ export default function DirecteurDashboard() {
             total={demandesEnAttente.length}
             items={demandesEnAttente.slice(0, 5)}
             isLoading={isLoadingDemandes}
+            isError={isErrorDemandes}
+            error={errorDemandes}
             onSeeAll={() => goTo('/directeur/demandes')}
             emptyMessage="Aucune demande en attente."
             renderItem={(d) => (
@@ -268,6 +270,8 @@ export default function DirecteurDashboard() {
               total={employes.length}
               items={employes.slice(0, 5)}
               isLoading={isLoadingEmployes}
+              isError={isErrorEmployes}
+              error={errorEmployes}
               onSeeAll={() => goTo('/directeur/rh', 'employes')}
               emptyMessage="Aucun employé pour le moment."
               renderItem={(e) => (
@@ -287,6 +291,8 @@ export default function DirecteurDashboard() {
               total={enseignants.length}
               items={enseignants.slice(0, 5)}
               isLoading={isLoadingEmployes}
+              isError={isErrorEmployes}
+              error={errorEmployes}
               onSeeAll={() => goTo('/directeur/rh', 'employes')}
               emptyMessage="Aucun enseignant pour le moment."
               renderItem={(e) => (

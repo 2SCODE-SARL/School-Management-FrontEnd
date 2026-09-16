@@ -6,6 +6,7 @@ import { listInscriptions } from '../../api/inscriptions'
 import { listAnneesScolaires } from '../../api/etablissements'
 import { searchEmployes } from '../../api/rh'
 import { useAuth } from '../../auth/AuthContext'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { StatTile } from '../../components/ui/StatTile'
 import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
 import { DashboardListCard } from '../../components/ui/DashboardListCard'
@@ -32,13 +33,13 @@ export default function SecretaireDashboard() {
     navigate(path, { state: { tab } })
   }
 
-  const { data: elevesData, isLoading: isLoadingEleves } = useQuery({
+  const { data: elevesData, isLoading: isLoadingEleves, isError: isErrorEleves, error: errorEleves } = useQuery({
     queryKey: ['eleves', 'list', etablissementId, { q: '', statut: undefined, page: 1 }],
     queryFn: () => searchEleves(etablissementId, { limit: 1 }),
     enabled: Boolean(etablissementId),
   })
 
-  const { data: employesData, isLoading: isLoadingEmployes } = useQuery({
+  const { data: employesData, isLoading: isLoadingEmployes, isError: isErrorEmployes, error: errorEmployes } = useQuery({
     queryKey: ['rh', 'employes', etablissementId, { q: '', type: '' }],
     queryFn: () => searchEmployes(etablissementId, {}),
     enabled: Boolean(etablissementId),
@@ -82,12 +83,14 @@ export default function SecretaireDashboard() {
   // pour la répartition par statut (index 1 = 'SOUMISE'), pas de requête
   // supplémentaire.
   const soumisesIndex = INSCRIPTION_STATUT_OPTIONS.findIndex((o) => o.value === 'SOUMISE')
-  const soumisesData = inscriptionsQueries[soumisesIndex]?.data
+  const soumisesQuery = inscriptionsQueries[soumisesIndex]
+  const soumisesData = soumisesQuery?.data
   const inscriptionsSoumises = (Array.isArray(soumisesData) ? soumisesData : (soumisesData?.items ?? []))
     .slice()
     .sort((a, b) => (b.dateInscription ?? b.createdAt ?? '').localeCompare(a.dateInscription ?? a.createdAt ?? ''))
 
   const isLoading = isLoadingEleves || isLoadingEmployes
+  const isError = isErrorEleves || isErrorEmployes
 
   return (
     <div>
@@ -97,6 +100,12 @@ export default function SecretaireDashboard() {
         <div className="p-16 flex justify-center bg-white rounded-2xl border border-ink-100">
           <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
         </div>
+      ) : isError ? (
+        <ApiErrorMessage
+          error={errorEleves ?? errorEmployes}
+          fallback="Impossible de charger le tableau de bord."
+          className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100 mb-6"
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatTile icon={GraduationCap} label="Élèves" value={elevesData?.total ?? 0} onClick={() => goTo('/secretaire/eleves', 'eleves')} />
@@ -145,6 +154,8 @@ export default function SecretaireDashboard() {
           total={inscriptionsSoumises.length}
           items={inscriptionsSoumises.slice(0, 5)}
           isLoading={isLoadingInscriptions}
+          isError={isErrorAnnees || soumisesQuery?.isError}
+          error={soumisesQuery?.error}
           onSeeAll={() => goTo('/secretaire/eleves', 'inscriptions')}
           emptyMessage="Aucune inscription soumise pour l'instant."
           renderItem={(item) => {
@@ -172,6 +183,8 @@ export default function SecretaireDashboard() {
         total={employes.length}
         items={employes.slice(0, 5)}
         isLoading={isLoadingEmployes}
+        isError={isErrorEmployes}
+        error={errorEmployes}
         onSeeAll={() => goTo('/secretaire/rh', 'employes')}
         emptyMessage="Aucun employé pour le moment."
         renderItem={(e) => (

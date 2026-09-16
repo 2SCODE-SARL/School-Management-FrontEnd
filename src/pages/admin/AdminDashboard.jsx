@@ -64,7 +64,7 @@ export default function AdminDashboard() {
 
   // Aperçu "Demandes en attente" — appel dédié (pas dans le payload du
   // tableau de bord général), même endpoint que la page Demandes.
-  const { data: demandesData, isLoading: isLoadingDemandes } = useQuery({
+  const { data: demandesData, isLoading: isLoadingDemandes, isError: isErrorDemandes, error: errorDemandes } = useQuery({
     queryKey: ['demandes', etablissementId, 'EN_ATTENTE'],
     queryFn: () => listDemandes(etablissementId, 'EN_ATTENTE'),
     enabled: Boolean(etablissementId),
@@ -74,7 +74,7 @@ export default function AdminDashboard() {
     .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
 
   // Aperçus "Employés" / "Enseignants" — un seul appel, deux vues dérivées.
-  const { data: employesData, isLoading: isLoadingEmployes } = useQuery({
+  const { data: employesData, isLoading: isLoadingEmployes, isError: isErrorEmployes, error: errorEmployes } = useQuery({
     queryKey: ['rh', 'employes', etablissementId, { q: '', type: '' }],
     queryFn: () => searchEmployes(etablissementId, {}),
     enabled: Boolean(etablissementId),
@@ -264,6 +264,8 @@ export default function AdminDashboard() {
                 total={demandesEnAttente.length}
                 items={demandesEnAttente.slice(0, 5)}
                 isLoading={isLoadingDemandes}
+                isError={isErrorDemandes}
+                error={errorDemandes}
                 onSeeAll={() => goTo('/admin/demandes')}
                 emptyMessage="Aucune demande en attente."
                 renderItem={(d) => (
@@ -292,6 +294,8 @@ export default function AdminDashboard() {
                   total={employes.length}
                   items={employes.slice(0, 5)}
                   isLoading={isLoadingEmployes}
+                  isError={isErrorEmployes}
+                  error={errorEmployes}
                   onSeeAll={() => goTo('/admin/rh', 'employes')}
                   emptyMessage="Aucun employé pour le moment."
                   renderItem={(e) => (
@@ -311,6 +315,8 @@ export default function AdminDashboard() {
                   total={enseignants.length}
                   items={enseignants.slice(0, 5)}
                   isLoading={isLoadingEmployes}
+                  isError={isErrorEmployes}
+                  error={errorEmployes}
                   onSeeAll={() => goTo('/admin/rh', 'employes')}
                   emptyMessage="Aucun enseignant pour le moment."
                   renderItem={(e) => (

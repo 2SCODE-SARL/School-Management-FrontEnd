@@ -20,7 +20,7 @@ export default function SurveillantDashboard() {
     navigate('/surveillant/presences', { state: { tab } })
   }
 
-  const { data: accesData, isLoading: isLoadingAcces } = useQuery({
+  const { data: accesData, isLoading: isLoadingAcces, isError: isErrorAcces, error: errorAcces } = useQuery({
     queryKey: ['presences', 'acces', etablissementId, today()],
     queryFn: () => listAccesParDate(etablissementId, today()),
     enabled: Boolean(etablissementId),
@@ -29,7 +29,7 @@ export default function SurveillantDashboard() {
     .slice()
     .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
 
-  const { data: alertesData, isLoading: isLoadingAlertes } = useQuery({
+  const { data: alertesData, isLoading: isLoadingAlertes, isError: isErrorAlertes, error: errorAlertes } = useQuery({
     queryKey: ['presences', 'alertes', etablissementId, { lue: false }],
     queryFn: () => listAlertes(etablissementId, { lue: false }),
     enabled: Boolean(etablissementId),
@@ -46,6 +46,8 @@ export default function SurveillantDashboard() {
           total={acces.length}
           items={acces.slice(0, 6)}
           isLoading={isLoadingAcces}
+          isError={isErrorAcces}
+          error={errorAcces}
           onSeeAll={() => goTo('acces')}
           emptyMessage="Aucun passage enregistré aujourd'hui."
           renderItem={(a, i) => (
@@ -69,6 +71,8 @@ export default function SurveillantDashboard() {
           total={alertes.length}
           items={alertes.slice(0, 6)}
           isLoading={isLoadingAlertes}
+          isError={isErrorAlertes}
+          error={errorAlertes}
           onSeeAll={() => goTo('alertes')}
           emptyMessage="Aucune alerte non lue."
           renderItem={(a, i) => (

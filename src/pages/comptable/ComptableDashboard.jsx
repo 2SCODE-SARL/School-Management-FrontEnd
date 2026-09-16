@@ -32,7 +32,7 @@ export default function ComptableDashboard() {
   })
 
   // Aperçu "Échéances impayées" — même endpoint que l'onglet Impayés.
-  const { data: impayesData, isLoading: isLoadingImpayes } = useQuery({
+  const { data: impayesData, isLoading: isLoadingImpayes, isError: isErrorImpayes, error: errorImpayes } = useQuery({
     queryKey: ['finances', 'impayes', etablissementId],
     queryFn: () => listImpayes(etablissementId),
     enabled: Boolean(etablissementId),
@@ -81,6 +81,8 @@ export default function ComptableDashboard() {
             total={impayes.length}
             items={impayes.slice(0, 5)}
             isLoading={isLoadingImpayes}
+            isError={isErrorImpayes}
+            error={errorImpayes}
             onSeeAll={() => goTo('impayes')}
             emptyMessage="Aucun impayé pour l'instant."
             renderItem={(it, i) => {

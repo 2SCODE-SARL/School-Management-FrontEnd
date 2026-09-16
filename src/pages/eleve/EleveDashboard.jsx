@@ -31,7 +31,7 @@ export default function EleveDashboard() {
     queryFn: getClasseCourante,
   })
   // Aperçu "Dernières notes" — même endpoint que l'onglet Résultats.
-  const { data: notesData, isLoading: isLoadingNotes } = useQuery({
+  const { data: notesData, isLoading: isLoadingNotes, isError: isErrorNotes, error: errorNotes } = useQuery({
     queryKey: ['portail-eleve', 'notes'],
     queryFn: getNotes,
   })
@@ -41,7 +41,7 @@ export default function EleveDashboard() {
 
   // Aperçu "Aujourd'hui" — même endpoint que l'onglet Emploi du temps,
   // filtré sur le jour courant (`jourSemaine` : 0=dimanche, comme Date.getDay()).
-  const { data: emploiData, isLoading: isLoadingEmploi } = useQuery({
+  const { data: emploiData, isLoading: isLoadingEmploi, isError: isErrorEmploi, error: errorEmploi } = useQuery({
     queryKey: ['portail-eleve', 'emploi-du-temps'],
     queryFn: getEmploiDuTemps,
   })
@@ -133,6 +133,8 @@ export default function EleveDashboard() {
             total={coursAujourdhui.length}
             items={coursAujourdhui}
             isLoading={isLoadingEmploi}
+            isError={isErrorEmploi}
+            error={errorEmploi}
             onSeeAll={() => navigate('/eleve/emplois-du-temps')}
             emptyMessage="Aucun cours prévu aujourd'hui."
             renderItem={(c) => (
@@ -162,6 +164,8 @@ export default function EleveDashboard() {
           total={notes.length}
           items={notes.slice(0, 6)}
           isLoading={isLoadingNotes}
+          isError={isErrorNotes}
+          error={errorNotes}
           onSeeAll={() => navigate('/eleve/resultats', { state: { tab: 'notes' } })}
           emptyMessage="Aucune note publiée pour l'instant."
           renderItem={(n) => (
