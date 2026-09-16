@@ -165,6 +165,9 @@ export function EleveDetailModal({ eleveId, etablissementId, onClose, onEdit }) 
   })
 
   const parents = eleve?.parents ?? []
+  // Confirmé en live : rattacher un parent n'est accepté par le backend que
+  // pour un élève au statut "Inscrit" — pas Préinscrit/Actif/Ancien/Radié.
+  const canAddParent = eleve?.statut === 'INSCRIT'
   // `eleve.inscriptions` couvre l'historique (préinscription initiale,
   // réinscriptions les années suivantes...) — on affiche les documents de
   // la plus récente, celle qui reflète le dossier actuel de l'élève.
@@ -224,13 +227,25 @@ export function EleveDetailModal({ eleveId, etablissementId, onClose, onEdit }) 
             </div>
 
             <div className="pt-4 border-t border-ink-100">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-1">
                 <p className="text-sm font-medium text-ink-900">Parents / tuteurs</p>
-                <Button size="sm" variant="secondary" onClick={() => setAddParentOpen(true)}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setAddParentOpen(true)}
+                  disabled={!canAddParent}
+                  title={canAddParent ? undefined : 'Un parent ne peut être ajouté qu\'à un élève au statut "Inscrit".'}
+                >
                   <Plus className="h-3.5 w-3.5" />
                   Ajouter
                 </Button>
               </div>
+              {!canAddParent && (
+                <p className="text-xs text-warning-600 mb-2">
+                  Un parent ne peut être ajouté qu'à un élève au statut "Inscrit" — celui-ci est actuellement "
+                  {STATUT_ELEVE_LABELS[eleve.statut] ?? eleve.statut}".
+                </p>
+              )}
 
               {parents.length === 0 ? (
                 <p className="text-sm text-ink-400">Aucun parent rattaché pour l'instant.</p>
