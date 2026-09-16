@@ -73,3 +73,13 @@ export function uploadInscriptionDocument(etablissementId, inscriptionId, data) 
 export function setDocumentStatut(etablissementId, documentId, statut) {
   return apiClient.patch(`${base(etablissementId)}/documents/${documentId}/statut`, { statut })
 }
+
+/**
+ * Nouveau (ajouté par le backend suite à notre remontée -14) : même
+ * principe que le module Documentation général — renvoie une URL signée
+ * temporaire pour un document d'inscription, au lieu du chemin de stockage
+ * brut (`s3://...`) jusqu'ici inutilisable côté staff.
+ */
+export function getDocumentEleveTelechargement(etablissementId, documentId) {
+  return apiClient.get(`${base(etablissementId)}/documents/${documentId}/telechargement`)
+}

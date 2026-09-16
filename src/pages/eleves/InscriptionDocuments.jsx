@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Eye, FileCheck, Upload } from 'lucide-react'
 import {
+  getDocumentEleveTelechargement,
   listInscriptionDocuments,
   listTypesDocuments,
   setDocumentStatut,
@@ -182,20 +183,27 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
     queryClient.invalidateQueries({ queryKey: documentsQueryKey })
   }
 
-  // Le backend ne fournit pour l'instant un lien signé consultable
-  // (`telechargementUrl`) que côté portail élève — pas sur cette API
-  // admin, qui ne renvoie que le chemin de stockage brut (`s3://...`,
-  // pas ouvrable directement par un navigateur). On ouvre quand même si
-  // jamais c'est déjà une URL http(s), sinon on prévient clairement.
+  // Nouveau (ajouté par le backend suite à notre remontée -14) : même
+  // principe que le module Documentation général — une URL signée
+  // temporaire, au lieu du chemin de stockage brut (`s3://...`) jusqu'ici
+  // inutilisable côté staff.
+  const telechargerMutation = useMutation({
+    mutationFn: (documentId) => getDocumentEleveTelechargement(etablissementId, documentId),
+    onSuccess: (result) => {
+      if (result?.url) {
+        window.open(result.url, '_blank', 'noopener,noreferrer')
+      } else {
+        setViewError("Le serveur n'a pas renvoyé de lien de téléchargement.")
+      }
+    },
+    onError: (err) => {
+      setViewError(err instanceof ApiError ? err.message : 'Impossible de récupérer le lien de téléchargement.')
+    },
+  })
+
   function handleView(doc) {
     setViewError('')
-    if (/^https?:\/\//i.test(doc.fichierUrl ?? '')) {
-      window.open(doc.fichierUrl, '_blank', 'noopener,noreferrer')
-      return
-    }
-    setViewError(
-      "Ce document est stocké en interne (chemin de stockage brut) — le backend ne fournit pas encore de lien de visualisation pour le personnel. Signalé, en attente d'un endpoint dédié.",
-    )
+    telechargerMutation.mutate(doc.id)
   }
 
   const uploadMutation = useMutation({
@@ -248,7 +256,8 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
                       <button
                         type="button"
                         onClick={() => handleView(doc)}
-                        className="text-ink-400 hover:text-primary-600 transition-colors"
+                        disabled={telechargerMutation.isPending && telechargerMutation.variables === doc.id}
+                        className="text-ink-400 hover:text-primary-600 transition-colors disabled:opacity-50"
                         aria-label="Voir le document"
                         title="Voir le document"
                       >
