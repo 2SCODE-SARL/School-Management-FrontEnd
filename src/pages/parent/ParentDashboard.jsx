@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Users } from 'lucide-react'
 import { getMesEnfants } from '../../api/portailParent'
 import { useAuth } from '../../auth/AuthContext'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
@@ -16,7 +17,7 @@ import { DemandesRattachement } from './DemandesRattachement'
  */
 export default function ParentDashboard() {
   const { user } = useAuth()
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['portail-parent', 'mes-enfants'],
     queryFn: getMesEnfants,
   })
@@ -36,9 +37,11 @@ export default function ParentDashboard() {
         </div>
       )}
       {isError && (
-        <p className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100">
-          Impossible de charger tes enfants.
-        </p>
+        <ApiErrorMessage
+          error={error}
+          fallback="Impossible de charger tes enfants."
+          className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100"
+        />
       )}
       {!isLoading && !isError && enfants.length === 0 && (
         <div className="p-16 text-center text-ink-400 bg-white rounded-2xl border border-dashed border-ink-200">

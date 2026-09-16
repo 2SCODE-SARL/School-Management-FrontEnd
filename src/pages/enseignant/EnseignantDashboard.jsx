@@ -4,6 +4,7 @@ import { AlertTriangle, CalendarClock, ClipboardCheck, GraduationCap, UserX } fr
 import { getEnseignantDashboard } from '../../api/dashboard'
 import { listReclamations } from '../../api/resultats'
 import { useAuth } from '../../auth/AuthContext'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { StatTile } from '../../components/ui/StatTile'
 import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
 import { DashboardListCard } from '../../components/ui/DashboardListCard'
@@ -15,7 +16,7 @@ export default function EnseignantDashboard() {
   const navigate = useNavigate()
   const etablissementId = user?.etablissementId
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['dashboard', 'enseignant', etablissementId],
     queryFn: () => getEnseignantDashboard(etablissementId),
     enabled: Boolean(etablissementId),
@@ -50,9 +51,11 @@ export default function EnseignantDashboard() {
       )}
 
       {isError && (
-        <p className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100">
-          Impossible de charger ton tableau de bord.
-        </p>
+        <ApiErrorMessage
+          error={error}
+          fallback="Impossible de charger ton tableau de bord."
+          className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100"
+        />
       )}
 
       {!isLoading && !isError && (

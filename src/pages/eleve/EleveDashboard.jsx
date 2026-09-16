@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Cake, CalendarClock, FileEdit, GraduationCap, MapPin, School, User, Users } from 'lucide-react'
 import { getClasseCourante, getEmploiDuTemps, getNotes, getProfil } from '../../api/portailEleve'
 import { useAuth } from '../../auth/AuthContext'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { InfoRow } from '../../components/ui/InfoRow'
@@ -21,7 +22,7 @@ export default function EleveDashboard() {
   const navigate = useNavigate()
   const { user } = useAuth()
 
-  const { data: profil, isLoading: isLoadingProfil, isError: isErrorProfil } = useQuery({
+  const { data: profil, isLoading: isLoadingProfil, isError: isErrorProfil, error: errorProfil } = useQuery({
     queryKey: ['portail-eleve', 'profil'],
     queryFn: getProfil,
   })
@@ -59,9 +60,11 @@ export default function EleveDashboard() {
 
   if (isErrorProfil || !profil) {
     return (
-      <p className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100">
-        Impossible de charger ton dossier.
-      </p>
+      <ApiErrorMessage
+        error={errorProfil}
+        fallback="Impossible de charger ton dossier."
+        className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100"
+      />
     )
   }
 

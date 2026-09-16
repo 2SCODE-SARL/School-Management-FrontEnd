@@ -4,6 +4,7 @@ import { AlertTriangle, ArrowDownCircle, ArrowUpCircle, Wallet } from 'lucide-re
 import { getComptableDashboard } from '../../api/dashboard'
 import { listImpayes } from '../../api/finances'
 import { useAuth } from '../../auth/AuthContext'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { StatTile } from '../../components/ui/StatTile'
 import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
 import { DashboardListCard } from '../../components/ui/DashboardListCard'
@@ -24,7 +25,7 @@ export default function ComptableDashboard() {
   const navigate = useNavigate()
   const etablissementId = user?.etablissementId
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['dashboard', 'comptable', etablissementId],
     queryFn: () => getComptableDashboard(etablissementId),
     enabled: Boolean(etablissementId),
@@ -58,9 +59,11 @@ export default function ComptableDashboard() {
       )}
 
       {isError && (
-        <p className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100">
-          Impossible de charger ton tableau de bord.
-        </p>
+        <ApiErrorMessage
+          error={error}
+          fallback="Impossible de charger ton tableau de bord."
+          className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100"
+        />
       )}
 
       {!isLoading && !isError && (

@@ -22,6 +22,7 @@ import { listDemandes } from '../../api/demandes'
 import { searchEmployes } from '../../api/rh'
 import { searchEtablissements } from '../../api/etablissements'
 import { useAuth } from '../../auth/AuthContext'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Combobox } from '../../components/ui/Combobox'
 import { StatTile } from '../../components/ui/StatTile'
 import { AlertTile } from '../../components/ui/AlertTile'
@@ -55,7 +56,7 @@ export default function AdminDashboard() {
   })
   const etablissementOptions = (etablissementsData?.items ?? []).map((e) => ({ value: e.id, label: e.nom }))
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['dashboard', 'general', etablissementId],
     queryFn: () => getGeneralDashboard(etablissementId),
     enabled: Boolean(etablissementId),
@@ -119,9 +120,11 @@ export default function AdminDashboard() {
           )}
 
           {isError && (
-            <p className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100">
-              Impossible de charger le tableau de bord.
-            </p>
+            <ApiErrorMessage
+              error={error}
+              fallback="Impossible de charger le tableau de bord."
+              className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100"
+            />
           )}
 
           {!isLoading && !isError && (

@@ -19,6 +19,7 @@ import { getGeneralDashboard } from '../../api/dashboard'
 import { listDemandes } from '../../api/demandes'
 import { searchEmployes } from '../../api/rh'
 import { useAuth } from '../../auth/AuthContext'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { StatTile } from '../../components/ui/StatTile'
 import { AlertTile } from '../../components/ui/AlertTile'
 import { WelcomeBanner } from '../../components/ui/WelcomeBanner'
@@ -37,7 +38,7 @@ export default function DirecteurDashboard() {
   const navigate = useNavigate()
   const etablissementId = user?.etablissementId
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['dashboard', 'general', etablissementId],
     queryFn: () => getGeneralDashboard(etablissementId),
     enabled: Boolean(etablissementId),
@@ -90,9 +91,11 @@ export default function DirecteurDashboard() {
       )}
 
       {isError && (
-        <p className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100">
-          Impossible de charger le tableau de bord.
-        </p>
+        <ApiErrorMessage
+          error={error}
+          fallback="Impossible de charger le tableau de bord."
+          className="p-8 text-center text-sm text-danger-600 bg-white rounded-2xl border border-ink-100"
+        />
       )}
 
       {!isLoading && !isError && (
