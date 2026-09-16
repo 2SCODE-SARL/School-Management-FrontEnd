@@ -9,6 +9,7 @@ import {
   removeMatiereClasse,
 } from '../../api/academique'
 import { searchEmployes } from '../../api/rh'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Modal } from '../../components/ui/Modal'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -107,7 +108,7 @@ export function ClasseDetailModal({ etablissementId, classeId, onClose, onEdit }
   const queryClient = useQueryClient()
 
   const classeQueryKey = ['academique', 'classes', 'detail', etablissementId, classeId]
-  const { data: classe, isLoading, isError } = useQuery({
+  const { data: classe, isLoading, isError, error } = useQuery({
     queryKey: classeQueryKey,
     queryFn: () => getClasse(etablissementId, classeId),
     enabled: Boolean(etablissementId && classeId),
@@ -180,7 +181,7 @@ export function ClasseDetailModal({ etablissementId, classeId, onClose, onEdit }
           </div>
         )}
         {isError && (
-          <p className="text-sm text-danger-600 text-center py-8">Impossible de charger cette classe.</p>
+          <ApiErrorMessage error={error} fallback="Impossible de charger cette classe." className="text-sm text-danger-600 text-center py-8" />
         )}
         {classe && (
           <>

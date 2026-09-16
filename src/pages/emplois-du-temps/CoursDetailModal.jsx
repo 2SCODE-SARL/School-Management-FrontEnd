@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CalendarClock, CheckCircle2, Pencil, XCircle } from 'lucide-react'
 import { annulerCours, getCours, terminerCours, updateCours } from '../../api/emploisDuTemps'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Modal } from '../../components/ui/Modal'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -24,7 +25,7 @@ export function CoursDetailModal({ etablissementId, classeId, coursId, onClose }
   const queryClient = useQueryClient()
 
   const queryKey = ['emplois-du-temps', 'cours', 'detail', etablissementId, coursId]
-  const { data: cours, isLoading, isError } = useQuery({
+  const { data: cours, isLoading, isError, error } = useQuery({
     queryKey,
     queryFn: () => getCours(etablissementId, coursId),
     enabled: Boolean(etablissementId && coursId),
@@ -75,7 +76,7 @@ export function CoursDetailModal({ etablissementId, classeId, coursId, onClose }
           </div>
         )}
         {isError && (
-          <p className="text-sm text-danger-600 text-center py-8">Impossible de charger ce cours.</p>
+          <ApiErrorMessage error={error} fallback="Impossible de charger ce cours." className="text-sm text-danger-600 text-center py-8" />
         )}
         {cours && (
           <>

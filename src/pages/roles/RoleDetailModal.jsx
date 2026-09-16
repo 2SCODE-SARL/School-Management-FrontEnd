@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { KeyRound, Plus, ShieldCheck, Trash2 } from 'lucide-react'
 import { assignPermissions, getRole, getRolePermissions, removeAllPermissions, updateRole } from '../../api/rbac'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Modal } from '../../components/ui/Modal'
 import { InfoRow } from '../../components/ui/InfoRow'
 import { Badge } from '../../components/ui/Badge'
@@ -26,7 +27,7 @@ export function RoleDetailModal({ roleId, onClose }) {
   const queryClient = useQueryClient()
 
   const roleQueryKey = ['rbac', 'role', roleId]
-  const { data: role, isLoading, isError } = useQuery({
+  const { data: role, isLoading, isError, error } = useQuery({
     queryKey: roleQueryKey,
     queryFn: () => getRole(roleId),
     enabled: Boolean(roleId),
@@ -94,7 +95,7 @@ export function RoleDetailModal({ roleId, onClose }) {
             <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
           </div>
         )}
-        {isError && <p className="text-sm text-danger-600 text-center py-8">Impossible de charger ce rôle.</p>}
+        {isError && <ApiErrorMessage error={error} fallback="Impossible de charger ce rôle." className="text-sm text-danger-600 text-center py-8" />}
       </Modal>
     )
   }

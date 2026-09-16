@@ -10,6 +10,7 @@ import {
 } from '../../api/inscriptions'
 import { getAccesPortailEleveStatus } from '../../api/eleves'
 import { listClasses, listNiveaux } from '../../api/academique'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Modal } from '../../components/ui/Modal'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
@@ -48,7 +49,7 @@ export function InscriptionDetailModal({ etablissementId, anneeScolaireId, inscr
   }, [inscriptionId])
 
   const queryKey = ['inscriptions', 'detail', etablissementId, inscriptionId]
-  const { data: inscription, isLoading, isError } = useQuery({
+  const { data: inscription, isLoading, isError, error } = useQuery({
     queryKey,
     queryFn: () => getInscription(etablissementId, inscriptionId),
     enabled: Boolean(etablissementId && inscriptionId),
@@ -138,7 +139,7 @@ export function InscriptionDetailModal({ etablissementId, anneeScolaireId, inscr
           </div>
         )}
         {isError && (
-          <p className="text-sm text-danger-600 text-center py-8">Impossible de charger cette inscription.</p>
+          <ApiErrorMessage error={error} fallback="Impossible de charger cette inscription." className="text-sm text-danger-600 text-center py-8" />
         )}
       </Modal>
     )

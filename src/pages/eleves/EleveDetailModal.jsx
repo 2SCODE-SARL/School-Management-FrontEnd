@@ -18,6 +18,7 @@ import {
   reinviteAccesPortailParent,
   unlinkParentFromEleve,
 } from '../../api/parents'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Modal } from '../../components/ui/Modal'
 import { Avatar } from '../../components/ui/Avatar'
 import { InfoRow } from '../../components/ui/InfoRow'
@@ -61,7 +62,7 @@ export function EleveDetailModal({ eleveId, etablissementId, onClose, onEdit }) 
   })
 
   const queryKey = ['eleves', 'detail', etablissementId, eleveId]
-  const { data: eleve, isLoading, isError } = useQuery({
+  const { data: eleve, isLoading, isError, error } = useQuery({
     queryKey,
     queryFn: () => getEleve(etablissementId, eleveId),
     enabled: Boolean(eleveId && etablissementId),
@@ -181,9 +182,7 @@ export function EleveDetailModal({ eleveId, etablissementId, onClose, onEdit }) 
           </div>
         )}
         {isError && (
-          <p className="text-sm text-danger-600 text-center py-8">
-            Impossible de charger cet élève.
-          </p>
+          <ApiErrorMessage error={error} fallback="Impossible de charger cet élève." className="text-sm text-danger-600 text-center py-8" />
         )}
         {eleve && (
           <>

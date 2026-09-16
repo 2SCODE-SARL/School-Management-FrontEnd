@@ -11,6 +11,7 @@ import {
   setExamenStatut,
   validerNote,
 } from '../../api/resultats'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Modal } from '../../components/ui/Modal'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -36,7 +37,7 @@ export function ExamenDetailModal({ etablissementId, examenId, onClose }) {
   const queryClient = useQueryClient()
 
   const examenQueryKey = ['resultats', 'examen', etablissementId, examenId]
-  const { data: examen, isLoading, isError } = useQuery({
+  const { data: examen, isLoading, isError, error } = useQuery({
     queryKey: examenQueryKey,
     queryFn: () => getExamen(etablissementId, examenId),
     enabled: Boolean(etablissementId && examenId),
@@ -132,7 +133,7 @@ export function ExamenDetailModal({ etablissementId, examenId, onClose }) {
             <div className="h-8 w-8 rounded-full border-2 border-ink-200 border-t-primary-600 animate-spin" />
           </div>
         )}
-        {isError && <p className="text-sm text-danger-600 text-center py-8">Impossible de charger cet examen.</p>}
+        {isError && <ApiErrorMessage error={error} fallback="Impossible de charger cet examen." className="text-sm text-danger-600 text-center py-8" />}
       </Modal>
     )
   }

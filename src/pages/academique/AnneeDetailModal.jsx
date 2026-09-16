@@ -8,6 +8,7 @@ import {
   setTrimestreStatut,
   updateTrimestre,
 } from '../../api/etablissements'
+import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
 import { Modal } from '../../components/ui/Modal'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -95,7 +96,7 @@ export function AnneeDetailModal({ etablissementId, anneeId, onClose, onEdit }) 
   const queryClient = useQueryClient()
 
   const queryKey = ['academique', 'annees', 'detail', etablissementId, anneeId]
-  const { data: annee, isLoading, isError } = useQuery({
+  const { data: annee, isLoading, isError, error } = useQuery({
     queryKey,
     queryFn: () => getAnneeScolaire(etablissementId, anneeId),
     enabled: Boolean(etablissementId && anneeId),
@@ -165,9 +166,11 @@ export function AnneeDetailModal({ etablissementId, anneeId, onClose, onEdit }) 
           </div>
         )}
         {isError && (
-          <p className="text-sm text-danger-600 text-center py-8">
-            Impossible de charger cette année scolaire.
-          </p>
+          <ApiErrorMessage
+            error={error}
+            fallback="Impossible de charger cette année scolaire."
+            className="text-sm text-danger-600 text-center py-8"
+          />
         )}
         {annee && (
           <>
