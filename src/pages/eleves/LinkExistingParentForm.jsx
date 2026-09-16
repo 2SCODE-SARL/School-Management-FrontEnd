@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Users } from 'lucide-react'
+import { Send, Users } from 'lucide-react'
 import { getEleve, searchEleves } from '../../api/eleves'
 import { Button } from '../../components/ui/Button'
 import { Combobox } from '../../components/ui/Combobox'
@@ -8,16 +8,36 @@ import { Alert } from '../../components/ui/Alert'
 import { ApiError } from '../../api/client'
 import { PARENT_TYPE_LABELS } from '../../config/eleveLabels'
 
+// Constaté en live : même pour un frère/sœur du MÊME établissement, le
+// backend refuse le rattachement direct si ce Parent a déjà activé son
+// compte portail — il exige alors le même circuit d'approbation que pour
+// un parent d'un AUTRE établissement (voir RattacherParentPlateformeForm).
+// Détecté par mot-clé faute de code d'erreur dédié documenté.
+function isApprovalRequiredError(message) {
+  return /compte portail/i.test(message ?? '') && /approbation/i.test(message ?? '')
+}
+
 /**
  * Rattache à l'élève courant un parent déjà présent dans le système, via un
  * frère/sœur déjà inscrit — aucun endpoint ne permet de chercher un parent
  * directement (ni liste, ni recherche par nom/téléphone), c'est la seule
  * voie possible pour éviter de ressaisir ses infos.
  */
-export function LinkExistingParentForm({ etablissementId, currentEleveId, onCancel, onSubmit, isSubmitting }) {
+export function LinkExistingParentForm({
+  etablissementId,
+  currentEleveId,
+  onCancel,
+  onSubmit,
+  onFallbackRattachement,
+  isSubmitting,
+  isFallbackSubmitting,
+}) {
   const [siblingId, setSiblingId] = useState('')
   const [selectedParentId, setSelectedParentId] = useState('')
+  const [selectedParentEmail, setSelectedParentEmail] = useState('')
   const [formError, setFormError] = useState('')
+  const [needsApproval, setNeedsApproval] = useState(false)
+  const [sent, setSent] = useState(false)
 
   const { data: elevesData } = useQuery({
     queryKey: ['eleves', 'options', etablissementId],
@@ -41,6 +61,7 @@ export function LinkExistingParentForm({ etablissementId, currentEleveId, onCanc
   async function handleSubmit(e) {
     e.preventDefault()
     setFormError('')
+    setNeedsApproval(false)
     if (!selectedParentId) {
       setFormError('Choisis un parent à rattacher.')
       return
@@ -48,8 +69,67 @@ export function LinkExistingParentForm({ etablissementId, currentEleveId, onCanc
     try {
       await onSubmit(selectedParentId)
     } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'Une erreur est survenue.'
+      if (isApprovalRequiredError(message)) {
+        if (selectedParentEmail) {
+          setNeedsApproval(true)
+        } else {
+          setFormError(
+            "Ce parent a déjà un compte portail actif : son approbation est requise, mais son email n'est pas renseigné sur cette fiche pour la lui demander automatiquement. Utilise plutôt l'onglet \"Déjà sur la plateforme\" avec son email.",
+          )
+        }
+      } else {
+        setFormError(message)
+      }
+    }
+  }
+
+  async function handleFallback() {
+    setFormError('')
+    try {
+      await onFallbackRattachement(selectedParentEmail)
+      setSent(true)
+    } catch (err) {
       setFormError(err instanceof ApiError ? err.message : 'Une erreur est survenue.')
     }
+  }
+
+  if (sent) {
+    return (
+      <div className="space-y-4">
+        <Alert variant="success">
+          Demande envoyée. Le parent la verra dans son portail avec les informations de l'élève, et devra confirmer
+          que c'est bien son enfant avant qu'il n'apparaisse dans la liste des parents de l'établissement.
+        </Alert>
+        <div className="flex justify-end pt-2">
+          <Button type="button" onClick={onCancel}>
+            Fermer
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  if (needsApproval) {
+    return (
+      <div className="space-y-4">
+        <Alert variant="warning">
+          Ce parent a déjà un compte portail actif : il doit approuver lui-même ce nouveau rattachement, même s'il
+          s'agit d'une fratrie du même établissement. Une demande va lui être envoyée à son adresse ({selectedParentEmail}),
+          qu'il verra depuis son propre tableau de bord.
+        </Alert>
+        {formError && <Alert variant="danger">{formError}</Alert>}
+        <div className="flex justify-end gap-3 pt-2">
+          <Button type="button" variant="secondary" onClick={onCancel}>
+            Annuler
+          </Button>
+          <Button type="button" isLoading={isFallbackSubmitting} onClick={handleFallback}>
+            <Send className="h-3.5 w-3.5" />
+            Envoyer la demande d'approbation
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -62,6 +142,7 @@ export function LinkExistingParentForm({ etablissementId, currentEleveId, onCanc
         onChange={(v) => {
           setSiblingId(v)
           setSelectedParentId('')
+          setSelectedParentEmail('')
         }}
         placeholder="Rechercher un élève..."
         searchPlaceholder="Rechercher par nom..."
@@ -85,7 +166,10 @@ export function LinkExistingParentForm({ etablissementId, currentEleveId, onCanc
                   <button
                     key={parentId}
                     type="button"
-                    onClick={() => setSelectedParentId(parentId)}
+                    onClick={() => {
+                      setSelectedParentId(parentId)
+                      setSelectedParentEmail(parent.email ?? '')
+                    }}
                     className={[
                       'flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors',
                       selectedParentId === parentId

@@ -451,8 +451,10 @@ export function EleveDetailModal({ eleveId, etablissementId, onClose, onEdit }) 
             etablissementId={etablissementId}
             currentEleveId={eleveId}
             isSubmitting={linkExistingParentMutation.isPending}
+            isFallbackSubmitting={demanderRattachementMutation.isPending}
             onCancel={closeAddParent}
             onSubmit={(parentId) => linkExistingParentMutation.mutateAsync(parentId)}
+            onFallbackRattachement={(email) => demanderRattachementMutation.mutateAsync({ email })}
           />
         )}
         {addParentMode === 'plateforme' && (
