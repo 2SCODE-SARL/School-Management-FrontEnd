@@ -46,9 +46,12 @@ export default function DirecteurDashboard() {
 
   // Aperçu "Demandes en attente" — appel dédié (pas dans le payload du
   // tableau de bord général), même endpoint que la page Demandes.
+  // `DEMANDE_STATUT_LABELS` n'a pas de valeur "EN_ATTENTE" (confirmé par un
+  // 400 listant les vraies valeurs) — "OUVERTE" est l'équivalent "pas
+  // encore traitée".
   const { data: demandesData, isLoading: isLoadingDemandes, isError: isErrorDemandes, error: errorDemandes } = useQuery({
-    queryKey: ['demandes', etablissementId, 'EN_ATTENTE'],
-    queryFn: () => listDemandes(etablissementId, 'EN_ATTENTE'),
+    queryKey: ['demandes', etablissementId, 'OUVERTE'],
+    queryFn: () => listDemandes(etablissementId, 'OUVERTE'),
     enabled: Boolean(etablissementId),
   })
   const demandesEnAttente = (Array.isArray(demandesData) ? demandesData : (demandesData?.items ?? []))
