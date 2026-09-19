@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Eye, FileCheck, Upload } from 'lucide-react'
+import { Eye, FileCheck, RefreshCw, Upload } from 'lucide-react'
 import {
   getDocumentEleveTelechargement,
   listInscriptionDocuments,
   listTypesDocuments,
+  remplacerDocumentEleve,
   setDocumentStatut,
   uploadInscriptionDocument,
 } from '../../api/inscriptions'
@@ -14,6 +15,7 @@ import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
 import { Alert } from '../../components/ui/Alert'
 import { ApiError } from '../../api/client'
+import { useToast } from '../../components/ui/ToastContext'
 import { pick } from '../../lib/pick'
 import { DOCUMENT_STATUT_OPTIONS } from '../../config/eleveLabels'
 
@@ -161,6 +163,10 @@ function ReceptionnerForm({ etablissementId, typeDocument, eleveNom, onCancel, o
 export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom }) {
   const [receptionnerType, setReceptionnerType] = useState(null)
   const [viewError, setViewError] = useState('')
+  const [replaceError, setReplaceError] = useState('')
+  const replaceFileInputRef = useRef(null)
+  const replaceDocIdRef = useRef(null)
+  const { showToast } = useToast()
   const queryClient = useQueryClient()
 
   const { data: typesData } = useQuery({
@@ -219,6 +225,31 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
     onSuccess: invalidateAll,
   })
 
+  const remplacerMutation = useMutation({
+    mutationFn: ({ documentId, fichier }) => remplacerDocumentEleve(etablissementId, documentId, fichier),
+    onSuccess: () => {
+      invalidateAll()
+      setReplaceError('')
+      showToast('Document remplacé avec succès')
+    },
+    onError: (err) => {
+      setReplaceError(err instanceof ApiError ? err.message : 'Impossible de remplacer le document.')
+    },
+  })
+
+  function handleReplaceClick(doc) {
+    setReplaceError('')
+    replaceDocIdRef.current = doc.id
+    replaceFileInputRef.current?.click()
+  }
+
+  function handleReplaceFileChange(e) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file || !replaceDocIdRef.current) return
+    remplacerMutation.mutate({ documentId: replaceDocIdRef.current, fichier: file })
+  }
+
   if (types.length === 0) {
     return (
       <p className="text-sm text-ink-400">
@@ -269,6 +300,20 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
                         <Eye className="h-4 w-4" />
                       </button>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => handleReplaceClick(doc)}
+                      disabled={remplacerMutation.isPending && replaceDocIdRef.current === doc.id}
+                      className="text-ink-400 hover:text-primary-600 transition-colors disabled:opacity-50"
+                      aria-label="Remplacer le fichier"
+                      title="Remplacer le fichier (erreur d'upload, mauvais document...)"
+                    >
+                      <RefreshCw
+                        className={`h-4 w-4 ${
+                          remplacerMutation.isPending && replaceDocIdRef.current === doc.id ? 'animate-spin' : ''
+                        }`}
+                      />
+                    </button>
                     <Select
                       id={`statut-${type.id}`}
                       options={DOCUMENT_STATUT_OPTIONS}
@@ -298,6 +343,18 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
           {viewError}
         </Alert>
       )}
+      {replaceError && (
+        <Alert variant="danger" className="mt-3">
+          {replaceError}
+        </Alert>
+      )}
+      <input
+        ref={replaceFileInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp,.zip"
+        onChange={handleReplaceFileChange}
+        className="hidden"
+      />
 
       <Modal
         open={Boolean(receptionnerType)}

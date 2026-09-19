@@ -83,3 +83,10 @@ export function setDocumentStatut(etablissementId, documentId, statut) {
 export function getDocumentEleveTelechargement(etablissementId, documentId) {
   return apiClient.get(`${base(etablissementId)}/documents/${documentId}/telechargement`)
 }
+
+/** Remplace le fichier d'un document déjà réceptionné (erreur d'upload, mauvais fichier...). */
+export function remplacerDocumentEleve(etablissementId, documentId, fichier) {
+  const formData = new FormData()
+  formData.append('fichier', fichier)
+  return apiClient.post(`${base(etablissementId)}/documents/${documentId}/remplacement`, formData)
+}
