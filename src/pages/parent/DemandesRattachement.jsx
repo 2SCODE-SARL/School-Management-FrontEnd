@@ -95,7 +95,8 @@ export function DemandesRattachement() {
                     {eleveNom || 'Un élève'} {etabNom ? `— ${etabNom}` : ''}
                   </p>
                   <p className="text-xs text-ink-400">
-                    Confirme que c'est bien ton enfant avant qu'il soit ajouté à ta liste.
+                    Confirme que c'est bien ton enfant. Il n'apparaîtra dans « Mes enfants » qu'une fois son
+                    inscription finalisée par l'établissement (statut « Inscrit »).
                   </p>
                 </div>
                 <Button size="sm" onClick={() => setOpenId(id)} className="shrink-0">
@@ -121,6 +122,8 @@ export function DemandesRattachement() {
             <p className="text-sm text-ink-600">
               Un établissement affirme que l'élève ci-dessous est ton enfant. Vérifie ses informations avant de
               confirmer — cette action donnera à cet établissement accès à son suivi scolaire depuis ton compte.
+              Une fois confirmé, il n'apparaîtra dans « Mes enfants » qu'une fois son inscription finalisée par
+              l'établissement (statut « Inscrit ») — pas d'inquiétude si ça n'est pas immédiat.
             </p>
             <div className="rounded-lg border border-ink-100 p-4 space-y-1">
               <p className="font-medium text-ink-900">
