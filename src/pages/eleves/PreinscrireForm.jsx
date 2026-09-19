@@ -13,13 +13,15 @@ import { NIVEAU_LABELS } from '../../config/academiqueLabels'
 
 // Constaté en live : le backend tente un rapprochement automatique des
 // parents saisis avec des comptes Parent existants (par nom/téléphone/
-// email) et refuse (409) quand le résultat est ambigu — sans donner
-// d'identifiant à réutiliser pour lever l'ambiguïté. `preinscrire`
-// n'accepte que des infos brutes de parent (pas de `parentId`), donc la
-// seule voie possible est de terminer la préinscription sans ce parent
-// puis de le rattacher depuis la fiche élève (mêmes flux que pour un
-// élève déjà existant : frère/sœur déjà inscrit, ou demande d'approbation
-// par email s'il a un compte portail).
+// email). Un rapprochement propre (ex: email exact d'un seul compte)
+// fonctionne très bien : pas de doublon créé, une demande de validation
+// est envoyée automatiquement à ce parent. Mais quand le rapprochement
+// est ambigu (plusieurs comptes candidats, ou des champs qui pointent
+// vers des comptes différents), le backend refuse (409) sans indiquer
+// quels champs posent problème ni proposer d'id à choisir — confirmé par
+// ailleurs qu'on ne peut pas non plus contourner en omettant ce parent
+// (`parents` est obligatoire et non vide, "Au moins un parent ou tuteur
+// est requis").
 function isAmbiguousParentError(message) {
   return /identit.*parent/i.test(message ?? '') && /ambigu/i.test(message ?? '')
 }
@@ -201,7 +203,7 @@ export function PreinscrireForm({ etablissementId, anneeScolaireId, onSubmit, on
       const message = err instanceof ApiError ? err.message : 'Une erreur est survenue.'
       if (isAmbiguousParentError(message)) {
         setFormError(
-          "Un des parents saisis correspond probablement à un compte déjà existant sur la plateforme (même nom, téléphone ou email) — impossible de créer un doublon. Retire ce parent de la liste ci-dessous et termine la préinscription sans lui, puis va sur la fiche de l'élève créé → \"Ajouter un parent\" → \"Déjà sur la plateforme\" pour le rattacher correctement.",
+          "Un des parents saisis correspond à plusieurs comptes différents déjà existants sur la plateforme (ou des champs contradictoires) — impossible de savoir automatiquement lequel c'est. Vérifie l'orthographe exacte de son email et de son téléphone, ou laisse un seul de ces deux champs rempli plutôt que les deux, puis réessaie.",
         )
       } else {
         setFormError(message)
@@ -284,7 +286,7 @@ export function PreinscrireForm({ etablissementId, anneeScolaireId, onSubmit, on
               errors={parentErrors[index]}
               onChange={(next) => updateParent(index, next)}
               onRemove={() => removeParent(index)}
-              canRemove={parents.length > 0}
+              canRemove={parents.length > 1}
             />
           ))}
         </div>
