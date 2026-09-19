@@ -11,6 +11,19 @@ import { rules, validate } from '../../lib/validate'
 import { PARENT_TYPE_OPTIONS, SEXE_OPTIONS } from '../../config/eleveLabels'
 import { NIVEAU_LABELS } from '../../config/academiqueLabels'
 
+// Constaté en live : le backend tente un rapprochement automatique des
+// parents saisis avec des comptes Parent existants (par nom/téléphone/
+// email) et refuse (409) quand le résultat est ambigu — sans donner
+// d'identifiant à réutiliser pour lever l'ambiguïté. `preinscrire`
+// n'accepte que des infos brutes de parent (pas de `parentId`), donc la
+// seule voie possible est de terminer la préinscription sans ce parent
+// puis de le rattacher depuis la fiche élève (mêmes flux que pour un
+// élève déjà existant : frère/sœur déjà inscrit, ou demande d'approbation
+// par email s'il a un compte portail).
+function isAmbiguousParentError(message) {
+  return /identit.*parent/i.test(message ?? '') && /ambigu/i.test(message ?? '')
+}
+
 const EMPTY_ELEVE = {
   prenom: '',
   nom: '',
@@ -185,7 +198,14 @@ export function PreinscrireForm({ etablissementId, anneeScolaireId, onSubmit, on
     try {
       await onSubmit(payload)
     } catch (err) {
-      setFormError(err instanceof ApiError ? err.message : 'Une erreur est survenue.')
+      const message = err instanceof ApiError ? err.message : 'Une erreur est survenue.'
+      if (isAmbiguousParentError(message)) {
+        setFormError(
+          "Un des parents saisis correspond probablement à un compte déjà existant sur la plateforme (même nom, téléphone ou email) — impossible de créer un doublon. Retire ce parent de la liste ci-dessous et termine la préinscription sans lui, puis va sur la fiche de l'élève créé → \"Ajouter un parent\" → \"Déjà sur la plateforme\" pour le rattacher correctement.",
+        )
+      } else {
+        setFormError(message)
+      }
     }
   }
 
@@ -264,7 +284,7 @@ export function PreinscrireForm({ etablissementId, anneeScolaireId, onSubmit, on
               errors={parentErrors[index]}
               onChange={(next) => updateParent(index, next)}
               onRemove={() => removeParent(index)}
-              canRemove={parents.length > 1}
+              canRemove={parents.length > 0}
             />
           ))}
         </div>
