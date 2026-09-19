@@ -163,7 +163,7 @@ function ReceptionnerForm({ etablissementId, typeDocument, eleveNom, onCancel, o
 export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom }) {
   const [receptionnerType, setReceptionnerType] = useState(null)
   const [viewError, setViewError] = useState('')
-  const [replaceError, setReplaceError] = useState('')
+  const [actionError, setActionError] = useState('')
   const replaceFileInputRef = useRef(null)
   const replaceDocIdRef = useRef(null)
   const { showToast } = useToast()
@@ -222,23 +222,29 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
 
   const statutMutation = useMutation({
     mutationFn: ({ documentId, statut }) => setDocumentStatut(etablissementId, documentId, statut),
-    onSuccess: invalidateAll,
+    onSuccess: () => {
+      invalidateAll()
+      setActionError('')
+    },
+    onError: (err) => {
+      setActionError(err instanceof ApiError ? err.message : 'Impossible de modifier le statut du document.')
+    },
   })
 
   const remplacerMutation = useMutation({
     mutationFn: ({ documentId, fichier }) => remplacerDocumentEleve(etablissementId, documentId, fichier),
     onSuccess: () => {
       invalidateAll()
-      setReplaceError('')
+      setActionError('')
       showToast('Document remplacé avec succès')
     },
     onError: (err) => {
-      setReplaceError(err instanceof ApiError ? err.message : 'Impossible de remplacer le document.')
+      setActionError(err instanceof ApiError ? err.message : 'Impossible de remplacer le document.')
     },
   })
 
   function handleReplaceClick(doc) {
-    setReplaceError('')
+    setActionError('')
     replaceDocIdRef.current = doc.id
     replaceFileInputRef.current?.click()
   }
@@ -303,14 +309,16 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
                     <button
                       type="button"
                       onClick={() => handleReplaceClick(doc)}
-                      disabled={remplacerMutation.isPending && replaceDocIdRef.current === doc.id}
+                      disabled={remplacerMutation.isPending && remplacerMutation.variables?.documentId === doc.id}
                       className="text-ink-400 hover:text-primary-600 transition-colors disabled:opacity-50"
                       aria-label="Remplacer le fichier"
                       title="Remplacer le fichier (erreur d'upload, mauvais document...)"
                     >
                       <RefreshCw
                         className={`h-4 w-4 ${
-                          remplacerMutation.isPending && replaceDocIdRef.current === doc.id ? 'animate-spin' : ''
+                          remplacerMutation.isPending && remplacerMutation.variables?.documentId === doc.id
+                            ? 'animate-spin'
+                            : ''
                         }`}
                       />
                     </button>
@@ -343,9 +351,9 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
           {viewError}
         </Alert>
       )}
-      {replaceError && (
+      {actionError && (
         <Alert variant="danger" className="mt-3">
-          {replaceError}
+          {actionError}
         </Alert>
       )}
       <input
