@@ -18,6 +18,7 @@ import { Button } from '../../components/ui/Button'
 import { Select } from '../../components/ui/Select'
 import { Alert } from '../../components/ui/Alert'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
+import { useToast } from '../../components/ui/ToastContext'
 import { ApiError } from '../../api/client'
 import {
   INSCRIPTION_STATUT_LABELS,
@@ -38,6 +39,7 @@ export function InscriptionDetailModal({ etablissementId, anneeScolaireId, inscr
   const [isSkipAffectationConfirmOpen, setSkipAffectationConfirmOpen] = useState(false)
   const [actionError, setActionError] = useState('')
   const queryClient = useQueryClient()
+  const { showToast } = useToast()
 
   // Ce composant reste monté d'un dossier à l'autre (le parent ne fait que
   // changer `inscriptionId`) : sans ce reset, une classe/un statut choisis
@@ -116,6 +118,7 @@ export function InscriptionDetailModal({ etablissementId, anneeScolaireId, inscr
       invalidateAll()
       setValiderConfirmOpen(false)
       setActionError('')
+      showToast('Élève inscrit avec succès')
     },
     onError: (err) => setActionError(err instanceof ApiError ? err.message : 'Une erreur est survenue.'),
   })

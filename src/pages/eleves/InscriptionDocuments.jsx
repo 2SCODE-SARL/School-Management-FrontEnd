@@ -246,7 +246,12 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
                 <div className="flex items-center gap-2 min-w-0">
                   <FileCheck className="h-4 w-4 text-ink-400 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-ink-900 truncate">{type.libelle}</p>
+                    <p className="text-sm font-medium text-ink-900 truncate">
+                      {type.libelle}
+                      {doc && !doc.fichierUrl && (
+                        <span className="font-normal text-ink-400"> (version papier)</span>
+                      )}
+                    </p>
                     {type.obligatoire && <p className="text-xs text-warning-600">Obligatoire</p>}
                   </div>
                 </div>
