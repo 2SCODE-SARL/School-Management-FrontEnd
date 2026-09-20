@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Eye, FileCheck, RefreshCw, Upload } from 'lucide-react'
+import { Eye, FileCheck, RefreshCw, Trash2, Upload } from 'lucide-react'
 import {
   getDocumentEleveTelechargement,
   listInscriptionDocuments,
   listTypesDocuments,
   remplacerDocumentEleve,
   setDocumentStatut,
+  supprimerDocumentEleve,
   uploadInscriptionDocument,
 } from '../../api/inscriptions'
 import { uploadDocument } from '../../api/documentation'
@@ -14,6 +15,7 @@ import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
 import { Alert } from '../../components/ui/Alert'
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { ApiError } from '../../api/client'
 import { useToast } from '../../components/ui/ToastContext'
 import { pick } from '../../lib/pick'
@@ -162,6 +164,7 @@ function ReceptionnerForm({ etablissementId, typeDocument, eleveNom, onCancel, o
  */
 export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom }) {
   const [receptionnerType, setReceptionnerType] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
   const [viewError, setViewError] = useState('')
   const [actionError, setActionError] = useState('')
   const replaceFileInputRef = useRef(null)
@@ -256,6 +259,29 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
     remplacerMutation.mutate({ documentId: replaceDocIdRef.current, fichier: file })
   }
 
+  const supprimerMutation = useMutation({
+    mutationFn: (documentId) => supprimerDocumentEleve(etablissementId, documentId),
+    onSuccess: (result) => {
+      invalidateAll()
+      // Retirer la dernière pièce vérifiée d'un type obligatoire peut faire
+      // repasser l'inscription de "Validée" à "Complète" côté backend — on
+      // invalidate large pour rafraîchir le statut affiché ailleurs (fiche
+      // élève, détail d'inscription), pas seulement cette liste.
+      queryClient.invalidateQueries({ queryKey: ['inscriptions'] })
+      queryClient.invalidateQueries({ queryKey: ['eleves'] })
+      setActionError('')
+      setDeleteTarget(null)
+      showToast(
+        result?.inscriptionReouverte
+          ? "Réception annulée — l'inscription repasse au statut « Complète »"
+          : 'Réception du document annulée',
+      )
+    },
+    onError: (err) => {
+      setActionError(err instanceof ApiError ? err.message : "Impossible d'annuler la réception de ce document.")
+    },
+  })
+
   if (types.length === 0) {
     return (
       <p className="text-sm text-ink-400">
@@ -329,6 +355,15 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
                       onChange={(e) => statutMutation.mutate({ documentId: doc.id, statut: e.target.value })}
                       className="w-36"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setDeleteTarget({ id: doc.id, libelle: type.libelle })}
+                      className="text-ink-400 hover:text-danger-600 transition-colors"
+                      aria-label="Annuler la réception"
+                      title="Annuler la réception de ce document"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 ) : (
                   <Button
@@ -381,6 +416,16 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
           />
         )}
       </Modal>
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => supprimerMutation.mutate(deleteTarget.id)}
+        isLoading={supprimerMutation.isPending}
+        title="Annuler la réception de ce document ?"
+        description={`« ${deleteTarget?.libelle ?? ''} » redeviendra vide, comme avant réception. Si c'était la dernière pièce obligatoire vérifiée d'une inscription validée, elle repassera au statut « Complète ».`}
+        confirmLabel="Annuler la réception"
+      />
     </>
   )
 }

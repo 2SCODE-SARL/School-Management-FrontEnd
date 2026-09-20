@@ -90,3 +90,13 @@ export function remplacerDocumentEleve(etablissementId, documentId, fichier) {
   formData.append('fichier', fichier)
   return apiClient.post(`${base(etablissementId)}/documents/${documentId}/remplacement`, formData)
 }
+
+/**
+ * Annule la réception d'un document (suppression logique + fichier privé).
+ * Si c'était la dernière pièce vérifiée d'un type obligatoire sur une
+ * inscription validée, celle-ci repasse automatiquement à "Complète"
+ * (`inscriptionReouverte` dans la réponse).
+ */
+export function supprimerDocumentEleve(etablissementId, documentId) {
+  return apiClient.delete(`${base(etablissementId)}/documents/${documentId}`)
+}
