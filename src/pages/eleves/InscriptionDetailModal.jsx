@@ -219,12 +219,7 @@ export function InscriptionDetailModal({ etablissementId, anneeScolaireId, inscr
 
         <div className="pt-4 mt-2 border-t border-ink-100">
           <p className="text-sm font-medium text-ink-900 mb-3">Documents</p>
-          <InscriptionDocuments
-            etablissementId={etablissementId}
-            inscriptionId={inscriptionId}
-            eleveNom={nomComplet}
-            inscriptionStatut={statut}
-          />
+          <InscriptionDocuments etablissementId={etablissementId} inscriptionId={inscriptionId} eleveNom={nomComplet} />
         </div>
 
         <div className="pt-4 mt-4 border-t border-ink-100 space-y-4">

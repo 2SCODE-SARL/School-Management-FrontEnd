@@ -160,7 +160,7 @@ function ReceptionnerForm({ etablissementId, typeDocument, eleveNom, onCancel, o
  * dossier, même si ce n'est pas (encore ?) vérifié par la transition de
  * statut elle-même.
  */
-export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom, inscriptionStatut }) {
+export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom }) {
   const [receptionnerType, setReceptionnerType] = useState(null)
   const [viewError, setViewError] = useState('')
   const [actionError, setActionError] = useState('')
@@ -275,15 +275,6 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom,
         <div className="space-y-2">
           {types.map((type) => {
             const doc = documentByTypeId[type.id]
-            // Règle backend confirmée (voir le point -16 du suivi) : un document
-            // obligatoire déjà "Vérifié" est verrouillé dès que l'inscription est
-            // validée — ni son fichier ni son statut ne peuvent alors être changés,
-            // et aucune action de "réouverture" n'est exposée par l'API pour le
-            // débloquer. On grise ici plutôt que de laisser buter sur l'erreur.
-            const isLocked =
-              inscriptionStatut === 'VALIDEE' && type.obligatoire && doc?.statut === 'VERIFIE'
-            const lockedTitle =
-              "Document obligatoire verrouillé : l'inscription est déjà validée. Contacte le support si ce document doit être corrigé."
             return (
               <div
                 key={type.id}
@@ -318,13 +309,10 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom,
                     <button
                       type="button"
                       onClick={() => handleReplaceClick(doc)}
-                      disabled={
-                        isLocked ||
-                        (remplacerMutation.isPending && remplacerMutation.variables?.documentId === doc.id)
-                      }
+                      disabled={remplacerMutation.isPending && remplacerMutation.variables?.documentId === doc.id}
                       className="text-ink-400 hover:text-primary-600 transition-colors disabled:opacity-50"
                       aria-label="Remplacer le fichier"
-                      title={isLocked ? lockedTitle : "Remplacer le fichier (erreur d'upload, mauvais document...)"}
+                      title="Remplacer le fichier (erreur d'upload, mauvais document...)"
                     >
                       <RefreshCw
                         className={`h-4 w-4 ${
@@ -339,8 +327,6 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom,
                       options={DOCUMENT_STATUT_OPTIONS}
                       value={doc.statut}
                       onChange={(e) => statutMutation.mutate({ documentId: doc.id, statut: e.target.value })}
-                      disabled={isLocked}
-                      title={isLocked ? lockedTitle : undefined}
                       className="w-36"
                     />
                   </div>

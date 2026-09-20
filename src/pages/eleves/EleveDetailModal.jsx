@@ -34,7 +34,6 @@ import {
 } from '../../config/eleveLabels'
 import { formatDate } from '../../lib/formatDate'
 import { generatePassword } from '../../lib/generatePassword'
-import { pick } from '../../lib/pick'
 import { AddParentForm } from './AddParentForm'
 import { LinkExistingParentForm } from './LinkExistingParentForm'
 import { RattacherParentPlateformeForm } from './RattacherParentPlateformeForm'
@@ -176,7 +175,6 @@ export function EleveDetailModal({ eleveId, etablissementId, onClose, onEdit }) 
   const latestInscription = inscriptions
     .slice()
     .sort((a, b) => (b.dateInscription ?? b.createdAt ?? '').localeCompare(a.dateInscription ?? a.createdAt ?? ''))[0]
-  const latestInscriptionStatut = pick(latestInscription, ['statut'], null)
 
   return (
     <>
@@ -327,7 +325,6 @@ export function EleveDetailModal({ eleveId, etablissementId, onClose, onEdit }) 
                   etablissementId={etablissementId}
                   inscriptionId={latestInscription.id}
                   eleveNom={`${eleve.prenom} ${eleve.nom}`.trim()}
-                  inscriptionStatut={latestInscriptionStatut}
                 />
               </div>
             )}
