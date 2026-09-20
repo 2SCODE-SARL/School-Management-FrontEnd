@@ -2,9 +2,10 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { CHART_PALETTE } from '../../lib/chartColors'
 
 /**
- * Carte "camembert" (donut) générique — répartitions (filles/garçons,
- * modes de paiement...) ou indicateur circulaire à valeur unique
- * (`centerLabel`, ex: taux de présence). `data` : `{ name, value }[]`.
+ * Carte "camembert" (disque plein, pas de trou au centre) générique —
+ * répartitions (filles/garçons, modes de paiement...) ou indicateur à
+ * valeur unique (`centerLabel`, ex: taux de présence, affiché dans une
+ * pastille blanche par-dessus le disque). `data` : `{ name, value }[]`.
  */
 export function DonutChartCard({ title, data, colors = CHART_PALETTE, centerLabel, emptyMessage = 'Aucune donnée pour le moment.', height = 220, bare = false }) {
   const hasData = data && data.length > 0 && data.some((d) => d.value > 0)
@@ -18,7 +19,7 @@ export function DonutChartCard({ title, data, colors = CHART_PALETTE, centerLabe
         <div className="relative" style={{ height }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={data} dataKey="value" nameKey="name" innerRadius="62%" outerRadius="90%" paddingAngle={2} stroke="none">
+              <Pie data={data} dataKey="value" nameKey="name" innerRadius={0} outerRadius="90%" paddingAngle={2} stroke="none">
                 {data.map((entry, i) => (
                   <Cell key={entry.name ?? i} fill={colors[i % colors.length]} />
                 ))}
@@ -27,8 +28,10 @@ export function DonutChartCard({ title, data, colors = CHART_PALETTE, centerLabe
             </PieChart>
           </ResponsiveContainer>
           {centerLabel && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="font-heading text-xl font-bold text-ink-900">{centerLabel}</span>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span className="rounded-full bg-white/90 px-3 py-1 font-heading text-xl font-bold text-ink-900 shadow-sm">
+                {centerLabel}
+              </span>
             </div>
           )}
         </div>
