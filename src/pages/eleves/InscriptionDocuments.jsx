@@ -162,7 +162,7 @@ function ReceptionnerForm({ etablissementId, typeDocument, eleveNom, onCancel, o
  * dossier, même si ce n'est pas (encore ?) vérifié par la transition de
  * statut elle-même.
  */
-export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom }) {
+export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom, inscriptionStatut }) {
   const [receptionnerType, setReceptionnerType] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [viewError, setViewError] = useState('')
@@ -301,6 +301,15 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
         <div className="space-y-2">
           {types.map((type) => {
             const doc = documentByTypeId[type.id]
+            // Confirmé en live (20/09) : le fix backend du point -16 ne
+            // couvre que le remplacement de fichier — dégrader le statut
+            // d'un document obligatoire déjà "Vérifié" sur une inscription
+            // validée reste bloqué côté `PATCH .../statut` avec le même
+            // message qu'avant. On grise ce menu précis (pas le reste) et on
+            // pointe vers "Annuler la réception" (-17, résolu), qui fait ce
+            // qu'on cherchait via "Manquant".
+            const isStatutDegradeLocked =
+              inscriptionStatut === 'VALIDEE' && type.obligatoire && doc?.statut === 'VERIFIE'
             return (
               <div
                 key={type.id}
@@ -353,6 +362,12 @@ export function InscriptionDocuments({ etablissementId, inscriptionId, eleveNom 
                       options={DOCUMENT_STATUT_OPTIONS}
                       value={doc.statut}
                       onChange={(e) => statutMutation.mutate({ documentId: doc.id, statut: e.target.value })}
+                      disabled={isStatutDegradeLocked}
+                      title={
+                        isStatutDegradeLocked
+                          ? 'Statut verrouillé sur un document obligatoire déjà validé — utilise la corbeille pour annuler la réception à la place.'
+                          : undefined
+                      }
                       className="w-36"
                     />
                     <button
