@@ -310,6 +310,13 @@ function FlyoutNavItem({
   const Icon = item.icon
   const buttonRef = useRef(null)
   const panelRef = useRef(null)
+  // Garde la dernière position connue : `position` redevient `null` dès la
+  // fermeture, mais il faut continuer à positionner le panneau au même
+  // endroit pendant que l'animation de sortie joue.
+  const [lastPosition, setLastPosition] = useState(position)
+  useEffect(() => {
+    if (position) setLastPosition(position)
+  }, [position])
 
   function handleClick() {
     const rect = buttonRef.current?.getBoundingClientRect()
@@ -363,34 +370,41 @@ function FlyoutNavItem({
         />
       </button>
 
-      {isOpen &&
-        position &&
-        createPortal(
-          <div
-            ref={panelRef}
-            style={{ top: position.top, left: position.left }}
-            onMouseEnter={onCancelScheduledClose}
-            onMouseLeave={onScheduleClose}
-            className="fixed z-50 w-60 origin-top-left animate-dropdown-in overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-xl shadow-ink-900/10"
-          >
-            <p className="truncate border-b border-ink-100 px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
-              {item.label}
-            </p>
-            <div className="p-1.5">
-              {childItems.map((child) => (
-                <button
-                  key={child.key}
-                  type="button"
-                  onClick={() => onNavigateChild(child)}
-                  className="block w-full truncate rounded-lg px-2.5 py-2 text-left text-sm font-medium text-ink-700 transition-colors hover:bg-primary-50 hover:text-primary-700"
-                >
-                  {child.label}
-                </button>
-              ))}
-            </div>
-          </div>,
-          document.body,
-        )}
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && lastPosition && (
+            <motion.div
+              key="flyout-panel"
+              ref={panelRef}
+              style={{ top: lastPosition.top, left: lastPosition.left }}
+              onMouseEnter={onCancelScheduledClose}
+              onMouseLeave={onScheduleClose}
+              initial={{ clipPath: 'inset(0 100% 0 0)', opacity: 0 }}
+              animate={{ clipPath: 'inset(0 0% 0 0)', opacity: 1 }}
+              exit={{ clipPath: 'inset(0 100% 0 0)', opacity: 0 }}
+              transition={{ duration: 0.18, ease: 'easeInOut' }}
+              className="fixed z-50 w-60 overflow-hidden border border-ink-100 bg-white shadow-xl shadow-ink-900/10"
+            >
+              <p className="truncate border-b border-ink-100 px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
+                {item.label}
+              </p>
+              <div className="divide-y divide-ink-100">
+                {childItems.map((child) => (
+                  <button
+                    key={child.key}
+                    type="button"
+                    onClick={() => onNavigateChild(child)}
+                    className="block w-full truncate px-3.5 py-2.5 text-left text-sm font-medium text-ink-700 transition-colors hover:bg-primary-50 hover:text-primary-700"
+                  >
+                    {child.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </div>
   )
 }
