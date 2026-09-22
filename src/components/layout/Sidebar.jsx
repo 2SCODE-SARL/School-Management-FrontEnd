@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import { useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, GraduationCap, X } from 'lucide-react'
@@ -29,6 +28,26 @@ function visibleChildrenOf(item, primaryRole) {
   return item.children.filter((child) => !child.allowedRoles || child.allowedRoles.includes(primaryRole))
 }
 
+/**
+ * Arborescence : ligne verticale + petite branche par élément, comme un
+ * menu de dossier/fichiers. Réutilisée pour les modules d'une section ET
+ * pour les sous-pages d'un module (imbrication à deux niveaux).
+ */
+function TreeList({ collapsed, children }) {
+  if (collapsed) return <>{children}</>
+  return (
+    <div className="relative space-y-1 py-1 pl-[27px]">
+      <div className="absolute left-[13px] top-0 bottom-2 w-px bg-white/15" aria-hidden="true" />
+      {children.map((node) => (
+        <div key={node.key} className="relative pl-3">
+          <span className="absolute left-0 top-1/2 h-px w-3 -translate-y-1/2 bg-white/15" aria-hidden="true" />
+          {node}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
   const { user } = useAuth()
   const location = useLocation()
@@ -41,10 +60,15 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
   const { ungrouped, sections } = groupNavItems(visibleItems)
 
   // La section qui contient la page courante démarre dépliée, les autres
-  // repliées — ensuite chacune se plie/déplie librement au clic.
+  // repliées — ensuite chacune se plie/déplie librement au clic. Même
+  // principe pour un module à sous-pages (ex: Finances) dans sa section.
   const [openSections, setOpenSections] = useState(() => {
     const active = sections.find((section) => section.items.some((item) => location.pathname.startsWith(item.path)))
     return new Set(active ? [active.key] : [])
+  })
+  const [openModules, setOpenModules] = useState(() => {
+    const active = visibleItems.find((item) => item.hasChildren && location.pathname.startsWith(item.path))
+    return new Set(active ? [active.path] : [])
   })
   function toggleSection(key) {
     setOpenSections((prev) => {
@@ -54,35 +78,16 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
       return next
     })
   }
-
-  // Sous-menu flottant (un seul ouvert à la fois) — un module avec au moins
-  // deux sous-pages visibles pour ce rôle s'ouvre en liste flottante plutôt
-  // que de naviguer directement (voir FlyoutNavItem). Rendu via un portail
-  // (position figée aux coordonnées du bouton) car le panneau <nav> a un
-  // défilement qui, sinon, coupe tout ce qui déborde à droite. S'ouvre au
-  // clic ET au survol ; la fermeture au survol est différée pour laisser le
-  // temps de glisser la souris du bouton vers le panneau sans qu'il se
-  // referme entre les deux.
-  const [openFlyout, setOpenFlyout] = useState(null) // { path, top, left } | null
-  const closeTimeoutRef = useRef(null)
-  function cancelScheduledClose() {
-    clearTimeout(closeTimeoutRef.current)
-  }
-  function scheduleClose() {
-    cancelScheduledClose()
-    closeTimeoutRef.current = setTimeout(() => setOpenFlyout(null), 200)
-  }
-  function closeFlyout() {
-    cancelScheduledClose()
-    setOpenFlyout(null)
-  }
-  function openFlyoutFor(item, rect) {
-    cancelScheduledClose()
-    setOpenFlyout({ path: item.path, top: rect.top, left: rect.right + 8 })
+  function toggleModule(path) {
+    setOpenModules((prev) => {
+      const next = new Set(prev)
+      if (next.has(path)) next.delete(path)
+      else next.add(path)
+      return next
+    })
   }
   function handleNavigateChild(item, child) {
     navigate(item.path, { state: { tab: child.key } })
-    closeFlyout()
     setMobileOpen(false)
   }
 
@@ -90,21 +95,18 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
     const childItems = visibleChildrenOf(item, primaryRole)
     if (item.hasChildren && childItems.length > 1) {
       return (
-        <FlyoutNavItem
+        <ExpandableNavItem
           key={item.path}
           item={item}
           childItems={childItems}
           collapsed={collapsed}
-          isOpen={openFlyout?.path === item.path}
-          position={openFlyout?.path === item.path ? openFlyout : null}
+          isOpen={collapsed || openModules.has(item.path)}
           isActive={location.pathname.startsWith(item.path)}
-          onToggle={(rect) =>
-            setOpenFlyout((prev) => (prev?.path === item.path ? null : { path: item.path, top: rect.top, left: rect.right + 8 }))
-          }
-          onHoverOpen={(rect) => openFlyoutFor(item, rect)}
-          onScheduleClose={scheduleClose}
-          onCancelScheduledClose={cancelScheduledClose}
-          onClose={closeFlyout}
+          onToggle={() => toggleModule(item.path)}
+          onNavigateDefault={() => {
+            navigate(item.path)
+            setMobileOpen(false)
+          }}
           onNavigateChild={(child) => handleNavigateChild(item, child)}
         />
       )
@@ -160,10 +162,7 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
 
         <div className={`border-t border-white/15 ${collapsed ? 'lg:mx-3' : 'mx-6'}`} />
 
-        <nav
-          className="scrollbar-on-dark flex-1 overflow-y-auto px-3 pt-6 pb-6 space-y-1"
-          onScroll={closeFlyout}
-        >
+        <nav className="scrollbar-on-dark flex-1 overflow-y-auto px-3 pt-6 pb-6 space-y-1">
           {ungrouped.map(renderNavEntry)}
 
           {sections.map((section) => {
@@ -197,24 +196,7 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
                       transition={{ duration: 0.2, ease: 'easeInOut' }}
                       className="overflow-hidden"
                     >
-                      {/* Arborescence : ligne verticale + petite branche par
-                          sous-item, comme un menu de dossier/fichiers. */}
-                      <div className={`relative space-y-1 py-1 ${collapsed ? 'pl-0' : 'pl-[27px]'}`}>
-                        {!collapsed && (
-                          <div className="absolute left-[13px] top-0 bottom-2 w-px bg-white/15" aria-hidden="true" />
-                        )}
-                        {section.items.map((item) => (
-                          <div key={item.path} className={`relative ${collapsed ? '' : 'pl-3'}`}>
-                            {!collapsed && (
-                              <span
-                                className="absolute left-0 top-1/2 h-px w-3 -translate-y-1/2 bg-white/15"
-                                aria-hidden="true"
-                              />
-                            )}
-                            {renderNavEntry(item)}
-                          </div>
-                        ))}
-                      </div>
+                      <TreeList collapsed={collapsed}>{section.items.map(renderNavEntry)}</TreeList>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -288,73 +270,32 @@ function NavItem({ item: { label, path, icon: Icon, end }, collapsed, onNavigate
 
 /**
  * Module avec plusieurs sous-pages (ex: Élèves & Inscriptions → Élèves /
- * Inscriptions / Parents / Types de documents) : au lieu de naviguer
- * directement, ouvre une liste flottante (comme un sous-menu d'app de
- * bureau) — chaque sous-page navigue vers la page du module en lui
- * indiquant quel onglet ouvrir (`state.tab`, déjà lu par ces pages).
+ * Inscriptions / Parents / Types de documents) : se plie/déplie directement
+ * dans la sidebar (même logique que les sections), pas de panneau flottant
+ * — chaque sous-page navigue vers la page du module en lui indiquant quel
+ * onglet ouvrir (`state.tab`, déjà lu par ces pages).
  */
-function FlyoutNavItem({
+function ExpandableNavItem({
   item,
   childItems,
   collapsed,
   isOpen,
-  position,
   isActive,
   onToggle,
-  onHoverOpen,
-  onScheduleClose,
-  onCancelScheduledClose,
-  onClose,
+  onNavigateDefault,
   onNavigateChild,
 }) {
   const Icon = item.icon
-  const buttonRef = useRef(null)
-  const panelRef = useRef(null)
-  // Garde la dernière position connue : `position` redevient `null` dès la
-  // fermeture, mais il faut continuer à positionner le panneau au même
-  // endroit pendant que l'animation de sortie joue.
-  const [lastPosition, setLastPosition] = useState(position)
-  useEffect(() => {
-    if (position) setLastPosition(position)
-  }, [position])
-
-  function handleClick() {
-    const rect = buttonRef.current?.getBoundingClientRect()
-    if (rect) onToggle(rect)
-  }
-  function handleMouseEnter() {
-    const rect = buttonRef.current?.getBoundingClientRect()
-    if (rect) onHoverOpen(rect)
-  }
-
-  // Ferme au clic extérieur via un listener plutôt qu'un calque plein écran
-  // invisible : ce calque, même avec un z-index bas, recouvrait le bouton
-  // déclencheur sur desktop (la sidebar passe en `z-index: auto` à partir de
-  // `lg:`, donc un calque `fixed` avec un z-index explicite passait quand
-  // même par-dessus) — ça coupait le survol en boucle (clignotement).
-  useEffect(() => {
-    if (!isOpen) return
-    function handlePointerDown(e) {
-      if (buttonRef.current?.contains(e.target) || panelRef.current?.contains(e.target)) return
-      onClose()
-    }
-    document.addEventListener('mousedown', handlePointerDown)
-    return () => document.removeEventListener('mousedown', handlePointerDown)
-  }, [isOpen, onClose])
-
   return (
-    <div className="relative">
+    <div>
       <button
-        ref={buttonRef}
         type="button"
-        onClick={handleClick}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={onScheduleClose}
+        onClick={collapsed ? onNavigateDefault : onToggle}
         title={collapsed ? item.label : undefined}
         className={[
           'relative flex w-full items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-medium transition-colors',
           collapsed ? 'lg:justify-center lg:px-0' : '',
-          isActive || isOpen ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+          isActive ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
         ].join(' ')}
       >
         <Icon className="h-4.5 w-4.5 shrink-0" />
@@ -364,47 +305,36 @@ function FlyoutNavItem({
           {item.label}
         </span>
         <ChevronRight
-          className={`h-4 w-4 opacity-50 shrink-0 transition-transform ${isOpen ? 'rotate-90' : ''} ${
+          className={`h-4 w-4 opacity-50 shrink-0 transition-transform ${isOpen && !collapsed ? 'rotate-90' : ''} ${
             collapsed ? 'lg:hidden' : ''
           }`}
         />
       </button>
 
-      {createPortal(
-        <AnimatePresence>
-          {isOpen && lastPosition && (
-            <motion.div
-              key="flyout-panel"
-              ref={panelRef}
-              style={{ top: lastPosition.top, left: lastPosition.left }}
-              onMouseEnter={onCancelScheduledClose}
-              onMouseLeave={onScheduleClose}
-              initial={{ clipPath: 'inset(0 100% 0 0)', opacity: 0 }}
-              animate={{ clipPath: 'inset(0 0% 0 0)', opacity: 1 }}
-              exit={{ clipPath: 'inset(0 100% 0 0)', opacity: 0 }}
-              transition={{ duration: 0.18, ease: 'easeInOut' }}
-              className="fixed z-50 w-60 overflow-hidden border border-ink-100 bg-white shadow-md shadow-ink-900/10"
-            >
-              <p className="truncate border-b border-ink-100 px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
-                {item.label}
-              </p>
-              <div className="divide-y divide-ink-100">
-                {childItems.map((child) => (
-                  <button
-                    key={child.key}
-                    type="button"
-                    onClick={() => onNavigateChild(child)}
-                    className="block w-full truncate px-3.5 py-2.5 text-left text-sm font-medium text-ink-700 transition-colors hover:bg-primary-50 hover:text-primary-700"
-                  >
-                    {child.label}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body,
-      )}
+      <AnimatePresence initial={false}>
+        {isOpen && !collapsed && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <TreeList collapsed={false}>
+              {childItems.map((child) => (
+                <button
+                  key={child.key}
+                  type="button"
+                  onClick={() => onNavigateChild(child)}
+                  className="block w-full truncate rounded-lg px-3 py-2 text-left text-sm text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  {child.label}
+                </button>
+              ))}
+            </TreeList>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
