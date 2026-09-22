@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Users } from 'lucide-react'
@@ -6,7 +6,6 @@ import { searchEtablissements } from '../../api/etablissements'
 import { useAuth } from '../../auth/AuthContext'
 import { getPrimaryRole } from '../../auth/roleHome'
 import { Combobox } from '../../components/ui/Combobox'
-import { TabBar } from '../../components/ui/TabBar'
 import { ElevesTab } from './ElevesTab'
 import { InscriptionsTab } from './InscriptionsTab'
 import { ParentsTab } from './ParentsTab'
@@ -28,6 +27,13 @@ export default function ElevesPage() {
     isAdmin ? (location.state?.etablissementId ?? '') : (user?.etablissementId ?? ''),
   )
   const [activeTab, setActiveTab] = useState(location.state?.tab ?? 'eleves')
+  // Le sous-menu de la sidebar navigue vers ce même chemin avec un nouvel
+  // `state.tab` — même route, donc pas de remontage : sans ceci, changer de
+  // sous-page depuis un module déjà ouvert resterait sans effet.
+  useEffect(() => {
+    if (location.state?.tab) setActiveTab(location.state.tab)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key])
 
   const { data: etablissementsData } = useQuery({
     queryKey: ['etablissements', 'options'],
@@ -39,14 +45,15 @@ export default function ElevesPage() {
     label: e.nom,
   }))
 
-  const ActiveComponent = TABS.find((t) => t.key === activeTab)?.Component
+  const activeTabDef = TABS.find((t) => t.key === activeTab)
+  const ActiveComponent = activeTabDef?.Component
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-1">Élèves & Inscriptions</h1>
-      <p className="text-sm text-ink-500 mb-6">
-        Fiches des élèves, préinscription, affectation et réinscription.
-      </p>
+      <p className="text-sm font-medium text-ink-400 mb-1">Élèves & Inscriptions</p>
+      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-6">
+        {activeTabDef?.label ?? 'Élèves & Inscriptions'}
+      </h1>
 
       {isAdmin && (
         <div className="mb-6 max-w-sm">
@@ -68,11 +75,7 @@ export default function ElevesPage() {
           Sélectionne un établissement pour voir ses élèves.
         </div>
       ) : (
-        <>
-          <TabBar tabs={TABS} active={activeTab} onChange={setActiveTab} />
-
-          {ActiveComponent && <ActiveComponent etablissementId={selectedEtabId} />}
-        </>
+        ActiveComponent && <ActiveComponent etablissementId={selectedEtabId} />
       )}
     </div>
   )

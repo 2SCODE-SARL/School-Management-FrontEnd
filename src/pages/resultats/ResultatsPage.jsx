@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { GraduationCap } from 'lucide-react'
@@ -6,7 +6,6 @@ import { useAuth } from '../../auth/AuthContext'
 import { getPrimaryRole } from '../../auth/roleHome'
 import { searchEtablissements } from '../../api/etablissements'
 import { Combobox } from '../../components/ui/Combobox'
-import { TabBar } from '../../components/ui/TabBar'
 import { ExamensTab } from './ExamensTab'
 import { ClassementsTab } from './ClassementsTab'
 import { BulletinGenererTab } from './BulletinGenererTab'
@@ -47,6 +46,13 @@ export default function ResultatsPage() {
     isAdmin ? (location.state?.etablissementId ?? '') : (user?.etablissementId ?? ''),
   )
   const [activeTab, setActiveTab] = useState(location.state?.tab ?? TABS[0]?.key ?? 'examens')
+  // Le sous-menu de la sidebar navigue vers ce même chemin avec un nouvel
+  // `state.tab` — même route, donc pas de remontage : sans ceci, changer de
+  // sous-page depuis un module déjà ouvert resterait sans effet.
+  useEffect(() => {
+    if (location.state?.tab) setActiveTab(location.state.tab)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key])
 
   const { data: etablissementsData } = useQuery({
     queryKey: ['etablissements', 'options'],
@@ -64,8 +70,8 @@ export default function ResultatsPage() {
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-1">Résultats</h1>
-      <p className="text-sm text-ink-500 mb-6">Examens, saisie des notes et publication.</p>
+      <p className="text-sm font-medium text-ink-400 mb-1">Résultats</p>
+      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-6">{activeTabDef?.label ?? 'Résultats'}</h1>
 
       {isAdmin && (
         <div className="mb-6 max-w-sm">
@@ -87,11 +93,7 @@ export default function ResultatsPage() {
           Sélectionne un établissement pour gérer ses résultats.
         </div>
       ) : (
-        <>
-          <TabBar tabs={TABS} active={activeTab} onChange={setActiveTab} />
-
-          {ActiveComponent && <ActiveComponent etablissementId={selectedEtabId} {...extraProps} />}
-        </>
+        ActiveComponent && <ActiveComponent etablissementId={selectedEtabId} {...extraProps} />
       )}
     </div>
   )

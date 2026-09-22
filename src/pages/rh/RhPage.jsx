@@ -1,13 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { IdCard } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
 import { getPrimaryRole } from '../../auth/roleHome'
 import { searchEtablissements } from '../../api/etablissements'
-import { listComptesEnAttente } from '../../api/rh'
 import { Combobox } from '../../components/ui/Combobox'
-import { TabBar } from '../../components/ui/TabBar'
 import { RhDashboardTab } from './RhDashboardTab'
 import { EmployesTab } from './EmployesTab'
 import { ComptesEnAttenteTab } from './ComptesEnAttenteTab'
@@ -43,6 +41,13 @@ export default function RhPage() {
     isAdmin ? (location.state?.etablissementId ?? '') : (user?.etablissementId ?? ''),
   )
   const [activeTab, setActiveTab] = useState(location.state?.tab ?? TABS[0]?.key ?? '')
+  // Le sous-menu de la sidebar navigue vers ce même chemin avec un nouvel
+  // `state.tab` — même route, donc pas de remontage : sans ceci, changer de
+  // sous-page depuis un module déjà ouvert resterait sans effet.
+  useEffect(() => {
+    if (location.state?.tab) setActiveTab(location.state.tab)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key])
 
   const { data: etablissementsData } = useQuery({
     queryKey: ['etablissements', 'options'],
@@ -54,23 +59,15 @@ export default function RhPage() {
     label: e.nom,
   }))
 
-  // Même queryKey que ComptesEnAttenteTab : react-query mutualise l'appel
-  // réseau, ça ne double pas la requête.
-  const { data: enAttenteData } = useQuery({
-    queryKey: ['rh', 'comptes-en-attente', selectedEtabId],
-    queryFn: () => listComptesEnAttente(selectedEtabId),
-    enabled: Boolean(selectedEtabId) && canViewComptesEnAttente,
-  })
-  const comptesEnAttenteCount = (Array.isArray(enAttenteData) ? enAttenteData : (enAttenteData?.items ?? [])).length
-
-  const ActiveComponent = TABS.find((t) => t.key === activeTab)?.Component
+  const activeTabDef = TABS.find((t) => t.key === activeTab)
+  const ActiveComponent = activeTabDef?.Component
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-1">Ressources humaines</h1>
-      <p className="text-sm text-ink-500 mb-6">
-        Fiches employés, comptes de connexion du personnel et paie.
-      </p>
+      <p className="text-sm font-medium text-ink-400 mb-1">Ressources humaines</p>
+      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-6">
+        {activeTabDef?.label ?? 'Ressources humaines'}
+      </h1>
 
       {isAdmin && (
         <div className="mb-6 max-w-sm">
@@ -92,32 +89,14 @@ export default function RhPage() {
           Sélectionne un établissement pour gérer ses employés.
         </div>
       ) : (
-        <>
-          {TABS.length > 1 && (
-            <TabBar
-              tabs={TABS.map((tab) => ({
-                ...tab,
-                badge:
-                  tab.key === 'comptes-en-attente' && comptesEnAttenteCount > 0 ? (
-                    <span className="inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full bg-danger-500 text-white text-xs font-semibold">
-                      {comptesEnAttenteCount}
-                    </span>
-                  ) : null,
-              }))}
-              active={activeTab}
-              onChange={setActiveTab}
-            />
-          )}
-
-          {ActiveComponent && (
-            <ActiveComponent
-              etablissementId={selectedEtabId}
-              canManageComptes={canManageComptes}
-              canViewComptesEnAttente={canViewComptesEnAttente}
-              onGoToTab={setActiveTab}
-            />
-          )}
-        </>
+        ActiveComponent && (
+          <ActiveComponent
+            etablissementId={selectedEtabId}
+            canManageComptes={canManageComptes}
+            canViewComptesEnAttente={canViewComptesEnAttente}
+            onGoToTab={setActiveTab}
+          />
+        )
       )}
     </div>
   )

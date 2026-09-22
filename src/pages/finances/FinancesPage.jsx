@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Wallet } from 'lucide-react'
@@ -6,7 +6,6 @@ import { useAuth } from '../../auth/AuthContext'
 import { getPrimaryRole } from '../../auth/roleHome'
 import { searchEtablissements } from '../../api/etablissements'
 import { Combobox } from '../../components/ui/Combobox'
-import { TabBar } from '../../components/ui/TabBar'
 import { TypesFraisTab } from './TypesFraisTab'
 import { EcheancesTab } from './EcheancesTab'
 import { ImpayesTab } from './ImpayesTab'
@@ -55,6 +54,13 @@ export default function FinancesPage() {
     isAdmin ? (location.state?.etablissementId ?? '') : (user?.etablissementId ?? ''),
   )
   const [activeTab, setActiveTab] = useState(location.state?.tab ?? TABS[0]?.key ?? '')
+  // Le sous-menu de la sidebar navigue vers ce même chemin avec un nouvel
+  // `state.tab` — même route, donc pas de remontage : sans ceci, changer de
+  // sous-page depuis un module déjà ouvert resterait sans effet.
+  useEffect(() => {
+    if (location.state?.tab) setActiveTab(location.state.tab)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key])
 
   const { data: etablissementsData } = useQuery({
     queryKey: ['etablissements', 'options'],
@@ -72,8 +78,8 @@ export default function FinancesPage() {
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-1">Finances</h1>
-      <p className="text-sm text-ink-500 mb-6">Frais de scolarité, encaissements, dépenses et budgets.</p>
+      <p className="text-sm font-medium text-ink-400 mb-1">Finances</p>
+      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-6">{activeTabDef?.label ?? 'Finances'}</h1>
 
       {isAdmin && (
         <div className="mb-6 max-w-sm">
@@ -100,11 +106,7 @@ export default function FinancesPage() {
           Aucun sous-module Finances n'est accessible pour ton rôle.
         </div>
       ) : (
-        <>
-          {TABS.length > 1 && <TabBar tabs={TABS} active={activeTab} onChange={setActiveTab} />}
-
-          {ActiveComponent && <ActiveComponent etablissementId={selectedEtabId} {...extraProps} />}
-        </>
+        <>{ActiveComponent && <ActiveComponent etablissementId={selectedEtabId} {...extraProps} />}</>
       )}
     </div>
   )
