@@ -170,19 +170,23 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
             const isOpen = collapsed || openSections.has(section.key)
             const SectionIcon = section.icon
             return (
-              <div key={section.key} className="mt-4 pt-4 border-t border-white/[0.08]">
+              <div key={section.key} className="mt-2">
                 <button
                   type="button"
                   onClick={() => toggleSection(section.key)}
-                  className={`flex w-full items-center justify-between gap-2 px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/40 hover:text-white/70 transition-colors ${
-                    collapsed ? 'lg:hidden' : ''
+                  className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-white/90 transition-colors hover:bg-white/10 ${
+                    collapsed ? 'lg:justify-center lg:px-0' : ''
                   }`}
                 >
-                  <span className="flex items-center gap-1.5 truncate">
-                    <SectionIcon className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">{section.label}</span>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/10">
+                    <SectionIcon className="h-4 w-4" />
                   </span>
-                  <ChevronDown className={`h-3 w-3 shrink-0 transition-transform ${isOpen ? '' : '-rotate-90'}`} />
+                  <span className={`flex-1 truncate text-left ${collapsed ? 'lg:hidden' : ''}`}>{section.label}</span>
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 shrink-0 opacity-60 transition-transform ${isOpen ? '' : '-rotate-90'} ${
+                      collapsed ? 'lg:hidden' : ''
+                    }`}
+                  />
                 </button>
                 <AnimatePresence initial={false}>
                   {isOpen && (
@@ -193,7 +197,24 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
                       transition={{ duration: 0.2, ease: 'easeInOut' }}
                       className="overflow-hidden"
                     >
-                      <div className="space-y-1 pt-0.5">{section.items.map(renderNavEntry)}</div>
+                      {/* Arborescence : ligne verticale + petite branche par
+                          sous-item, comme un menu de dossier/fichiers. */}
+                      <div className={`relative space-y-1 py-1 ${collapsed ? 'pl-0' : 'pl-[27px]'}`}>
+                        {!collapsed && (
+                          <div className="absolute left-[13px] top-0 bottom-2 w-px bg-white/15" aria-hidden="true" />
+                        )}
+                        {section.items.map((item) => (
+                          <div key={item.path} className={`relative ${collapsed ? '' : 'pl-3'}`}>
+                            {!collapsed && (
+                              <span
+                                className="absolute left-0 top-1/2 h-px w-3 -translate-y-1/2 bg-white/15"
+                                aria-hidden="true"
+                              />
+                            )}
+                            {renderNavEntry(item)}
+                          </div>
+                        ))}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
