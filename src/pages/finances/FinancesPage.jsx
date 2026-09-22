@@ -7,7 +7,6 @@ import { getPrimaryRole } from '../../auth/roleHome'
 import { searchEtablissements } from '../../api/etablissements'
 import { Combobox } from '../../components/ui/Combobox'
 import { TabBar } from '../../components/ui/TabBar'
-import { PaieTab } from './PaieTab'
 import { TypesFraisTab } from './TypesFraisTab'
 import { EcheancesTab } from './EcheancesTab'
 import { ImpayesTab } from './ImpayesTab'
@@ -17,9 +16,10 @@ import { BudgetsTab } from './BudgetsTab'
 
 // Rôles confirmés via les tags Swagger — pas uniformes d'un sous-module à
 // l'autre (ex: Secrétaire a Échéances/Impayés/Encaissements mais pas
-// Paie/Frais/Dépenses/Budgets).
+// Frais/Dépenses/Budgets). La Paie a été déplacée dans Ressources humaines
+// (RhPage) — regroupement demandé, le Comptable y a maintenant accès en plus
+// de son module Finances.
 const ALL_TABS = [
-  { key: 'paie', label: 'Paie', Component: PaieTab, roles: ['ADMINISTRATEUR', 'DIRECTEUR', 'COMPTABLE'] },
   { key: 'frais', label: 'Frais & Réductions', Component: TypesFraisTab, roles: ['ADMINISTRATEUR', 'DIRECTEUR'] },
   {
     key: 'echeances',
@@ -73,7 +73,7 @@ export default function FinancesPage() {
   return (
     <div>
       <h1 className="font-heading text-2xl font-bold text-ink-900 mb-1">Finances</h1>
-      <p className="text-sm text-ink-500 mb-6">Paie, frais de scolarité, encaissements, dépenses et budgets.</p>
+      <p className="text-sm text-ink-500 mb-6">Frais de scolarité, encaissements, dépenses et budgets.</p>
 
       {isAdmin && (
         <div className="mb-6 max-w-sm">

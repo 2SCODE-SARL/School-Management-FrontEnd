@@ -11,11 +11,17 @@ import { TabBar } from '../../components/ui/TabBar'
 import { RhDashboardTab } from './RhDashboardTab'
 import { EmployesTab } from './EmployesTab'
 import { ComptesEnAttenteTab } from './ComptesEnAttenteTab'
+import { PaieTab } from '../finances/PaieTab'
 
+// La Paie vivait dans Finances — regroupée ici avec le reste RH (fiches
+// employés, comptes). Le Comptable, qui n'avait jusqu'ici que Finances,
+// gagne donc l'accès à ce module mais uniquement pour cet onglet (voir le
+// filtre par rôle plus bas et `COMPTABLE_BUILT_PAGES` dans App.jsx).
 const ALL_TABS = [
-  { key: 'dashboard', label: 'Tableau de bord', Component: RhDashboardTab },
-  { key: 'employes', label: 'Employés', Component: EmployesTab },
-  { key: 'comptes-en-attente', label: 'Comptes en attente', Component: ComptesEnAttenteTab, requires: 'view' },
+  { key: 'dashboard', label: 'Tableau de bord', Component: RhDashboardTab, roles: ['ADMINISTRATEUR', 'DIRECTEUR', 'SECRETAIRE'] },
+  { key: 'employes', label: 'Employés', Component: EmployesTab, roles: ['ADMINISTRATEUR', 'DIRECTEUR', 'SECRETAIRE'] },
+  { key: 'paie', label: 'Paie', Component: PaieTab, roles: ['ADMINISTRATEUR', 'DIRECTEUR', 'COMPTABLE'] },
+  { key: 'comptes-en-attente', label: 'Comptes en attente', Component: ComptesEnAttenteTab, roles: ['ADMINISTRATEUR', 'DIRECTEUR', 'SECRETAIRE'], requires: 'view' },
 ]
 
 export default function RhPage() {
@@ -29,12 +35,14 @@ export default function RhPage() {
   // statut de ses propres provisionnements) — mais pas la traiter.
   const canManageComptes = isAdmin || role === 'DIRECTEUR'
   const canViewComptesEnAttente = canManageComptes || role === 'SECRETAIRE'
-  const TABS = ALL_TABS.filter((t) => t.requires !== 'view' || canViewComptesEnAttente)
+  const TABS = ALL_TABS.filter(
+    (t) => t.roles.includes(role) && (t.requires !== 'view' || canViewComptesEnAttente),
+  )
   // Arrivée possible depuis une statistique cliquable d'un tableau de bord.
   const [selectedEtabId, setSelectedEtabId] = useState(
     isAdmin ? (location.state?.etablissementId ?? '') : (user?.etablissementId ?? ''),
   )
-  const [activeTab, setActiveTab] = useState(location.state?.tab ?? 'dashboard')
+  const [activeTab, setActiveTab] = useState(location.state?.tab ?? TABS[0]?.key ?? '')
 
   const { data: etablissementsData } = useQuery({
     queryKey: ['etablissements', 'options'],
@@ -61,7 +69,7 @@ export default function RhPage() {
     <div>
       <h1 className="font-heading text-2xl font-bold text-ink-900 mb-1">Ressources humaines</h1>
       <p className="text-sm text-ink-500 mb-6">
-        Fiches employés : la référence à lier aux comptes de connexion du personnel.
+        Fiches employés, comptes de connexion du personnel et paie.
       </p>
 
       {isAdmin && (
@@ -85,19 +93,21 @@ export default function RhPage() {
         </div>
       ) : (
         <>
-          <TabBar
-            tabs={TABS.map((tab) => ({
-              ...tab,
-              badge:
-                tab.key === 'comptes-en-attente' && comptesEnAttenteCount > 0 ? (
-                  <span className="inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full bg-danger-500 text-white text-xs font-semibold">
-                    {comptesEnAttenteCount}
-                  </span>
-                ) : null,
-            }))}
-            active={activeTab}
-            onChange={setActiveTab}
-          />
+          {TABS.length > 1 && (
+            <TabBar
+              tabs={TABS.map((tab) => ({
+                ...tab,
+                badge:
+                  tab.key === 'comptes-en-attente' && comptesEnAttenteCount > 0 ? (
+                    <span className="inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full bg-danger-500 text-white text-xs font-semibold">
+                      {comptesEnAttenteCount}
+                    </span>
+                  ) : null,
+              }))}
+              active={activeTab}
+              onChange={setActiveTab}
+            />
+          )}
 
           {ActiveComponent && (
             <ActiveComponent

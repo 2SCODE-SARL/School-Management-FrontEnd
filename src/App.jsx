@@ -116,11 +116,14 @@ const SECRETAIRE_BUILT_PAGES = {
   '/secretaire/documentation': DocumentationPage,
 }
 
-// Le Comptable n'a que Finances — module complet (Paie, Frais &
-// Réductions, Échéances, Impayés, Encaissements, Dépenses, Budgets),
-// vérifié via les tags Swagger ("50 — Comptable | Finances").
+// Le Comptable a Finances — module complet (Frais & Réductions, Échéances,
+// Impayés, Encaissements, Dépenses, Budgets), vérifié via les tags Swagger
+// ("50 — Comptable | Finances") — plus, depuis le déplacement de la Paie,
+// un accès à Ressources humaines limité au seul onglet "Paie" (RhPage
+// filtre les autres onglets par rôle en interne).
 const COMPTABLE_BUILT_PAGES = {
   '/comptable/finances': FinancesPage,
+  '/comptable/rh': RhPage,
 }
 
 // Portail Élève : lecture seule, endpoints `portail-eleves/me/...`.

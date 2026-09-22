@@ -49,16 +49,11 @@ export const APP_MODULES = [
     allowedRoles: [ADMIN, DIRECTEUR, SURVEILLANT, ENSEIGNANT, SECRETAIRE, COMPTABLE, ELEVE, PARENT],
   },
   {
-    key: 'etablissements',
-    label: 'Établissements',
-    icon: Building2,
-    allowedRoles: [ADMIN],
-  },
-  {
     key: 'eleves',
     label: 'Élèves & Inscriptions',
     icon: Users,
     hasChildren: true,
+    group: 'academique',
     allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE],
   },
   {
@@ -66,6 +61,7 @@ export const APP_MODULES = [
     label: 'Académique',
     icon: BookOpen,
     hasChildren: true,
+    group: 'academique',
     allowedRoles: [ADMIN, DIRECTEUR],
   },
   {
@@ -73,12 +69,14 @@ export const APP_MODULES = [
     label: 'Emplois du temps',
     icon: CalendarClock,
     hasChildren: true,
+    group: 'academique',
     allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, ELEVE],
   },
   {
     key: 'presences',
     label: 'Présences',
     icon: ClipboardCheck,
+    group: 'academique',
     allowedRoles: [ADMIN, DIRECTEUR, SURVEILLANT, ENSEIGNANT, ELEVE, PARENT],
   },
   {
@@ -86,6 +84,7 @@ export const APP_MODULES = [
     label: 'Résultats',
     icon: GraduationCap,
     hasChildren: true,
+    group: 'academique',
     allowedRoles: [ADMIN, DIRECTEUR, ENSEIGNANT, ELEVE],
   },
   {
@@ -93,12 +92,14 @@ export const APP_MODULES = [
     label: 'Suivi scolaire',
     icon: GraduationCap,
     hasChildren: true,
+    group: 'academique',
     allowedRoles: [PARENT],
   },
   {
     key: 'mes-documents',
     label: 'Mes documents',
     icon: FolderOpen,
+    group: 'academique',
     allowedRoles: [ELEVE],
   },
   {
@@ -106,6 +107,7 @@ export const APP_MODULES = [
     label: 'Finances',
     icon: Wallet,
     hasChildren: true,
+    group: 'finances',
     allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, COMPTABLE],
   },
   {
@@ -113,13 +115,18 @@ export const APP_MODULES = [
     label: 'Ressources humaines',
     icon: IdCard,
     hasChildren: true,
-    allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE],
+    group: 'finances',
+    // COMPTABLE ajouté suite au déplacement de la Paie (ex-Finances) dans ce
+    // module : RhPage filtre déjà ses onglets par rôle en interne, seul
+    // "Paie" lui est réellement accessible.
+    allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, COMPTABLE],
   },
   {
     key: 'documentation',
     label: 'Documentation',
     icon: FolderOpen,
     hasChildren: true,
+    group: 'gestion',
     allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE],
   },
   {
@@ -127,33 +134,52 @@ export const APP_MODULES = [
     label: 'Communication',
     icon: MessageSquare,
     hasChildren: true,
+    group: 'gestion',
     allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE],
   },
   {
     key: 'demandes',
     label: 'Demandes',
     icon: Inbox,
+    group: 'gestion',
     allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, PARENT],
+  },
+  {
+    key: 'etablissements',
+    label: 'Établissements',
+    icon: Building2,
+    group: 'parametrage',
+    allowedRoles: [ADMIN],
   },
   {
     key: 'roles',
     label: 'Rôles et permissions',
     icon: ShieldCheck,
+    group: 'parametrage',
     allowedRoles: [ADMIN],
   },
   {
     key: 'utilisateurs',
     label: 'Utilisateurs',
     icon: UserCog,
+    group: 'parametrage',
     allowedRoles: [ADMIN, DIRECTEUR],
   },
   {
     key: 'parametrage',
     label: 'Paramétrage',
     icon: Settings,
+    group: 'parametrage',
     allowedRoles: [ADMIN, DIRECTEUR],
   },
 ]
+
+export const MODULE_GROUP_LABELS = {
+  academique: 'Académique',
+  finances: 'Finances',
+  gestion: 'Gestion',
+  parametrage: 'Paramétrage',
+}
 
 /** Construit la liste de navigation d'un espace (ex: "/admin", "/directeur"). */
 export function getNavigationForSpace(basePath) {
