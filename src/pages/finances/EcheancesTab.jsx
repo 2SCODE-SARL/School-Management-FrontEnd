@@ -177,7 +177,7 @@ function AppliquerReductionForm({ etablissementId, onSubmit, onCancel, isSubmitt
         />
       ) : (
         <Alert variant="warning">
-          Aucune réduction créée pendant cette session (onglet "Scolarité") — aucun endpoint ne permet de
+          Aucune réduction créée pendant cette session (onglet "Frais & Réductions") — aucun endpoint ne permet de
           lister les réductions déjà existantes. Saisis directement son id si tu le connais.
         </Alert>
       )}

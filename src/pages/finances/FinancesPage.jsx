@@ -19,7 +19,7 @@ import { BudgetsTab } from './BudgetsTab'
 // (RhPage) — regroupement demandé, le Comptable y a maintenant accès en plus
 // de son module Finances.
 const ALL_TABS = [
-  { key: 'frais', label: 'Scolarité', Component: TypesFraisTab, roles: ['ADMINISTRATEUR', 'DIRECTEUR'] },
+  { key: 'frais', label: 'Frais & Réductions', Component: TypesFraisTab, roles: ['ADMINISTRATEUR', 'DIRECTEUR'] },
   {
     key: 'echeances',
     label: 'Échéances',
@@ -78,8 +78,8 @@ export default function FinancesPage() {
 
   return (
     <div>
-      <p className="text-sm font-medium text-ink-400 mb-1">Finances</p>
-      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-6">{activeTabDef?.label ?? 'Finances'}</h1>
+      <p className="text-sm font-medium text-ink-400 mb-1">Scolarité</p>
+      <h1 className="font-heading text-2xl font-bold text-ink-900 mb-6">{activeTabDef?.label ?? 'Scolarité'}</h1>
 
       {isAdmin && (
         <div className="mb-6 max-w-sm">
