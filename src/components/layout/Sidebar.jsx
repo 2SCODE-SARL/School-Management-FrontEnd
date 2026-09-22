@@ -330,8 +330,11 @@ function FlyoutNavItem({
         position &&
         createPortal(
           <>
-            {/* Ferme le sous-menu au clic ailleurs. */}
-            <div className="fixed inset-0 z-40" onClick={onClose} aria-hidden="true" />
+            {/* Ferme le sous-menu au clic ailleurs. z-30 (pas 40, sous la
+                sidebar) pour ne pas recouvrir le bouton déclencheur — sinon
+                le survol du bouton bascule aussitôt sur cette couche et
+                déclenche un mouseleave, qui referme puis rouvre en boucle. */}
+            <div className="fixed inset-0 z-30" onClick={onClose} aria-hidden="true" />
             <div
               style={{ top: position.top, left: position.left }}
               onMouseEnter={onCancelScheduledClose}
