@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -309,6 +309,7 @@ function FlyoutNavItem({
 }) {
   const Icon = item.icon
   const buttonRef = useRef(null)
+  const panelRef = useRef(null)
 
   function handleClick() {
     const rect = buttonRef.current?.getBoundingClientRect()
@@ -318,6 +319,21 @@ function FlyoutNavItem({
     const rect = buttonRef.current?.getBoundingClientRect()
     if (rect) onHoverOpen(rect)
   }
+
+  // Ferme au clic extérieur via un listener plutôt qu'un calque plein écran
+  // invisible : ce calque, même avec un z-index bas, recouvrait le bouton
+  // déclencheur sur desktop (la sidebar passe en `z-index: auto` à partir de
+  // `lg:`, donc un calque `fixed` avec un z-index explicite passait quand
+  // même par-dessus) — ça coupait le survol en boucle (clignotement).
+  useEffect(() => {
+    if (!isOpen) return
+    function handlePointerDown(e) {
+      if (buttonRef.current?.contains(e.target) || panelRef.current?.contains(e.target)) return
+      onClose()
+    }
+    document.addEventListener('mousedown', handlePointerDown)
+    return () => document.removeEventListener('mousedown', handlePointerDown)
+  }, [isOpen, onClose])
 
   return (
     <div className="relative">
@@ -350,35 +366,29 @@ function FlyoutNavItem({
       {isOpen &&
         position &&
         createPortal(
-          <>
-            {/* Ferme le sous-menu au clic ailleurs. z-30 (pas 40, sous la
-                sidebar) pour ne pas recouvrir le bouton déclencheur — sinon
-                le survol du bouton bascule aussitôt sur cette couche et
-                déclenche un mouseleave, qui referme puis rouvre en boucle. */}
-            <div className="fixed inset-0 z-30" onClick={onClose} aria-hidden="true" />
-            <div
-              style={{ top: position.top, left: position.left }}
-              onMouseEnter={onCancelScheduledClose}
-              onMouseLeave={onScheduleClose}
-              className="fixed z-50 w-60 origin-top-left animate-dropdown-in overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-xl shadow-ink-900/10"
-            >
-              <p className="truncate border-b border-ink-100 px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
-                {item.label}
-              </p>
-              <div className="p-1.5">
-                {childItems.map((child) => (
-                  <button
-                    key={child.key}
-                    type="button"
-                    onClick={() => onNavigateChild(child)}
-                    className="block w-full truncate rounded-lg px-2.5 py-2 text-left text-sm font-medium text-ink-700 transition-colors hover:bg-primary-50 hover:text-primary-700"
-                  >
-                    {child.label}
-                  </button>
-                ))}
-              </div>
+          <div
+            ref={panelRef}
+            style={{ top: position.top, left: position.left }}
+            onMouseEnter={onCancelScheduledClose}
+            onMouseLeave={onScheduleClose}
+            className="fixed z-50 w-60 origin-top-left animate-dropdown-in overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-xl shadow-ink-900/10"
+          >
+            <p className="truncate border-b border-ink-100 px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
+              {item.label}
+            </p>
+            <div className="p-1.5">
+              {childItems.map((child) => (
+                <button
+                  key={child.key}
+                  type="button"
+                  onClick={() => onNavigateChild(child)}
+                  className="block w-full truncate rounded-lg px-2.5 py-2 text-left text-sm font-medium text-ink-700 transition-colors hover:bg-primary-50 hover:text-primary-700"
+                >
+                  {child.label}
+                </button>
+              ))}
             </div>
-          </>,
+          </div>,
           document.body,
         )}
     </div>
