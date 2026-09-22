@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { MessageSquare } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
@@ -18,11 +19,12 @@ const ALL_TABS = [
 
 export default function CommunicationPage() {
   const { user } = useAuth()
+  const location = useLocation()
   const role = getPrimaryRole(user)
   const isAdmin = role === 'ADMINISTRATEUR'
   const TABS = ALL_TABS.filter((t) => t.roles.includes(role))
   const [selectedEtabId, setSelectedEtabId] = useState(isAdmin ? '' : (user?.etablissementId ?? ''))
-  const [activeTab, setActiveTab] = useState(TABS[0]?.key ?? '')
+  const [activeTab, setActiveTab] = useState(location.state?.tab ?? TABS[0]?.key ?? '')
 
   const { data: etablissementsData } = useQuery({
     queryKey: ['etablissements', 'options'],

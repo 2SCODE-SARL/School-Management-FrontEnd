@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, GraduationCap, X } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
@@ -22,9 +22,16 @@ function groupNavItems(items) {
   return { ungrouped, sections }
 }
 
+/** Sous-pages d'un module visibles pour ce rôle (mêmes règles `allowedRoles` que les modules). */
+function visibleChildrenOf(item, primaryRole) {
+  if (!item.children) return []
+  return item.children.filter((child) => !child.allowedRoles || child.allowedRoles.includes(primaryRole))
+}
+
 export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
   const { user } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const primaryRole = getPrimaryRole(user)
   const { collapsed, setCollapsed, mobileOpen, setMobileOpen } = useSidebar()
   const visibleItems = navigation.filter(
@@ -45,6 +52,39 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
       else next.add(key)
       return next
     })
+  }
+
+  // Sous-menu flottant (un seul ouvert à la fois) — un module avec au moins
+  // deux sous-pages visibles pour ce rôle s'ouvre en liste flottante plutôt
+  // que de naviguer directement (voir FlyoutNavItem).
+  const [openFlyout, setOpenFlyout] = useState(null)
+  function closeFlyout() {
+    setOpenFlyout(null)
+  }
+  function handleNavigateChild(item, child) {
+    navigate(item.path, { state: { tab: child.key } })
+    closeFlyout()
+    setMobileOpen(false)
+  }
+
+  function renderNavEntry(item) {
+    const childItems = visibleChildrenOf(item, primaryRole)
+    if (item.hasChildren && childItems.length > 1) {
+      return (
+        <FlyoutNavItem
+          key={item.path}
+          item={item}
+          childItems={childItems}
+          collapsed={collapsed}
+          isOpen={openFlyout === item.path}
+          isActive={location.pathname.startsWith(item.path)}
+          onToggle={() => setOpenFlyout((prev) => (prev === item.path ? null : item.path))}
+          onClose={closeFlyout}
+          onNavigateChild={(child) => handleNavigateChild(item, child)}
+        />
+      )
+    }
+    return <NavItem key={item.path} item={item} collapsed={collapsed} onNavigate={() => setMobileOpen(false)} />
   }
 
   return (
@@ -96,9 +136,7 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
         <div className={`border-t border-white/15 ${collapsed ? 'lg:mx-3' : 'mx-6'}`} />
 
         <nav className="scrollbar-on-dark flex-1 overflow-y-auto px-3 pt-6 pb-6 space-y-1">
-          {ungrouped.map((item) => (
-            <NavItem key={item.path} item={item} collapsed={collapsed} onNavigate={() => setMobileOpen(false)} />
-          ))}
+          {ungrouped.map(renderNavEntry)}
 
           {sections.map((section) => {
             const isOpen = collapsed || openSections.has(section.key)
@@ -127,16 +165,7 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
                       transition={{ duration: 0.2, ease: 'easeInOut' }}
                       className="overflow-hidden"
                     >
-                      <div className="space-y-1 pt-0.5">
-                        {section.items.map((item) => (
-                          <NavItem
-                            key={item.path}
-                            item={item}
-                            collapsed={collapsed}
-                            onNavigate={() => setMobileOpen(false)}
-                          />
-                        ))}
-                      </div>
+                      <div className="space-y-1 pt-0.5">{section.items.map(renderNavEntry)}</div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -166,7 +195,7 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
   )
 }
 
-function NavItem({ item: { label, path, icon: Icon, end, hasChildren }, collapsed, onNavigate }) {
+function NavItem({ item: { label, path, icon: Icon, end }, collapsed, onNavigate }) {
   return (
     <NavLink
       to={path}
@@ -196,18 +225,73 @@ function NavItem({ item: { label, path, icon: Icon, end, hasChildren }, collapse
             <span className={`relative z-10 truncate flex-1 font-semibold ${collapsed ? 'lg:hidden' : ''}`}>
               {label}
             </span>
-            {hasChildren && (
-              <ChevronRight className={`relative z-10 h-4 w-4 opacity-50 shrink-0 ${collapsed ? 'lg:hidden' : ''}`} />
-            )}
           </>
         ) : (
           <>
             <Icon className="h-4.5 w-4.5 shrink-0" />
             <span className={`truncate flex-1 ${collapsed ? 'lg:hidden' : ''}`}>{label}</span>
-            {hasChildren && <ChevronRight className={`h-4 w-4 opacity-50 shrink-0 ${collapsed ? 'lg:hidden' : ''}`} />}
           </>
         )
       }
     </NavLink>
+  )
+}
+
+/**
+ * Module avec plusieurs sous-pages (ex: Élèves & Inscriptions → Élèves /
+ * Inscriptions / Parents / Types de documents) : au lieu de naviguer
+ * directement, ouvre une liste flottante (comme un sous-menu d'app de
+ * bureau) — chaque sous-page navigue vers la page du module en lui
+ * indiquant quel onglet ouvrir (`state.tab`, déjà lu par ces pages).
+ */
+function FlyoutNavItem({ item, childItems, collapsed, isOpen, isActive, onToggle, onClose, onNavigateChild }) {
+  const Icon = item.icon
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onToggle}
+        title={collapsed ? item.label : undefined}
+        className={[
+          'relative flex w-full items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-medium transition-colors',
+          collapsed ? 'lg:justify-center lg:px-0' : '',
+          isActive || isOpen ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+        ].join(' ')}
+      >
+        <Icon className="h-4.5 w-4.5 shrink-0" />
+        <span
+          className={`truncate flex-1 text-left ${isActive ? 'font-semibold' : ''} ${collapsed ? 'lg:hidden' : ''}`}
+        >
+          {item.label}
+        </span>
+        <ChevronRight
+          className={`h-4 w-4 opacity-50 shrink-0 transition-transform ${isOpen ? 'rotate-90' : ''} ${
+            collapsed ? 'lg:hidden' : ''
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <>
+          {/* Ferme le sous-menu au clic ailleurs, sans intercepter le survol. */}
+          <div className="fixed inset-0 z-40" onClick={onClose} aria-hidden="true" />
+          <div className="absolute left-full top-0 z-50 ml-2 w-56 origin-top-left animate-dropdown-in rounded-xl border border-ink-100 bg-white py-1.5 shadow-lg shadow-ink-900/10">
+            <p className="truncate px-3 pb-1 pt-0.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
+              {item.label}
+            </p>
+            {childItems.map((child) => (
+              <button
+                key={child.key}
+                type="button"
+                onClick={() => onNavigateChild(child)}
+                className="block w-full truncate px-3 py-2 text-left text-sm text-ink-700 transition-colors hover:bg-ink-50 hover:text-primary-700"
+              >
+                {child.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
   )
 }

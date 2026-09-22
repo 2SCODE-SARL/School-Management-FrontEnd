@@ -56,6 +56,12 @@ export const APP_MODULES = [
     hasChildren: true,
     group: 'academique',
     allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE],
+    children: [
+      { key: 'eleves', label: 'Élèves' },
+      { key: 'inscriptions', label: 'Inscriptions' },
+      { key: 'parents', label: 'Parents' },
+      { key: 'types-documents', label: 'Types de documents' },
+    ],
   },
   {
     key: 'academique',
@@ -64,12 +70,21 @@ export const APP_MODULES = [
     hasChildren: true,
     group: 'academique',
     allowedRoles: [ADMIN, DIRECTEUR],
+    children: [
+      { key: 'annees', label: 'Années scolaires' },
+      { key: 'niveaux', label: 'Niveaux' },
+      { key: 'series', label: 'Séries' },
+      { key: 'matieres', label: 'Matières' },
+      { key: 'salles', label: 'Salles' },
+      { key: 'types-evaluation', label: "Types d'évaluation" },
+      { key: 'classes', label: 'Classes' },
+      { key: 'ponderations', label: 'Pondérations' },
+    ],
   },
   {
     key: 'emplois-du-temps',
     label: 'Emplois du temps',
     icon: CalendarClock,
-    hasChildren: true,
     group: 'academique',
     allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, ELEVE],
   },
@@ -86,7 +101,18 @@ export const APP_MODULES = [
     icon: GraduationCap,
     hasChildren: true,
     group: 'academique',
+    // ELEVE utilise une page dédiée sans onglets (EleveResultatsPage) — pas
+    // de `children` ici pour ce rôle, donc aucun n'est visible et le sous-
+    // menu se replie automatiquement sur un lien direct (voir Sidebar.jsx).
     allowedRoles: [ADMIN, DIRECTEUR, ENSEIGNANT, ELEVE],
+    children: [
+      { key: 'examens', label: 'Examens', allowedRoles: [ADMIN, DIRECTEUR, ENSEIGNANT] },
+      { key: 'classements', label: 'Classements', allowedRoles: [ADMIN, DIRECTEUR, ENSEIGNANT] },
+      { key: 'appreciations', label: 'Appréciations', allowedRoles: [ADMIN, DIRECTEUR, ENSEIGNANT] },
+      { key: 'bulletins', label: 'Bulletins', allowedRoles: [ADMIN, DIRECTEUR] },
+      { key: 'deliberations', label: 'Délibérations', allowedRoles: [ADMIN, DIRECTEUR] },
+      { key: 'reclamations', label: 'Réclamations', allowedRoles: [ENSEIGNANT] },
+    ],
   },
   {
     key: 'suivi-scolaire',
@@ -95,6 +121,11 @@ export const APP_MODULES = [
     hasChildren: true,
     group: 'academique',
     allowedRoles: [PARENT],
+    children: [
+      { key: 'notes', label: 'Notes' },
+      { key: 'moyennes', label: 'Moyennes' },
+      { key: 'bulletins', label: 'Bulletins' },
+    ],
   },
   {
     key: 'mes-documents',
@@ -110,6 +141,14 @@ export const APP_MODULES = [
     hasChildren: true,
     group: 'finances',
     allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, COMPTABLE],
+    children: [
+      { key: 'frais', label: 'Frais & Réductions', allowedRoles: [ADMIN, DIRECTEUR] },
+      { key: 'echeances', label: 'Échéances', allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, COMPTABLE] },
+      { key: 'impayes', label: 'Impayés', allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, COMPTABLE] },
+      { key: 'encaissements', label: 'Encaissements', allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, COMPTABLE] },
+      { key: 'depenses', label: 'Dépenses', allowedRoles: [ADMIN, DIRECTEUR, COMPTABLE] },
+      { key: 'budgets', label: 'Budgets', allowedRoles: [ADMIN, DIRECTEUR, COMPTABLE] },
+    ],
   },
   {
     key: 'rh',
@@ -121,6 +160,12 @@ export const APP_MODULES = [
     // module : RhPage filtre déjà ses onglets par rôle en interne, seul
     // "Paie" lui est réellement accessible.
     allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, COMPTABLE],
+    children: [
+      { key: 'dashboard', label: 'Tableau de bord', allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE] },
+      { key: 'employes', label: 'Employés', allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE] },
+      { key: 'paie', label: 'Paie', allowedRoles: [ADMIN, DIRECTEUR, COMPTABLE] },
+      { key: 'comptes-en-attente', label: 'Comptes en attente', allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE] },
+    ],
   },
   {
     key: 'documentation',
@@ -129,6 +174,11 @@ export const APP_MODULES = [
     hasChildren: true,
     group: 'gestion',
     allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE],
+    children: [
+      { key: 'documents', label: 'Documents' },
+      { key: 'modeles', label: 'Modèles' },
+      { key: 'import-export', label: 'Import / Export' },
+    ],
   },
   {
     key: 'communication',
@@ -137,6 +187,10 @@ export const APP_MODULES = [
     hasChildren: true,
     group: 'gestion',
     allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE],
+    children: [
+      { key: 'envoyer', label: 'Envoyer une notification', allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE] },
+      { key: 'templates', label: 'Modèles de message', allowedRoles: [ADMIN, DIRECTEUR] },
+    ],
   },
   {
     key: 'demandes',

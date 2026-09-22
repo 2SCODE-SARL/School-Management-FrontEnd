@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { FolderOpen } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
@@ -19,9 +20,10 @@ const TABS = [
 
 export default function DocumentationPage() {
   const { user } = useAuth()
+  const location = useLocation()
   const isAdmin = getPrimaryRole(user) === 'ADMINISTRATEUR'
   const [selectedEtabId, setSelectedEtabId] = useState(isAdmin ? '' : (user?.etablissementId ?? ''))
-  const [activeTab, setActiveTab] = useState('documents')
+  const [activeTab, setActiveTab] = useState(location.state?.tab ?? 'documents')
 
   const { data: etablissementsData } = useQuery({
     queryKey: ['etablissements', 'options'],

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getMesEnfants } from '../../api/portailParent'
 import { Select } from '../../components/ui/Select'
@@ -14,8 +15,9 @@ const TABS = [
 ]
 
 export default function SuiviScolairePage() {
+  const location = useLocation()
   const [eleveId, setEleveId] = useState('')
-  const [activeTab, setActiveTab] = useState('notes')
+  const [activeTab, setActiveTab] = useState(location.state?.tab ?? 'notes')
 
   const { data, isLoading } = useQuery({
     queryKey: ['portail-parent', 'mes-enfants'],
