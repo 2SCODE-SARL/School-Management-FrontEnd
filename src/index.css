@@ -148,32 +148,3 @@ h4 {
   background-color: rgba(255, 255, 255, 0.4);
 }
 
-/*
-  Pastille de menu actif "en ruban" : elle touche le bord droit de la
-  sidebar et se rétrécit en douceur juste avant, comme un onglet qui se
-  détache du panneau. Le dégradé radial de chaque pseudo-élément découpe
-  un quart de cercle transparent (qui laisse voir le fond blanc de la
-  pastille) dans un petit carré sinon rempli de la couleur de la sidebar —
-  c'est cette découpe qui dessine la courbe concave en haut et en bas.
-  Couleur du carré = teinte moyenne du dégradé de la sidebar (primary-700).
-*/
-.nav-active-pill {
-  border-radius: 14px 0 0 14px;
-}
-.nav-active-pill::before,
-.nav-active-pill::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  width: 16px;
-  height: 16px;
-  z-index: 1;
-}
-.nav-active-pill::before {
-  top: 0;
-  background: radial-gradient(circle at bottom left, transparent 16px, var(--color-primary-700) 0);
-}
-.nav-active-pill::after {
-  bottom: 0;
-  background: radial-gradient(circle at top left, transparent 16px, var(--color-primary-700) 0);
-}

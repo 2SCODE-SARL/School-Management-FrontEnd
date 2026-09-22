@@ -175,26 +175,27 @@ function NavItem({ item: { label, path, icon: Icon, end, hasChildren }, collapse
       title={collapsed ? label : undefined}
       className={({ isActive }) =>
         [
-          'relative flex items-center gap-3 py-2.5 px-3 text-sm font-medium transition-colors',
+          'relative flex items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-medium transition-colors',
           collapsed ? 'lg:justify-center lg:px-0' : '',
-          isActive ? '-mr-3 text-primary-700' : 'rounded-xl text-white/80 hover:bg-white/10 hover:text-white',
+          isActive ? 'text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
         ].join(' ')
       }
     >
       {({ isActive }) =>
         isActive ? (
           <>
-            {/* Pastille active "en ruban" : glisse en douceur d'un item à
-                l'autre grâce au layoutId partagé (Framer Motion), et se
-                découpe en courbe au bord de la sidebar via .nav-active-pill
-                (voir index.css). */}
+            {/* Surbrillance active discrète : un fond translucide qui glisse
+                en douceur d'un item à l'autre (layoutId partagé, Framer
+                Motion) — plus sobre qu'un bloc blanc plein. */}
             <motion.div
               layoutId="sidebar-active-pill"
-              className="nav-active-pill absolute inset-0 bg-white shadow-sm"
+              className="absolute inset-0 rounded-xl bg-white/15"
               transition={{ type: 'spring', stiffness: 450, damping: 38 }}
             />
             <Icon className="relative z-10 h-4.5 w-4.5 shrink-0" />
-            <span className={`relative z-10 truncate flex-1 ${collapsed ? 'lg:hidden' : ''}`}>{label}</span>
+            <span className={`relative z-10 truncate flex-1 font-semibold ${collapsed ? 'lg:hidden' : ''}`}>
+              {label}
+            </span>
             {hasChildren && (
               <ChevronRight className={`relative z-10 h-4 w-4 opacity-50 shrink-0 ${collapsed ? 'lg:hidden' : ''}`} />
             )}
