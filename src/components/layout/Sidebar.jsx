@@ -59,10 +59,26 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
   // deux sous-pages visibles pour ce rôle s'ouvre en liste flottante plutôt
   // que de naviguer directement (voir FlyoutNavItem). Rendu via un portail
   // (position figée aux coordonnées du bouton) car le panneau <nav> a un
-  // défilement qui, sinon, coupe tout ce qui déborde à droite.
+  // défilement qui, sinon, coupe tout ce qui déborde à droite. S'ouvre au
+  // clic ET au survol ; la fermeture au survol est différée pour laisser le
+  // temps de glisser la souris du bouton vers le panneau sans qu'il se
+  // referme entre les deux.
   const [openFlyout, setOpenFlyout] = useState(null) // { path, top, left } | null
+  const closeTimeoutRef = useRef(null)
+  function cancelScheduledClose() {
+    clearTimeout(closeTimeoutRef.current)
+  }
+  function scheduleClose() {
+    cancelScheduledClose()
+    closeTimeoutRef.current = setTimeout(() => setOpenFlyout(null), 200)
+  }
   function closeFlyout() {
+    cancelScheduledClose()
     setOpenFlyout(null)
+  }
+  function openFlyoutFor(item, rect) {
+    cancelScheduledClose()
+    setOpenFlyout({ path: item.path, top: rect.top, left: rect.right + 8 })
   }
   function handleNavigateChild(item, child) {
     navigate(item.path, { state: { tab: child.key } })
@@ -83,10 +99,11 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
           position={openFlyout?.path === item.path ? openFlyout : null}
           isActive={location.pathname.startsWith(item.path)}
           onToggle={(rect) =>
-            setOpenFlyout((prev) =>
-              prev?.path === item.path ? null : { path: item.path, top: rect.top, left: rect.right + 8 },
-            )
+            setOpenFlyout((prev) => (prev?.path === item.path ? null : { path: item.path, top: rect.top, left: rect.right + 8 }))
           }
+          onHoverOpen={(rect) => openFlyoutFor(item, rect)}
+          onScheduleClose={scheduleClose}
+          onCancelScheduledClose={cancelScheduledClose}
           onClose={closeFlyout}
           onNavigateChild={(child) => handleNavigateChild(item, child)}
         />
@@ -153,7 +170,7 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
             const isOpen = collapsed || openSections.has(section.key)
             const SectionIcon = section.icon
             return (
-              <div key={section.key} className="mt-3 pt-3 border-t border-white/10">
+              <div key={section.key} className="mt-4 pt-4 border-t border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => toggleSection(section.key)}
@@ -255,13 +272,30 @@ function NavItem({ item: { label, path, icon: Icon, end }, collapsed, onNavigate
  * bureau) — chaque sous-page navigue vers la page du module en lui
  * indiquant quel onglet ouvrir (`state.tab`, déjà lu par ces pages).
  */
-function FlyoutNavItem({ item, childItems, collapsed, isOpen, position, isActive, onToggle, onClose, onNavigateChild }) {
+function FlyoutNavItem({
+  item,
+  childItems,
+  collapsed,
+  isOpen,
+  position,
+  isActive,
+  onToggle,
+  onHoverOpen,
+  onScheduleClose,
+  onCancelScheduledClose,
+  onClose,
+  onNavigateChild,
+}) {
   const Icon = item.icon
   const buttonRef = useRef(null)
 
   function handleClick() {
     const rect = buttonRef.current?.getBoundingClientRect()
     if (rect) onToggle(rect)
+  }
+  function handleMouseEnter() {
+    const rect = buttonRef.current?.getBoundingClientRect()
+    if (rect) onHoverOpen(rect)
   }
 
   return (
@@ -270,6 +304,8 @@ function FlyoutNavItem({ item, childItems, collapsed, isOpen, position, isActive
         ref={buttonRef}
         type="button"
         onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={onScheduleClose}
         title={collapsed ? item.label : undefined}
         className={[
           'relative flex w-full items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-medium transition-colors',
@@ -298,21 +334,25 @@ function FlyoutNavItem({ item, childItems, collapsed, isOpen, position, isActive
             <div className="fixed inset-0 z-40" onClick={onClose} aria-hidden="true" />
             <div
               style={{ top: position.top, left: position.left }}
-              className="fixed z-50 w-56 origin-top-left animate-dropdown-in rounded-xl border border-ink-100 bg-white py-1.5 shadow-lg shadow-ink-900/10"
+              onMouseEnter={onCancelScheduledClose}
+              onMouseLeave={onScheduleClose}
+              className="fixed z-50 w-60 origin-top-left animate-dropdown-in overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-xl shadow-ink-900/10"
             >
-              <p className="truncate px-3 pb-1 pt-0.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
+              <p className="truncate border-b border-ink-100 px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
                 {item.label}
               </p>
-              {childItems.map((child) => (
-                <button
-                  key={child.key}
-                  type="button"
-                  onClick={() => onNavigateChild(child)}
-                  className="block w-full truncate px-3 py-2 text-left text-sm text-ink-700 transition-colors hover:bg-ink-50 hover:text-primary-700"
-                >
-                  {child.label}
-                </button>
-              ))}
+              <div className="p-1.5">
+                {childItems.map((child) => (
+                  <button
+                    key={child.key}
+                    type="button"
+                    onClick={() => onNavigateChild(child)}
+                    className="block w-full truncate rounded-lg px-2.5 py-2 text-left text-sm font-medium text-ink-700 transition-colors hover:bg-primary-50 hover:text-primary-700"
+                  >
+                    {child.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </>,
           document.body,
