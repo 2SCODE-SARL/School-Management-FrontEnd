@@ -383,7 +383,7 @@ function FlyoutNavItem({
               animate={{ clipPath: 'inset(0 0% 0 0)', opacity: 1 }}
               exit={{ clipPath: 'inset(0 100% 0 0)', opacity: 0 }}
               transition={{ duration: 0.18, ease: 'easeInOut' }}
-              className="fixed z-50 w-60 overflow-hidden border border-ink-100 bg-white shadow-xl shadow-ink-900/10"
+              className="fixed z-50 w-60 overflow-hidden border border-ink-100 bg-white shadow-md shadow-ink-900/10"
             >
               <p className="truncate border-b border-ink-100 px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
                 {item.label}
