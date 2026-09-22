@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, GraduationCap, X } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
 import { getPrimaryRole } from '../../auth/roleHome'
-import { MODULE_GROUP_LABELS } from '../../config/modules'
+import { MODULE_GROUP_META } from '../../config/modules'
 import { useSidebar } from './SidebarContext'
 
 // Ordre d'affichage des sections — les modules sans `group` (Tableau de
@@ -16,7 +16,7 @@ function groupNavItems(items) {
   const ungrouped = items.filter((item) => !item.group)
   const sections = GROUP_ORDER.map((key) => ({
     key,
-    label: MODULE_GROUP_LABELS[key],
+    ...MODULE_GROUP_META[key],
     items: items.filter((item) => item.group === key),
   })).filter((section) => section.items.length > 0)
   return { ungrouped, sections }
@@ -102,8 +102,9 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
 
           {sections.map((section) => {
             const isOpen = collapsed || openSections.has(section.key)
+            const SectionIcon = section.icon
             return (
-              <div key={section.key} className="pt-3">
+              <div key={section.key} className="mt-3 pt-3 border-t border-white/10">
                 <button
                   type="button"
                   onClick={() => toggleSection(section.key)}
@@ -111,21 +112,34 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
                     collapsed ? 'lg:hidden' : ''
                   }`}
                 >
-                  <span className="truncate">{section.label}</span>
+                  <span className="flex items-center gap-1.5 truncate">
+                    <SectionIcon className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{section.label}</span>
+                  </span>
                   <ChevronDown className={`h-3 w-3 shrink-0 transition-transform ${isOpen ? '' : '-rotate-90'}`} />
                 </button>
-                {isOpen && (
-                  <div className="space-y-1">
-                    {section.items.map((item) => (
-                      <NavItem
-                        key={item.path}
-                        item={item}
-                        collapsed={collapsed}
-                        onNavigate={() => setMobileOpen(false)}
-                      />
-                    ))}
-                  </div>
-                )}
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: 'easeInOut' }}
+                      className="overflow-hidden"
+                    >
+                      <div className="space-y-1 pt-0.5">
+                        {section.items.map((item) => (
+                          <NavItem
+                            key={item.path}
+                            item={item}
+                            collapsed={collapsed}
+                            onNavigate={() => setMobileOpen(false)}
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )
           })}

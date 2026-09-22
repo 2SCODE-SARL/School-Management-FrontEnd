@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   UserCog,
   Settings,
+  Layers,
 } from 'lucide-react'
 
 const ADMIN = 'ADMINISTRATEUR'
@@ -174,11 +175,11 @@ export const APP_MODULES = [
   },
 ]
 
-export const MODULE_GROUP_LABELS = {
-  academique: 'Académique',
-  finances: 'Finances',
-  gestion: 'Gestion',
-  parametrage: 'Paramétrage',
+export const MODULE_GROUP_META = {
+  academique: { label: 'Académique', icon: BookOpen },
+  finances: { label: 'Finances', icon: Wallet },
+  gestion: { label: 'Gestion', icon: Layers },
+  parametrage: { label: 'Paramétrage', icon: Settings },
 }
 
 /** Construit la liste de navigation d'un espace (ex: "/admin", "/directeur"). */
