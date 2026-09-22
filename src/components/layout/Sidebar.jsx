@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, GraduationCap, X } from 'lucide-react'
@@ -56,8 +57,10 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
 
   // Sous-menu flottant (un seul ouvert à la fois) — un module avec au moins
   // deux sous-pages visibles pour ce rôle s'ouvre en liste flottante plutôt
-  // que de naviguer directement (voir FlyoutNavItem).
-  const [openFlyout, setOpenFlyout] = useState(null)
+  // que de naviguer directement (voir FlyoutNavItem). Rendu via un portail
+  // (position figée aux coordonnées du bouton) car le panneau <nav> a un
+  // défilement qui, sinon, coupe tout ce qui déborde à droite.
+  const [openFlyout, setOpenFlyout] = useState(null) // { path, top, left } | null
   function closeFlyout() {
     setOpenFlyout(null)
   }
@@ -76,9 +79,14 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
           item={item}
           childItems={childItems}
           collapsed={collapsed}
-          isOpen={openFlyout === item.path}
+          isOpen={openFlyout?.path === item.path}
+          position={openFlyout?.path === item.path ? openFlyout : null}
           isActive={location.pathname.startsWith(item.path)}
-          onToggle={() => setOpenFlyout((prev) => (prev === item.path ? null : item.path))}
+          onToggle={(rect) =>
+            setOpenFlyout((prev) =>
+              prev?.path === item.path ? null : { path: item.path, top: rect.top, left: rect.right + 8 },
+            )
+          }
           onClose={closeFlyout}
           onNavigateChild={(child) => handleNavigateChild(item, child)}
         />
@@ -135,7 +143,10 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
 
         <div className={`border-t border-white/15 ${collapsed ? 'lg:mx-3' : 'mx-6'}`} />
 
-        <nav className="scrollbar-on-dark flex-1 overflow-y-auto px-3 pt-6 pb-6 space-y-1">
+        <nav
+          className="scrollbar-on-dark flex-1 overflow-y-auto px-3 pt-6 pb-6 space-y-1"
+          onScroll={closeFlyout}
+        >
           {ungrouped.map(renderNavEntry)}
 
           {sections.map((section) => {
@@ -244,13 +255,21 @@ function NavItem({ item: { label, path, icon: Icon, end }, collapsed, onNavigate
  * bureau) — chaque sous-page navigue vers la page du module en lui
  * indiquant quel onglet ouvrir (`state.tab`, déjà lu par ces pages).
  */
-function FlyoutNavItem({ item, childItems, collapsed, isOpen, isActive, onToggle, onClose, onNavigateChild }) {
+function FlyoutNavItem({ item, childItems, collapsed, isOpen, position, isActive, onToggle, onClose, onNavigateChild }) {
   const Icon = item.icon
+  const buttonRef = useRef(null)
+
+  function handleClick() {
+    const rect = buttonRef.current?.getBoundingClientRect()
+    if (rect) onToggle(rect)
+  }
+
   return (
     <div className="relative">
       <button
+        ref={buttonRef}
         type="button"
-        onClick={onToggle}
+        onClick={handleClick}
         title={collapsed ? item.label : undefined}
         className={[
           'relative flex w-full items-center gap-3 py-2.5 px-3 rounded-xl text-sm font-medium transition-colors',
@@ -271,27 +290,33 @@ function FlyoutNavItem({ item, childItems, collapsed, isOpen, isActive, onToggle
         />
       </button>
 
-      {isOpen && (
-        <>
-          {/* Ferme le sous-menu au clic ailleurs, sans intercepter le survol. */}
-          <div className="fixed inset-0 z-40" onClick={onClose} aria-hidden="true" />
-          <div className="absolute left-full top-0 z-50 ml-2 w-56 origin-top-left animate-dropdown-in rounded-xl border border-ink-100 bg-white py-1.5 shadow-lg shadow-ink-900/10">
-            <p className="truncate px-3 pb-1 pt-0.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
-              {item.label}
-            </p>
-            {childItems.map((child) => (
-              <button
-                key={child.key}
-                type="button"
-                onClick={() => onNavigateChild(child)}
-                className="block w-full truncate px-3 py-2 text-left text-sm text-ink-700 transition-colors hover:bg-ink-50 hover:text-primary-700"
-              >
-                {child.label}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
+      {isOpen &&
+        position &&
+        createPortal(
+          <>
+            {/* Ferme le sous-menu au clic ailleurs. */}
+            <div className="fixed inset-0 z-40" onClick={onClose} aria-hidden="true" />
+            <div
+              style={{ top: position.top, left: position.left }}
+              className="fixed z-50 w-56 origin-top-left animate-dropdown-in rounded-xl border border-ink-100 bg-white py-1.5 shadow-lg shadow-ink-900/10"
+            >
+              <p className="truncate px-3 pb-1 pt-0.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
+                {item.label}
+              </p>
+              {childItems.map((child) => (
+                <button
+                  key={child.key}
+                  type="button"
+                  onClick={() => onNavigateChild(child)}
+                  className="block w-full truncate px-3 py-2 text-left text-sm text-ink-700 transition-colors hover:bg-ink-50 hover:text-primary-700"
+                >
+                  {child.label}
+                </button>
+              ))}
+            </div>
+          </>,
+          document.body,
+        )}
     </div>
   )
 }
