@@ -1,6 +1,7 @@
-import { NavLink } from 'react-router-dom'
+import { useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronRight, ChevronsLeft, ChevronsRight, GraduationCap, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, GraduationCap, X } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
 import { getPrimaryRole } from '../../auth/roleHome'
 import { MODULE_GROUP_LABELS } from '../../config/modules'
@@ -23,12 +24,28 @@ function groupNavItems(items) {
 
 export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
   const { user } = useAuth()
+  const location = useLocation()
   const primaryRole = getPrimaryRole(user)
   const { collapsed, setCollapsed, mobileOpen, setMobileOpen } = useSidebar()
   const visibleItems = navigation.filter(
     (item) => !item.allowedRoles || item.allowedRoles.includes(primaryRole),
   )
   const { ungrouped, sections } = groupNavItems(visibleItems)
+
+  // La section qui contient la page courante démarre dépliée, les autres
+  // repliées — ensuite chacune se plie/déplie librement au clic.
+  const [openSections, setOpenSections] = useState(() => {
+    const active = sections.find((section) => section.items.some((item) => location.pathname.startsWith(item.path)))
+    return new Set(active ? [active.key] : [])
+  })
+  function toggleSection(key) {
+    setOpenSections((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
 
   return (
     <>
@@ -83,20 +100,35 @@ export function Sidebar({ navigation, subtitle = 'Espace Administrateur' }) {
             <NavItem key={item.path} item={item} collapsed={collapsed} onNavigate={() => setMobileOpen(false)} />
           ))}
 
-          {sections.map((section) => (
-            <div key={section.key} className="pt-3">
-              <p
-                className={`px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/40 ${
-                  collapsed ? 'lg:hidden' : ''
-                }`}
-              >
-                {section.label}
-              </p>
-              {section.items.map((item) => (
-                <NavItem key={item.path} item={item} collapsed={collapsed} onNavigate={() => setMobileOpen(false)} />
-              ))}
-            </div>
-          ))}
+          {sections.map((section) => {
+            const isOpen = collapsed || openSections.has(section.key)
+            return (
+              <div key={section.key} className="pt-3">
+                <button
+                  type="button"
+                  onClick={() => toggleSection(section.key)}
+                  className={`flex w-full items-center justify-between gap-2 px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/40 hover:text-white/70 transition-colors ${
+                    collapsed ? 'lg:hidden' : ''
+                  }`}
+                >
+                  <span className="truncate">{section.label}</span>
+                  <ChevronDown className={`h-3 w-3 shrink-0 transition-transform ${isOpen ? '' : '-rotate-90'}`} />
+                </button>
+                {isOpen && (
+                  <div className="space-y-1">
+                    {section.items.map((item) => (
+                      <NavItem
+                        key={item.path}
+                        item={item}
+                        collapsed={collapsed}
+                        onNavigate={() => setMobileOpen(false)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </nav>
 
         <button
