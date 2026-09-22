@@ -19,7 +19,7 @@ import { BudgetsTab } from './BudgetsTab'
 // (RhPage) — regroupement demandé, le Comptable y a maintenant accès en plus
 // de son module Finances.
 const ALL_TABS = [
-  { key: 'frais', label: 'Frais & Réductions', Component: TypesFraisTab, roles: ['ADMINISTRATEUR', 'DIRECTEUR'] },
+  { key: 'frais', label: 'Scolarité', Component: TypesFraisTab, roles: ['ADMINISTRATEUR', 'DIRECTEUR'] },
   {
     key: 'echeances',
     label: 'Échéances',

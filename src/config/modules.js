@@ -142,7 +142,7 @@ export const APP_MODULES = [
     group: 'finances',
     allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, COMPTABLE],
     children: [
-      { key: 'frais', label: 'Frais & Réductions', allowedRoles: [ADMIN, DIRECTEUR] },
+      { key: 'frais', label: 'Scolarité', allowedRoles: [ADMIN, DIRECTEUR] },
       { key: 'echeances', label: 'Échéances', allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, COMPTABLE] },
       { key: 'impayes', label: 'Impayés', allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, COMPTABLE] },
       { key: 'encaissements', label: 'Encaissements', allowedRoles: [ADMIN, DIRECTEUR, SECRETAIRE, COMPTABLE] },
