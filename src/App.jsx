@@ -39,6 +39,7 @@ import CommunicationPage from './pages/communication/CommunicationPage'
 import PlaceholderPage from './pages/admin/PlaceholderPage'
 import ProfilePage from './pages/profile/ProfilePage'
 import NotificationsPage from './pages/notifications/NotificationsPage'
+import FormationReferentielsPage from './pages/formation/ReferentielsPage'
 import { getNavigationForSpace } from './config/modules'
 
 const adminNavigation = getNavigationForSpace('/admin')
@@ -68,6 +69,7 @@ const ADMIN_BUILT_PAGES = {
   '/admin/documentation': DocumentationPage,
   '/admin/roles': RolesPage,
   '/admin/parametrage': ParametragePage,
+  '/admin/formation-referentiels': FormationReferentielsPage,
 }
 
 // Le Directeur n'a pas Établissements, mais a maintenant Utilisateurs

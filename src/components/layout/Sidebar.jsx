@@ -9,7 +9,7 @@ import { useSidebar } from './SidebarContext'
 
 // Ordre d'affichage des sections — les modules sans `group` (Tableau de
 // bord) restent en tête, hors section.
-const GROUP_ORDER = ['academique', 'finances', 'gestion', 'parametrage']
+const GROUP_ORDER = ['academique', 'finances', 'gestion', 'parametrage', 'formation']
 
 /** Répartit les modules visibles en sections, dans l'ordre `GROUP_ORDER`. */
 function groupNavItems(items) {

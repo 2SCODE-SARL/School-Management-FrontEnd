@@ -15,6 +15,8 @@ import {
   UserCog,
   Settings,
   Layers,
+  Store,
+  ListTree,
 } from 'lucide-react'
 
 const ADMIN = 'ADMINISTRATEUR'
@@ -227,6 +229,18 @@ export const APP_MODULES = [
     group: 'parametrage',
     allowedRoles: [ADMIN, DIRECTEUR],
   },
+  // Module Formation (marketplace de cours en ligne, /api/training/...) —
+  // rôles propres au module (Administrateur global / Formateur / Apprenant),
+  // pas liés à un établissement. On commence par les référentiels (pays,
+  // langues), bloquants pour tout le reste (création de profil formateur).
+  // Voir la mémoire "training-module-discovery" pour le contexte complet.
+  {
+    key: 'formation-referentiels',
+    label: 'Référentiels',
+    icon: ListTree,
+    group: 'formation',
+    allowedRoles: [ADMIN],
+  },
 ]
 
 export const MODULE_GROUP_META = {
@@ -234,6 +248,7 @@ export const MODULE_GROUP_META = {
   finances: { label: 'Finances', icon: Wallet },
   gestion: { label: 'Gestion', icon: Layers },
   parametrage: { label: 'Paramétrage', icon: Settings },
+  formation: { label: 'Formation', icon: Store },
 }
 
 /** Construit la liste de navigation d'un espace (ex: "/admin", "/directeur"). */
