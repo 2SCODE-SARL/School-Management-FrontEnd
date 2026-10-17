@@ -68,6 +68,13 @@ export function DynamicForm({
         payload[f.name] = Number(payload[f.name])
       }
     })
+    // Un champ texte optionnel laissé vide doit être omis, pas envoyé comme
+    // chaîne vide — certains DTOs valident le format (regex) même sur un
+    // champ `@IsOptional()`, qui ne tolère une absence que si la clé est
+    // absente, pas si elle vaut ''.
+    for (const key of Object.keys(payload)) {
+      if (payload[key] === '') delete payload[key]
+    }
 
     try {
       await onSubmit(payload)
