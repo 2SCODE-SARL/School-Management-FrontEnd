@@ -23,3 +23,15 @@ export function createTrainingLanguage(data) {
 export function updateTrainingLanguage(id, data) {
   return apiClient.patch(`/training/referentiels/languages/${id}`, data)
 }
+
+// Prestataires (profil "formateur") — n'importe quel compte connecté peut
+// créer le sien, individuel ou organisme.
+export function listMyTrainingProviders() {
+  return apiClient.get('/training/providers/mine')
+}
+export function createIndividualTrainingProvider(data) {
+  return apiClient.post('/training/providers/individual', data)
+}
+export function createOrganizationTrainingProvider(data) {
+  return apiClient.post('/training/providers/organizations', data)
+}

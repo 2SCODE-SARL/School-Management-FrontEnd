@@ -40,6 +40,7 @@ import PlaceholderPage from './pages/admin/PlaceholderPage'
 import ProfilePage from './pages/profile/ProfilePage'
 import NotificationsPage from './pages/notifications/NotificationsPage'
 import FormationReferentielsPage from './pages/formation/ReferentielsPage'
+import EspaceFormateurPage from './pages/formation/EspaceFormateurPage'
 import { getNavigationForSpace } from './config/modules'
 
 const adminNavigation = getNavigationForSpace('/admin')
@@ -70,6 +71,7 @@ const ADMIN_BUILT_PAGES = {
   '/admin/roles': RolesPage,
   '/admin/parametrage': ParametragePage,
   '/admin/formation-referentiels': FormationReferentielsPage,
+  '/admin/formation-espace': EspaceFormateurPage,
 }
 
 // Le Directeur n'a pas Établissements, mais a maintenant Utilisateurs
@@ -87,11 +89,15 @@ const DIRECTEUR_BUILT_PAGES = {
   '/directeur/communication': CommunicationPage,
   '/directeur/documentation': DocumentationPage,
   '/directeur/parametrage': ParametragePage,
+  '/directeur/formation-espace': EspaceFormateurPage,
 }
 
 // Le Surveillant n'a que Présences (accès élèves + alertes) — vérifié.
+// Formation : ouvert à tous les rôles, le module a son propre système de
+// rôles indépendant (voir config/modules.js).
 const SURVEILLANT_BUILT_PAGES = {
   '/surveillant/presences': PresencesPage,
+  '/surveillant/formation-espace': EspaceFormateurPage,
 }
 
 // L'Enseignant n'a que Présences (présence du personnel) — Résultats reste
@@ -99,6 +105,7 @@ const SURVEILLANT_BUILT_PAGES = {
 const ENSEIGNANT_BUILT_PAGES = {
   '/enseignant/presences': PresencesPage,
   '/enseignant/resultats': ResultatsPage,
+  '/enseignant/formation-espace': EspaceFormateurPage,
 }
 
 // Le Secrétaire n'a ni Établissements ni Utilisateurs ni Académique — son
@@ -116,6 +123,7 @@ const SECRETAIRE_BUILT_PAGES = {
   '/secretaire/demandes': StaffDemandesPage,
   '/secretaire/communication': CommunicationPage,
   '/secretaire/documentation': DocumentationPage,
+  '/secretaire/formation-espace': EspaceFormateurPage,
 }
 
 // Le Comptable a Finances — module complet (Frais & Réductions, Échéances,
@@ -126,6 +134,7 @@ const SECRETAIRE_BUILT_PAGES = {
 const COMPTABLE_BUILT_PAGES = {
   '/comptable/finances': FinancesPage,
   '/comptable/rh': RhPage,
+  '/comptable/formation-espace': EspaceFormateurPage,
 }
 
 // Portail Élève : lecture seule, endpoints `portail-eleves/me/...`.
@@ -134,6 +143,7 @@ const ELEVE_BUILT_PAGES = {
   '/eleve/presences': ElevePresencesPage,
   '/eleve/resultats': EleveResultatsPage,
   '/eleve/mes-documents': EleveDocumentsPage,
+  '/eleve/formation-espace': EspaceFormateurPage,
 }
 
 // Portail Parent : mes enfants (notes/bulletins/présences/accès) +
@@ -142,6 +152,7 @@ const PARENT_BUILT_PAGES = {
   '/parent/suivi-scolaire': SuiviScolairePage,
   '/parent/presences': PresencesAccesPage,
   '/parent/demandes': ParentDemandesPage,
+  '/parent/formation-espace': EspaceFormateurPage,
 }
 
 /**

@@ -241,6 +241,13 @@ export const APP_MODULES = [
     group: 'formation',
     allowedRoles: [ADMIN],
   },
+  {
+    key: 'formation-espace',
+    label: 'Espace formateur',
+    icon: GraduationCap,
+    group: 'formation',
+    allowedRoles: [ADMIN, DIRECTEUR, SURVEILLANT, ENSEIGNANT, SECRETAIRE, COMPTABLE, ELEVE, PARENT],
+  },
 ]
 
 export const MODULE_GROUP_META = {
