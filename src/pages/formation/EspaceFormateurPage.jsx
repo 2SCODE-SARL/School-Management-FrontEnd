@@ -9,10 +9,11 @@ import {
   listTrainingLanguages,
 } from '../../api/training'
 import { ApiErrorMessage } from '../../components/ui/ApiErrorMessage'
+import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { useToast } from '../../components/ui/ToastContext'
-import { pick } from '../../lib/pick'
+import { TRAINING_VERIFICATION_STATUS_LABELS, trainingVerificationBadgeVariant } from '../../config/trainingLabels'
 import { IndividualProviderForm } from './IndividualProviderForm'
 import { OrganizationProviderForm } from './OrganizationProviderForm'
 
@@ -133,12 +134,15 @@ export default function EspaceFormateurPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {providers.map((provider) => {
-              const isOrg = Boolean(pick(provider, ['denomination'], null))
-              const name = pick(provider, ['denomination', 'publicName', 'nom'], 'Profil formateur')
+              const isOrg = provider.type === 'ORGANIZATION'
+              const profile = isOrg ? provider.organizationProfile : provider.trainerProfile
+              const name = isOrg
+                ? (profile?.denomination ?? 'Organisme sans nom')
+                : (profile?.publicName || 'Formateur individuel')
               const subtitle = isOrg
-                ? pick(provider, ['adresse'], null)
-                : [pick(provider, ['specialite'], null), pick(provider, ['ville'], null)].filter(Boolean).join(' — ')
-              const statut = pick(provider, ['statut', 'status', 'verificationStatut'], null)
+                ? profile?.adresse
+                : [profile?.specialite, profile?.ville].filter(Boolean).join(' — ')
+              const statut = provider.verificationStatus
               return (
                 <div key={provider.id} className="bg-white rounded-2xl border border-ink-100 p-5">
                   <div className="flex items-start gap-3">
@@ -149,10 +153,14 @@ export default function EspaceFormateurPage() {
                         <GraduationCap className="h-5 w-5 text-primary-600" />
                       )}
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="font-medium text-ink-900 truncate">{name}</p>
                       {subtitle && <p className="text-sm text-ink-500 truncate">{subtitle}</p>}
-                      {statut && <p className="text-xs text-ink-400 mt-1">Statut : {statut}</p>}
+                      {statut && (
+                        <Badge variant={trainingVerificationBadgeVariant(statut)} className="mt-2">
+                          {TRAINING_VERIFICATION_STATUS_LABELS[statut] ?? statut}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
