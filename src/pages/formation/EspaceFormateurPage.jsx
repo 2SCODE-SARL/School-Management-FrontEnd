@@ -39,14 +39,23 @@ export default function EspaceFormateurPage() {
     queryFn: listTrainingCountries,
   })
   const countries = Array.isArray(countriesQuery.data) ? countriesQuery.data : (countriesQuery.data?.items ?? [])
-  const countryOptions = countries.map((c) => ({ value: c.id, label: c.nom }))
+  // Un <select> affiche visuellement sa première option même sans valeur
+  // choisie (même piège que DynamicForm) — un vrai placeholder vide évite
+  // de laisser croire qu'un pays est déjà sélectionné.
+  const countryOptions = [
+    { value: '', label: 'Choisir un pays...' },
+    ...countries.map((c) => ({ value: c.id, label: c.nom })),
+  ]
 
   const languagesQuery = useQuery({
     queryKey: ['training', 'referentiels', 'languages'],
     queryFn: listTrainingLanguages,
   })
   const languages = Array.isArray(languagesQuery.data) ? languagesQuery.data : (languagesQuery.data?.items ?? [])
-  const languageOptions = languages.map((l) => ({ value: l.id, label: l.libelle }))
+  const languageOptions = [
+    { value: '', label: 'Choisir une langue...' },
+    ...languages.map((l) => ({ value: l.id, label: l.libelle })),
+  ]
 
   function invalidateProviders() {
     queryClient.invalidateQueries({ queryKey: ['training', 'providers', 'mine'] })
