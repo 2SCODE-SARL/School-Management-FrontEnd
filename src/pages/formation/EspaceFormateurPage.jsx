@@ -16,6 +16,7 @@ import { useToast } from '../../components/ui/ToastContext'
 import { TRAINING_VERIFICATION_STATUS_LABELS, trainingVerificationBadgeVariant } from '../../config/trainingLabels'
 import { IndividualProviderForm } from './IndividualProviderForm'
 import { OrganizationProviderForm } from './OrganizationProviderForm'
+import { VerificationDossierModal } from './VerificationDossierModal'
 
 /**
  * Point d'entrée "formateur" du module Formation (marketplace de cours) —
@@ -26,6 +27,7 @@ import { OrganizationProviderForm } from './OrganizationProviderForm'
  */
 export default function EspaceFormateurPage() {
   const [createMode, setCreateMode] = useState(null) // null | 'individual' | 'organization'
+  const [verificationTarget, setVerificationTarget] = useState(null) // { id, name } | null
   const queryClient = useQueryClient()
   const { showToast } = useToast()
 
@@ -144,7 +146,12 @@ export default function EspaceFormateurPage() {
                 : [profile?.specialite, profile?.ville].filter(Boolean).join(' — ')
               const statut = provider.verificationStatus
               return (
-                <div key={provider.id} className="bg-white rounded-2xl border border-ink-100 p-5">
+                <button
+                  key={provider.id}
+                  type="button"
+                  onClick={() => setVerificationTarget({ id: provider.id, name })}
+                  className="text-left bg-white rounded-2xl border border-ink-100 p-5 hover:border-primary-200 transition-colors"
+                >
                   <div className="flex items-start gap-3">
                     <div className="h-10 w-10 rounded-xl bg-primary-50 flex items-center justify-center shrink-0">
                       {isOrg ? (
@@ -163,7 +170,7 @@ export default function EspaceFormateurPage() {
                       )}
                     </div>
                   </div>
-                </div>
+                </button>
               )
             })}
           </div>
@@ -196,6 +203,14 @@ export default function EspaceFormateurPage() {
           onSubmit={(data) => createOrganizationMutation.mutateAsync(data)}
         />
       </Modal>
+
+      {verificationTarget && (
+        <VerificationDossierModal
+          providerId={verificationTarget.id}
+          providerName={verificationTarget.name}
+          onClose={() => setVerificationTarget(null)}
+        />
+      )}
     </div>
   )
 }

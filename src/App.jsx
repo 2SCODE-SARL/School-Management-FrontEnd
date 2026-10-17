@@ -41,6 +41,7 @@ import ProfilePage from './pages/profile/ProfilePage'
 import NotificationsPage from './pages/notifications/NotificationsPage'
 import FormationReferentielsPage from './pages/formation/ReferentielsPage'
 import EspaceFormateurPage from './pages/formation/EspaceFormateurPage'
+import VerificationsAdminPage from './pages/formation/VerificationsAdminPage'
 import { getNavigationForSpace } from './config/modules'
 
 const adminNavigation = getNavigationForSpace('/admin')
@@ -71,6 +72,7 @@ const ADMIN_BUILT_PAGES = {
   '/admin/roles': RolesPage,
   '/admin/parametrage': ParametragePage,
   '/admin/formation-referentiels': FormationReferentielsPage,
+  '/admin/formation-verifications': VerificationsAdminPage,
   '/admin/formation-espace': EspaceFormateurPage,
 }
 

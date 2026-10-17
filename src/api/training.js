@@ -35,3 +35,50 @@ export function createIndividualTrainingProvider(data) {
 export function createOrganizationTrainingProvider(data) {
   return apiClient.post('/training/providers/organizations', data)
 }
+
+// Vérification/KYC d'un prestataire — côté Formateur (son propre dossier).
+export function getMyProviderVerification(providerId) {
+  return apiClient.get(`/training/provider-verifications/providers/${providerId}`)
+}
+export function uploadProviderVerificationDocument(providerId, type, fichier) {
+  const formData = new FormData()
+  formData.append('type', type)
+  formData.append('fichier', fichier)
+  return apiClient.post(`/training/provider-verifications/providers/${providerId}/documents`, formData)
+}
+export function deleteProviderVerificationDocument(providerId, documentId) {
+  return apiClient.delete(`/training/provider-verifications/providers/${providerId}/documents/${documentId}`)
+}
+export function getProviderVerificationDocumentDownload(providerId, documentId) {
+  return apiClient.get(`/training/provider-verifications/providers/${providerId}/documents/${documentId}/download`)
+}
+export function submitProviderVerification(providerId) {
+  return apiClient.post(`/training/provider-verifications/providers/${providerId}/submit`)
+}
+
+// Vérification/KYC — côté Administrateur (revue des dossiers soumis).
+export function listProviderVerificationsAdmin({ status, providerType, page = 1, limit = 20 } = {}) {
+  const params = new URLSearchParams()
+  if (status) params.set('status', status)
+  if (providerType) params.set('providerType', providerType)
+  params.set('page', page)
+  params.set('limit', limit)
+  return apiClient.get(`/training/provider-verifications/admin?${params.toString()}`)
+}
+export function getProviderVerificationAdmin(verificationId) {
+  return apiClient.get(`/training/provider-verifications/admin/${verificationId}`)
+}
+export function getProviderVerificationDocumentDownloadAdmin(verificationId, documentId) {
+  return apiClient.get(
+    `/training/provider-verifications/admin/${verificationId}/documents/${documentId}/download`,
+  )
+}
+export function startReviewProviderVerification(verificationId) {
+  return apiClient.patch(`/training/provider-verifications/admin/${verificationId}/start-review`)
+}
+export function approveProviderVerification(verificationId) {
+  return apiClient.patch(`/training/provider-verifications/admin/${verificationId}/approve`)
+}
+export function rejectProviderVerification(verificationId, reason) {
+  return apiClient.patch(`/training/provider-verifications/admin/${verificationId}/reject`, { reason })
+}

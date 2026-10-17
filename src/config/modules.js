@@ -242,6 +242,13 @@ export const APP_MODULES = [
     allowedRoles: [ADMIN],
   },
   {
+    key: 'formation-verifications',
+    label: 'Vérifications',
+    icon: ShieldCheck,
+    group: 'formation',
+    allowedRoles: [ADMIN],
+  },
+  {
     key: 'formation-espace',
     label: 'Espace formateur',
     icon: GraduationCap,
