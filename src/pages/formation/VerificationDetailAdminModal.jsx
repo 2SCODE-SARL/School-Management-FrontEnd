@@ -36,8 +36,10 @@ export function VerificationDetailAdminModal({ verificationId, onClose, listQuer
     queryFn: () => getProviderVerificationAdmin(verificationId),
     enabled: Boolean(verificationId),
   })
-  const documents = Array.isArray(detail?.documents) ? detail.documents : []
-  const status = detail?.status ?? detail?.verificationStatus ?? null
+  // Même forme imbriquée que côté Formateur (confirmée en live) :
+  // { provider: {...}, verification: { status, documents: [...] } }.
+  const documents = Array.isArray(detail?.verification?.documents) ? detail.verification.documents : []
+  const status = detail?.verification?.status ?? null
 
   function invalidate() {
     queryClient.invalidateQueries({ queryKey })
@@ -112,9 +114,12 @@ export function VerificationDetailAdminModal({ verificationId, onClose, listQuer
                     key={doc.id}
                     className="flex items-center justify-between gap-3 rounded-lg border border-ink-100 px-3 py-2"
                   >
-                    <span className="text-sm text-ink-700 truncate">
-                      {TRAINING_VERIFICATION_DOCUMENT_TYPE_LABELS[doc.type] ?? doc.type}
-                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-ink-900 truncate">
+                        {TRAINING_VERIFICATION_DOCUMENT_TYPE_LABELS[doc.type] ?? doc.type}
+                      </p>
+                      {doc.originalName && <p className="text-xs text-ink-400 truncate">{doc.originalName}</p>}
+                    </div>
                     <button
                       type="button"
                       onClick={() => downloadMutation.mutate(doc.id)}

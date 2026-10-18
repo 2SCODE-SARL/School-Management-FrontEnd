@@ -13,12 +13,13 @@ export const TRAINING_VERIFICATION_STATUS_LABELS = {
   SUBMITTED: 'Soumis, en attente de revue',
   UNDER_REVIEW: 'En cours de revue',
   APPROVED: 'Vérifié',
+  VERIFIED: 'Vérifié', // confirmé en live : valeur réelle sur provider.verificationStatus
   REJECTED: 'Rejeté',
   SUSPENDED: 'Suspendu',
 }
 
 export function trainingVerificationBadgeVariant(status) {
-  if (status === 'APPROVED') return 'success'
+  if (status === 'APPROVED' || status === 'VERIFIED') return 'success'
   if (status === 'REJECTED' || status === 'SUSPENDED') return 'danger'
   if (status === 'DRAFT') return 'neutral'
   if (status === 'PENDING_REVIEW' || status === 'SUBMITTED' || status === 'UNDER_REVIEW') return 'warning'
