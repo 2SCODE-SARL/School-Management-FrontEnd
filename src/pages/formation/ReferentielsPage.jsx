@@ -3,18 +3,20 @@ import { useLocation } from 'react-router-dom'
 import { TabBar } from '../../components/ui/TabBar'
 import { CountriesTab } from './CountriesTab'
 import { LanguagesTab } from './LanguagesTab'
+import { CurrenciesTab } from './CurrenciesTab'
 
 const TABS = [
   { key: 'pays', label: 'Pays', Component: CountriesTab },
   { key: 'langues', label: 'Langues', Component: LanguagesTab },
+  { key: 'devises', label: 'Devises', Component: CurrenciesTab },
 ]
 
 /**
- * Données de référence du module Formation (marketplace de cours) : pays et
- * langues, nécessaires avant qu'un formateur puisse créer son profil
- * (`nationalityCountryId`, `defaultTargetCountryId`, `defaultLanguageId`).
- * Portée plateforme, pas d'établissement — à la différence des référentiels
- * académiques habituels.
+ * Données de référence du module Formation (marketplace de cours) : pays,
+ * langues et devises, nécessaires avant qu'un formateur puisse créer son
+ * profil ou un cours (`nationalityCountryId`, `targetCountryId`,
+ * `languageId`, `currencyId`...). Portée plateforme, pas d'établissement —
+ * à la différence des référentiels académiques habituels.
  */
 export default function ReferentielsPage() {
   const location = useLocation()

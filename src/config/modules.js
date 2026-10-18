@@ -17,6 +17,7 @@ import {
   Layers,
   Store,
   ListTree,
+  PlayCircle,
 } from 'lucide-react'
 
 const ADMIN = 'ADMINISTRATEUR'
@@ -252,6 +253,13 @@ export const APP_MODULES = [
     key: 'formation-espace',
     label: 'Espace formateur',
     icon: GraduationCap,
+    group: 'formation',
+    allowedRoles: [ADMIN, DIRECTEUR, SURVEILLANT, ENSEIGNANT, SECRETAIRE, COMPTABLE, ELEVE, PARENT],
+  },
+  {
+    key: 'formation-cours',
+    label: 'Mes cours',
+    icon: PlayCircle,
     group: 'formation',
     allowedRoles: [ADMIN, DIRECTEUR, SURVEILLANT, ENSEIGNANT, SECRETAIRE, COMPTABLE, ELEVE, PARENT],
   },

@@ -24,6 +24,16 @@ export function updateTrainingLanguage(id, data) {
   return apiClient.patch(`/training/referentiels/languages/${id}`, data)
 }
 
+export function listTrainingCurrencies() {
+  return apiClient.get('/training/referentiels/currencies')
+}
+export function createTrainingCurrency(data) {
+  return apiClient.post('/training/referentiels/currencies', data)
+}
+export function updateTrainingCurrency(id, data) {
+  return apiClient.patch(`/training/referentiels/currencies/${id}`, data)
+}
+
 // Prestataires (profil "formateur") — n'importe quel compte connecté peut
 // créer le sien, individuel ou organisme.
 export function listMyTrainingProviders() {
@@ -81,4 +91,23 @@ export function approveProviderVerification(verificationId) {
 }
 export function rejectProviderVerification(verificationId, reason) {
   return apiClient.patch(`/training/provider-verifications/admin/${verificationId}/reject`, { reason })
+}
+
+// Produits (cours) — Formateur, pour un prestataire déjà vérifié.
+export function listMyTrainingProducts({ providerId, status, page = 1, limit = 20 } = {}) {
+  const params = new URLSearchParams()
+  if (providerId) params.set('providerId', providerId)
+  if (status) params.set('status', status)
+  params.set('page', page)
+  params.set('limit', limit)
+  return apiClient.get(`/training/products/mine?${params.toString()}`)
+}
+export function createTrainingProduct(data) {
+  return apiClient.post('/training/products', data)
+}
+export function getMyTrainingProduct(id) {
+  return apiClient.get(`/training/products/${id}`)
+}
+export function updateTrainingProduct(id, data) {
+  return apiClient.patch(`/training/products/${id}`, data)
 }
