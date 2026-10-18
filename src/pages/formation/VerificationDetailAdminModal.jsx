@@ -36,10 +36,10 @@ export function VerificationDetailAdminModal({ verificationId, onClose, listQuer
     queryFn: () => getProviderVerificationAdmin(verificationId),
     enabled: Boolean(verificationId),
   })
-  // Même forme imbriquée que côté Formateur (confirmée en live) :
-  // { provider: {...}, verification: { status, documents: [...] } }.
-  const documents = Array.isArray(detail?.verification?.documents) ? detail.verification.documents : []
-  const status = detail?.verification?.status ?? null
+  // Forme plate confirmée en live (différente du dossier côté Formateur,
+  // qui lui imbrique sous `verification`) : `status`/`documents` directs.
+  const documents = Array.isArray(detail?.documents) ? detail.documents : []
+  const status = detail?.status ?? null
 
   function invalidate() {
     queryClient.invalidateQueries({ queryKey })
