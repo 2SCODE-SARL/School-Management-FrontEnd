@@ -137,9 +137,9 @@ export default function MesCoursPage() {
                     {TRAINING_PRODUCT_TYPE_LABELS[product.type] ?? product.type}
                   </p>
                 </div>
-                {product.status && (
-                  <Badge variant={trainingProductStatusBadgeVariant(product.status)} className="shrink-0">
-                    {TRAINING_PRODUCT_STATUS_LABELS[product.status] ?? product.status}
+                {product.publicationStatus && (
+                  <Badge variant={trainingProductStatusBadgeVariant(product.publicationStatus)} className="shrink-0">
+                    {TRAINING_PRODUCT_STATUS_LABELS[product.publicationStatus] ?? product.publicationStatus}
                   </Badge>
                 )}
               </div>
