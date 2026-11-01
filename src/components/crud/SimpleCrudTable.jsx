@@ -1,5 +1,6 @@
 import { Pencil, Power } from 'lucide-react'
 import { ActionsMenu } from '../ui/ActionsMenu'
+import { Button } from '../ui/Button'
 
 /**
  * Tableau générique pour une ressource simple (pas de recherche/pagination —
@@ -59,25 +60,34 @@ export function SimpleCrudTable({
                   {col.render ? col.render(item) : (item[col.key] ?? '—')}
                 </td>
               ))}
-              {hasActions && (
-                <td className="px-4 py-3 text-right">
-                  <ActionsMenu
-                    actions={[
-                      onEdit && {
-                        label: 'Modifier',
-                        icon: Pencil,
-                        onClick: () => onEdit(item),
-                      },
-                      onToggleActive && {
-                        label: item.actif === false ? 'Activer' : 'Désactiver',
-                        icon: Power,
-                        onClick: () => onToggleActive(item),
-                        isLoading: isToggling?.(item),
-                      },
-                    ].filter(Boolean)}
-                  />
-                </td>
-              )}
+              {hasActions &&
+                (() => {
+                  const actions = [
+                    onEdit && { label: 'Modifier', icon: Pencil, onClick: () => onEdit(item) },
+                    onToggleActive && {
+                      label: item.actif === false ? 'Activer' : 'Désactiver',
+                      icon: Power,
+                      onClick: () => onToggleActive(item),
+                      isLoading: isToggling?.(item),
+                    },
+                  ].filter(Boolean)
+                  return (
+                    <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                      {actions.length === 1 ? (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          isLoading={actions[0].isLoading}
+                          onClick={actions[0].onClick}
+                        >
+                          {actions[0].label}
+                        </Button>
+                      ) : (
+                        <ActionsMenu actions={actions} />
+                      )}
+                    </td>
+                  )
+                })()}
             </tr>
           ))}
         </tbody>
