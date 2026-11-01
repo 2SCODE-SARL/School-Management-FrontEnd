@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Bell, ChevronDown, LogOut, Menu, Search, User } from 'lucide-react'
+import { Bell, Calendar, ChevronDown, LogOut, Menu, User } from 'lucide-react'
 import { useAuth } from '../../auth/AuthContext'
 import { listMesNotifications, listMesNotificationsNonLues, marquerNotificationLue } from '../../api/communication'
+import { listAnneesScolaires } from '../../api/etablissements'
 import { Avatar } from '../ui/Avatar'
 import { ROLE_LABELS } from '../../config/roles'
 import { formatDateTime } from '../../lib/formatDate'
@@ -60,6 +61,17 @@ export function Topbar() {
   })
   const recentes = Array.isArray(recentesData) ? recentesData : (recentesData?.items ?? [])
 
+  // Pas de contexte établissement unique pour l'Admin (il en gère
+  // plusieurs, choisis page par page) — on n'affiche l'année en cours que
+  // pour les rôles scopés à un seul établissement.
+  const { data: anneesData } = useQuery({
+    queryKey: ['etablissements', 'annees', user?.etablissementId],
+    queryFn: () => listAnneesScolaires(user.etablissementId),
+    enabled: Boolean(user?.etablissementId),
+  })
+  const annees = Array.isArray(anneesData) ? anneesData : (anneesData?.items ?? [])
+  const anneeEnCours = annees.find((a) => a.statut === 'EN_COURS')
+
   const marquerLueMutation = useMutation({
     mutationFn: (notificationId) => marquerNotificationLue(notificationId),
     onSuccess: () => {
@@ -85,14 +97,14 @@ export function Topbar() {
         <Menu className="h-5 w-5" />
       </button>
 
-      <div className="relative w-full max-w-xs min-w-0">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400" />
-        <input
-          type="search"
-          placeholder="Rechercher..."
-          className="w-full rounded-lg border border-ink-200 bg-ink-50 pl-9 pr-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 outline-none transition-colors focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
-        />
-      </div>
+      {anneeEnCours && (
+        <div className="flex items-center gap-2 min-w-0 text-sm text-ink-600">
+          <Calendar className="h-4 w-4 text-ink-400 shrink-0" />
+          <span className="truncate">
+            Année scolaire : <span className="font-medium text-ink-900">{anneeEnCours.libelle}</span>
+          </span>
+        </div>
+      )}
 
       <div className="flex items-center gap-2 sm:gap-4 shrink-0 ml-auto">
         <div className="relative" ref={notifRef}>
