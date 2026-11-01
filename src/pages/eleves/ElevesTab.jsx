@@ -9,7 +9,6 @@ import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
 import { Pagination } from '../../components/ui/Pagination'
-import { ActionsMenu } from '../../components/ui/ActionsMenu'
 import { TruncatedText } from '../../components/ui/TruncatedText'
 import {
   STATUT_ELEVE_LABELS,
@@ -166,20 +165,26 @@ export function ElevesTab({ etablissementId }) {
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <ActionsMenu
-                        actions={[
-                          {
-                            label: 'Voir la fiche',
-                            icon: GraduationCap,
-                            onClick: () => setViewingEleveId(eleve.id),
-                          },
-                          {
-                            label: 'Modifier',
-                            icon: Pencil,
-                            onClick: () => setEditingEleve(eleve),
-                          },
-                        ]}
-                      />
+                      <div className="flex items-center justify-end gap-3" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          onClick={() => setViewingEleveId(eleve.id)}
+                          className="text-ink-400 hover:text-primary-600 transition-colors"
+                          aria-label="Voir la fiche"
+                          title="Voir la fiche"
+                        >
+                          <GraduationCap className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingEleve(eleve)}
+                          className="text-ink-400 hover:text-primary-600 transition-colors"
+                          aria-label="Modifier"
+                          title="Modifier"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
