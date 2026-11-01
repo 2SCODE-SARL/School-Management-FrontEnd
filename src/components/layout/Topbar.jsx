@@ -7,7 +7,7 @@ import { listMesNotifications, listMesNotificationsNonLues, marquerNotificationL
 import { listAnneesScolaires } from '../../api/etablissements'
 import { Avatar } from '../ui/Avatar'
 import { ROLE_LABELS } from '../../config/roles'
-import { formatDateTime } from '../../lib/formatDate'
+import { formatDate, formatDateTime } from '../../lib/formatDate'
 import { useSidebar } from './SidebarContext'
 
 export function Topbar() {
@@ -101,7 +101,10 @@ export function Topbar() {
         <div className="flex items-center gap-2 min-w-0 text-sm text-ink-600">
           <Calendar className="h-4 w-4 text-ink-400 shrink-0" />
           <span className="truncate">
-            Année scolaire : <span className="font-medium text-ink-900">{anneeEnCours.libelle}</span>
+            Année scolaire : <span className="font-medium text-ink-900">{anneeEnCours.libelle}</span>{' '}
+            <span className="text-ink-400">
+              ({formatDate(anneeEnCours.dateDebut)} – {formatDate(anneeEnCours.dateFin)})
+            </span>
           </span>
         </div>
       )}

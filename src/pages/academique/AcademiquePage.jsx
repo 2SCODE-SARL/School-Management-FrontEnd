@@ -6,7 +6,6 @@ import { useAuth } from '../../auth/AuthContext'
 import { getPrimaryRole } from '../../auth/roleHome'
 import { searchEtablissements } from '../../api/etablissements'
 import { Combobox } from '../../components/ui/Combobox'
-import { AnneesTab } from './AnneesTab'
 import { NiveauxTab } from './NiveauxTab'
 import { SeriesTab } from './SeriesTab'
 import { MatieresTab } from './MatieresTab'
@@ -16,7 +15,6 @@ import { ClassesTab } from './ClassesTab'
 import { PonderationsTab } from './PonderationsTab'
 
 const TABS = [
-  { key: 'annees', label: 'Années scolaires', Component: AnneesTab },
   { key: 'niveaux', label: 'Niveaux', Component: NiveauxTab },
   { key: 'series', label: 'Séries', Component: SeriesTab },
   { key: 'matieres', label: 'Matières', Component: MatieresTab },
@@ -34,7 +32,7 @@ export default function AcademiquePage() {
   const [selectedEtabId, setSelectedEtabId] = useState(
     isAdmin ? (location.state?.etablissementId ?? '') : (user?.etablissementId ?? ''),
   )
-  const [activeTab, setActiveTab] = useState(location.state?.tab ?? 'annees')
+  const [activeTab, setActiveTab] = useState(location.state?.tab ?? 'niveaux')
   // Le sous-menu de la sidebar navigue vers ce même chemin avec un nouvel
   // `state.tab` — même route, donc pas de remontage : sans ceci, changer de
   // sous-page depuis un module déjà ouvert resterait sans effet.

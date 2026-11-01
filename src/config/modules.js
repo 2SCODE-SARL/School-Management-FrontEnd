@@ -74,7 +74,6 @@ export const APP_MODULES = [
     group: 'academique',
     allowedRoles: [ADMIN, DIRECTEUR],
     children: [
-      { key: 'annees', label: 'Années scolaires' },
       { key: 'niveaux', label: 'Niveaux' },
       { key: 'series', label: 'Séries' },
       { key: 'matieres', label: 'Matières' },
@@ -227,8 +226,13 @@ export const APP_MODULES = [
     key: 'parametrage',
     label: 'Paramétrage',
     icon: Settings,
+    hasChildren: true,
     group: 'parametrage',
     allowedRoles: [ADMIN, DIRECTEUR],
+    children: [
+      { key: 'annees', label: 'Années scolaires' },
+      { key: 'parametres', label: 'Paramètres' },
+    ],
   },
   // Module Formation (marketplace de cours en ligne, /api/training/...) —
   // rôles propres au module (Administrateur global / Formateur / Apprenant),
