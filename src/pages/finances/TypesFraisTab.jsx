@@ -10,6 +10,7 @@ import { Select } from '../../components/ui/Select'
 import { TextField } from '../../components/ui/TextField'
 import { Badge } from '../../components/ui/Badge'
 import { Alert } from '../../components/ui/Alert'
+import { SimpleCrudTable } from '../../components/crud/SimpleCrudTable'
 import { ApiError } from '../../api/client'
 import { rules, validate } from '../../lib/validate'
 import { PERIODICITE_LABELS, PERIODICITE_OPTIONS, TYPE_FRAIS_CODE_LABELS, TYPE_FRAIS_CODE_OPTIONS } from '../../config/financesLabels'
@@ -134,36 +135,37 @@ export function TypesFraisTab({ etablissementId }) {
             </div>
           )}
           {isError && <ApiErrorMessage error={error} fallback="Impossible de charger les types de frais." />}
-          {!isLoading && !isError && types.length === 0 && (
-            <div className="p-16 text-center text-ink-400">
-              <Receipt className="h-8 w-8 mx-auto mb-3 opacity-50" />
-              Aucun type de frais pour cette année.
-            </div>
-          )}
-          {!isLoading && !isError && types.length > 0 && (
-            <div className="divide-y divide-ink-50">
-              {types.map((t) => (
-                <div key={t.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-ink-900 truncate">{t.libelle}</p>
-                    <p className="text-xs text-ink-400">
-                      {TYPE_FRAIS_CODE_LABELS[t.code] ?? t.code} · {PERIODICITE_LABELS[t.periodicite] ?? t.periodicite} · {t.montant} GNF
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Badge variant={t.actif === false ? 'neutral' : 'success'}>{t.actif === false ? 'Inactif' : 'Actif'}</Badge>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      isLoading={actifMutation.isPending && actifMutation.variables?.id === t.id}
-                      onClick={() => actifMutation.mutate({ id: t.id, actif: t.actif === false })}
-                    >
-                      {t.actif === false ? 'Activer' : 'Désactiver'}
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+          {!isLoading && !isError && (
+            <SimpleCrudTable
+              items={types}
+              emptyMessage="Aucun type de frais pour cette année."
+              emptyIcon={Receipt}
+              onToggleActive={(t) => actifMutation.mutate({ id: t.id, actif: t.actif === false })}
+              isToggling={(t) => actifMutation.isPending && actifMutation.variables?.id === t.id}
+              columns={[
+                {
+                  key: 'libelle',
+                  label: 'Libellé',
+                  render: (t) => <span className="font-medium text-ink-900">{t.libelle}</span>,
+                },
+                { key: 'code', label: 'Type', render: (t) => TYPE_FRAIS_CODE_LABELS[t.code] ?? t.code },
+                {
+                  key: 'periodicite',
+                  label: 'Périodicité',
+                  render: (t) => PERIODICITE_LABELS[t.periodicite] ?? t.periodicite,
+                },
+                { key: 'montant', label: 'Montant', render: (t) => `${t.montant} GNF` },
+                {
+                  key: 'actif',
+                  label: 'Statut',
+                  render: (t) => (
+                    <Badge variant={t.actif === false ? 'neutral' : 'success'}>
+                      {t.actif === false ? 'Inactif' : 'Actif'}
+                    </Badge>
+                  ),
+                },
+              ]}
+            />
           )}
         </div>
       </div>
